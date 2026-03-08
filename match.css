@@ -665,6 +665,7 @@ border-radius:12px;
 border:3px solid rgba(255,255,255,0.8);
 overflow:hidden;
 box-shadow:0 10px 25px rgba(0,0,0,0.2);
+padding-bottom: 40px;
 
 /* GRASS PATTERN */
 
@@ -684,11 +685,14 @@ repeating-linear-gradient(
 .pitch::before{
 content:"";
 position:absolute;
-top:50%;
-left:0;
 width:100%;
-height:2px;
-background:white;
+height:100%;
+background:linear-gradient(
+to bottom,
+rgba(255,255,255,0.05),
+rgba(0,0,0,0.1)
+);
+pointer-events:none;
 }
 
 
@@ -725,6 +729,7 @@ bottom:0;
 }
 
 
+
 /* ============================= */
 /* PLAYER CARD */
 /* ============================= */
@@ -739,6 +744,14 @@ min-width:60px;
 text-align:center;
 }
 
+.player{
+transition:0.2s;
+}
+
+.player:hover{
+transform:scale(1.1);
+z-index:10;
+}
 
 /* PLAYER NUMBER */
 
@@ -746,16 +759,15 @@ text-align:center;
 width:36px;
 height:36px;
 border-radius:50%;
-background:#ffffff;
+background:#fff;
 display:flex;
 align-items:center;
 justify-content:center;
 font-size:13px;
 font-weight:700;
 color:#111;
-border:2px solid #22c55e;
-box-shadow:0 3px 6px rgba(0,0,0,0.25);
-transition:0.2s;
+border:2px solid #e5e7eb;
+box-shadow:0 4px 10px rgba(0,0,0,0.25);
 }
 
 .player-circle:hover{
@@ -769,67 +781,17 @@ transform:scale(1.15);
 font-size:11px;
 color:white;
 font-weight:600;
-text-align:center;
-max-width:80px;
-line-height:1.1;
-text-shadow:0 1px 3px rgba(0,0,0,0.6);
+padding:2px 6px;
+border-radius:6px;
+background:rgba(0,0,0,0.6);
 }
-
 
 /* ============================= */
 /* HOME TEAM POSITIONS */
 /* ============================= */
 
-.gk{
-bottom:15px;
-left:50%;
-transform:translateX(-50%);
-}
-
-.cb1{
-bottom:80px;
-left:35%;
-}
-
-.cb2{
-bottom:80px;
-right:35%;
-}
-
-.lb{
-bottom:110px;
-left:10%;
-}
-
-.rb{
-bottom:110px;
-right:10%;
-}
-
-.cm1{
-bottom:180px;
-left:20%;
-}
-
-.cm2{
-bottom:180px;
-left:50%;
-transform:translateX(-50%);
-}
-
-.cm3{
-bottom:180px;
-right:20%;
-}
-
-.lw{
-bottom:270px;
-left:15%;
-}
-
-.rw{
-bottom:270px;
-right:15%;
+.home-team{
+top:0;
 }
 
 .st{
@@ -838,69 +800,91 @@ left:50%;
 transform:translateX(-50%);
 }
 
+.lw{ bottom:270px; left:15%; }
+.rw{ bottom:270px; right:15%; }
 
-/* ============================= */
-/* AWAY TEAM POSITIONS */
-/* ============================= */
+.cm1{ bottom:180px; left:20%; }
+.cm2{ bottom:180px; left:50%; transform:translateX(-50%); }
+.cm3{ bottom:180px; right:20%; }
 
-.gk-away{
-top:15px;
+.lb{ bottom:110px; left:10%; }
+.rb{ bottom:110px; right:10%; }
+
+.cb1{ bottom:80px; left:35%; }
+.cb2{ bottom:80px; right:35%; }
+
+.gk{
+bottom:15px;
 left:50%;
 transform:translateX(-50%);
 }
 
-.cb1-away{
+/* AWAY TEAM POSITIONS */
+/* AWAY TEAM POSITIONS */
+
+.st-away{
 top:80px;
-left:35%;
+left:50%;
+transform:translateX(-50%);
 }
 
-.cb2-away{
+.lw-away{
 top:80px;
-right:35%;
+left:15%;
 }
 
-.lb-away{
-top:110px;
-left:10%;
+.rw-away{
+top:80px;
+right:15%;
 }
 
-.rb-away{
-top:110px;
-right:10%;
-}
+/* MIDFIELD */
 
 .cm1-away{
-top:180px;
+top:160px;
 left:20%;
 }
 
 .cm2-away{
-top:180px;
+top:160px;
 left:50%;
 transform:translateX(-50%);
 }
 
 .cm3-away{
-top:180px;
+top:160px;
 right:20%;
 }
 
-.lw-away{
-top:270px;
-left:15%;
+/* DEFENCE */
+
+.lb-away{
+top:240px;
+left:10%;
 }
 
-.rw-away{
-top:270px;
-right:15%;
+.rb-away{
+top:240px;
+right:10%;
 }
 
-.st-away{
-top:330px;
+.cb1-away{
+top:280px;
+left:35%;
+}
+
+.cb2-away{
+top:280px;
+right:35%;
+}
+
+/* GOALKEEPER */
+
+.gk-away{
+top:340px;
 left:50%;
 transform:translateX(-50%);
 }
-
 /* ============================= */
 /* PENALTY BOX */
 /* ============================= */

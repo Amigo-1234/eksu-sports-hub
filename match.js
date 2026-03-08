@@ -77,3 +77,59 @@ statusBadge.className = "status-badge scheduled";
 timeDisplay.textContent = "16:00";
 
 }
+
+const events = [
+
+{
+minute:21,
+type:"goal",
+player:"Taiwo",
+team:"Engineering"
+},
+
+{
+minute:33,
+type:"yellow",
+player:"Malik",
+team:"Agric"
+},
+
+{
+minute:60,
+type:"sub",
+player:"Substitution",
+team:"Engineering"
+}
+
+];
+
+const eventsList = document.getElementById("eventsList");
+
+events.forEach(event=>{
+
+let icon = "⚽";
+let className = "";
+
+if(event.type === "goal"){
+icon = "⚽";
+className = "goal-event";
+}
+
+if(event.type === "yellow"){
+icon = "🟨";
+}
+
+if(event.type === "sub"){
+icon = "🔁";
+}
+
+eventsList.innerHTML += `
+<div class="event-row ${className}">
+<span class="minute">${event.minute}'</span>
+<span class="event-icon ${event.type}">${icon}</span>
+<span class="event-player">${event.player}</span>
+<span class="event-team">${event.team}</span>
+</div>
+`;
+
+});
