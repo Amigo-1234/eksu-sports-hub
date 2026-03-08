@@ -66,7 +66,13 @@ Match Center
 
 </div>
 
-<div class="match-time" id="matchTime"></div>
+<div class="match-status">
+
+<span class="status-badge live">LIVE</span>
+
+<span id="matchTime"></span>
+
+</div>
 
 </section>
 
@@ -87,25 +93,40 @@ Match Center
 
 <div id="summary" class="tab-panel active">
 
-<div class="timeline">
+<div class="events-list">
 
-<div class="timeline-event left">
-
+<div class="event-row goal-event">
 <span class="minute">21'</span>
-
-<span class="event-icon">⚽</span>
-
-<span class="event-text">Taiwo</span>
-
+<span class="event-icon goal">⚽</span>
+<span class="event-player">Taiwo</span>
+<span class="event-team">Engineering</span>
 </div>
 
-<div class="timeline-event right">
+
+<div class="event-row">
 
 <span class="minute">33'</span>
 
-<span class="event-icon">🟨</span>
+<span class="event-icon yellow">🟨</span>
 
-<span class="event-text">Malik</span>
+<span class="event-player">Malik</span>
+
+<span class="event-team">Agric</span>
+
+</div>
+
+
+<div class="event-row">
+
+<span class="minute">60'</span>
+
+<span class="event-icon sub">🔁</span>
+
+<span class="event-player">Substitution</span>
+
+<span class="event-team">Engineering</span>
+
+</div>
 
 </div>
 

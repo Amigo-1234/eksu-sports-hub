@@ -463,3 +463,190 @@ margin-right:6px;
 font-weight:500;
 
 }
+
+/* EVENTS LIST */
+
+.events-list{
+
+margin-top:25px;
+
+display:flex;
+
+flex-direction:column;
+
+gap:12px;
+
+}
+
+
+/* EVENT ROW */
+
+.event-row{
+
+display:flex;
+
+align-items:center;
+
+gap:10px;
+
+padding:12px 14px;
+
+background:#f9fafb;
+
+border-radius:8px;
+
+font-size:14px;
+
+}
+
+
+/* MINUTE */
+
+.minute{
+
+font-weight:600;
+
+color:#444;
+
+min-width:40px;
+
+}
+
+
+/* ICON */
+
+.event-icon{
+
+font-size:18px;
+
+}
+
+
+/* PLAYER */
+
+.event-player{
+
+font-weight:600;
+
+}
+
+
+/* TEAM */
+
+.event-team{
+
+color:#777;
+
+margin-left:auto;
+
+}
+
+/* MATCH STATUS */
+
+.match-status{
+
+margin-top:12px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+gap:10px;
+
+font-size:14px;
+
+color:#666;
+
+}
+
+
+/* STATUS BADGE */
+
+.status-badge{
+
+padding:4px 10px;
+
+border-radius:20px;
+
+font-size:12px;
+
+font-weight:600;
+
+}
+
+
+/* LIVE BADGE */
+
+.status-badge.live{
+
+background:#fee2e2;
+
+color:#b91c1c;
+
+}
+
+
+/* FINISHED BADGE */
+
+.status-badge.finished{
+
+background:#e5e7eb;
+
+color:#374151;
+
+}
+
+
+/* SCHEDULED BADGE */
+
+.status-badge.scheduled{
+
+background:#dbeafe;
+
+color:#1d4ed8;
+
+}
+
+.event-icon.goal{
+color:#16a34a;
+}
+
+.event-icon.yellow{
+color:#facc15;
+}
+
+.event-icon.sub{
+color:#3b82f6;
+}
+
+/* GOAL HIGHLIGHT */
+
+.goal-event{
+
+background:#ecfdf5;
+
+border-left:4px solid #16a34a;
+
+animation:goalFlash 1.2s ease;
+
+}
+
+/* GOAL ANIMATION */
+
+@keyframes goalFlash{
+
+0%{
+background:#bbf7d0;
+}
+
+50%{
+background:#ecfdf5;
+}
+
+100%{
+background:#ecfdf5;
+}
+
+}
