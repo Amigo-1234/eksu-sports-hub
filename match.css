@@ -115,7 +115,7 @@ align-items:center;
 
 justify-content:space-between;
 
-gap:40px;
+gap:20px;
 
 margin-bottom:20px;
 
@@ -136,7 +136,13 @@ gap:12px;
 
 font-weight:600;
 
-font-size:17px;
+font-size:16px;
+
+max-width:110px;
+
+text-align:center;
+
+word-wrap:break-word;
 
 }
 
@@ -170,6 +176,8 @@ color:#9b1c1c;
 
 letter-spacing:3px;
 
+flex-shrink:0;
+
 }
 
 
@@ -192,17 +200,18 @@ font-weight:500;
 
 @media (max-width:600px){
 
-.teams{
+.team{
 
-gap:20px;
+max-width:90px;
+
+font-size:14px;
 
 }
 
 .team-badge{
 
-width:65px;
-
-height:65px;
+width:60px;
+height:60px;
 
 }
 
@@ -236,5 +245,221 @@ transition:0.2s;
 .back-btn:hover{
 
 background:rgba(255,255,255,0.3);
+
+}
+
+/* MATCH TABS */
+
+.match-tabs{
+
+display:flex;
+
+justify-content:center;
+
+gap:30px;
+
+margin-top:40px;
+
+border-bottom:1px solid #eee;
+
+padding-bottom:10px;
+
+}
+
+
+/* TAB */
+
+.tab{
+
+font-weight:600;
+
+font-size:14px;
+
+color:#777;
+
+cursor:pointer;
+
+padding-bottom:8px;
+
+}
+
+
+/* ACTIVE TAB */
+
+.tab.active{
+
+color:#9b1c1c;
+
+border-bottom:2px solid #9b1c1c;
+
+}
+
+
+/* CONTENT AREA */
+
+.tab-content{
+
+margin-top:30px;
+
+text-align:left;
+
+}
+
+
+/* PANELS */
+
+.tab-panel{
+
+display:none;
+
+}
+
+
+/* ACTIVE PANEL */
+
+.tab-panel.active{
+
+display:block;
+
+}
+
+
+/* EVENTS */
+
+.event{
+
+display:flex;
+
+align-items:center;
+
+gap:10px;
+
+padding:12px 0;
+
+border-bottom:1px solid #eee;
+
+}
+
+
+.minute{
+
+font-weight:600;
+
+color:#555;
+
+width:40px;
+
+}
+
+
+.event-icon{
+
+font-size:18px;
+
+}
+
+
+.event-text{
+
+font-weight:500;
+
+}
+
+/* MATCH TIMELINE */
+
+.timeline{
+
+position:relative;
+
+margin-top:20px;
+
+padding:20px 0;
+
+}
+
+
+/* CENTER LINE */
+
+.timeline::before{
+
+content:"";
+
+position:absolute;
+
+left:50%;
+
+top:0;
+
+width:2px;
+
+height:100%;
+
+background:#e5e7eb;
+
+}
+
+
+/* EVENT */
+
+.timeline-event{
+
+position:relative;
+
+width:50%;
+
+padding:15px 25px;
+
+font-size:14px;
+
+}
+
+
+/* LEFT EVENTS */
+
+.timeline-event.left{
+
+text-align:right;
+
+left:0;
+
+}
+
+
+/* RIGHT EVENTS */
+
+.timeline-event.right{
+
+left:50%;
+
+}
+
+
+/* EVENT ICON */
+
+.event-icon{
+
+margin:0 6px;
+
+}
+
+
+/* MINUTE */
+
+.minute{
+
+font-weight:600;
+
+color:#555;
+
+margin-right:6px;
+
+}
+
+
+/* EVENT TEXT */
+
+.event-text{
+
+font-weight:500;
 
 }
