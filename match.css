@@ -904,3 +904,76 @@ border-left:none;
 border-top:none;
 border-radius:40px 0 0 0;
 }
+
+/* PLAYER CARD */
+.player{
+
+position:absolute;
+
+display:flex;
+flex-direction:column;
+
+align-items:center;
+justify-content:center;
+
+gap:4px;
+
+min-width:60px;
+
+text-align:center;
+
+}
+
+
+/* PLAYER CIRCLE */
+
+.player-circle{
+
+width:36px;
+height:36px;
+
+border-radius:50%;
+
+background:#ffffff;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:13px;
+font-weight:700;
+
+color:#111;
+
+border:2px solid #22c55e;
+
+box-shadow:0 3px 6px rgba(0,0,0,0.25);
+
+}
+
+
+/* PLAYER NAME */
+
+.player-name{
+
+font-size:11px;
+
+color:white;
+
+font-weight:600;
+
+text-align:center;
+
+max-width:80px;
+
+line-height:1.1;
+
+text-shadow:0 1px 3px rgba(0,0,0,0.6);
+
+}
+
+.player-circle:hover{
+
+transform:scale(1.15);
+
+}
