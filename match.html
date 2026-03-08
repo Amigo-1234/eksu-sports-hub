@@ -6,20 +6,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Match Details</title>
+<title>Match Center</title>
 
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="match.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 </head>
 
 <body>
 
-<header class="header">
+<header class="match-header-bar">
 
-<div class="nav-container">
+<div class="match-nav">
 
-<div class="logo">
-EKSU Sports
+<a href="index.html" class="back-btn">
+
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+
+<path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+</svg>
+
+</a>
+
+<div class="match-page-title">
+Match Center
 </div>
 
 </div>
@@ -27,21 +40,35 @@ EKSU Sports
 </header>
 
 
-<div class="match-details">
+<section class="match-center">
 
-<h2 id="matchTitle"></h2>
+<div class="competition" id="competition"></div>
 
-<div class="scoreboard">
+<div class="teams">
+
+<div class="team">
+
+<img src="ball.png" class="team-badge">
 
 <div id="homeTeam"></div>
 
-<div id="score"></div>
+</div>
+
+<div class="score" id="score"></div>
+
+<div class="team">
+
+<img src="ball.png" class="team-badge">
 
 <div id="awayTeam"></div>
 
 </div>
 
 </div>
+
+<div class="match-time" id="matchTime"></div>
+
+</section>
 
 
 <script src="match.js"></script>
