@@ -658,9 +658,7 @@ background:#ecfdf5;
 position:relative;
 
 width:100%;
-
 max-width:420px;
-
 height:520px;
 
 margin:30px auto;
@@ -669,7 +667,52 @@ background:#15803d;
 
 border-radius:12px;
 
+border:3px solid rgba(255,255,255,0.7);
+
 box-shadow:0 10px 25px rgba(0,0,0,0.15);
+
+overflow:hidden;
+
+}
+
+/* HALF LINE */
+
+.pitch::before{
+
+content:"";
+
+position:absolute;
+
+top:50%;
+left:0;
+
+width:100%;
+height:2px;
+
+background:rgba(255,255,255,0.6);
+
+}
+
+
+/* CENTER CIRCLE */
+
+.pitch::after{
+
+content:"";
+
+position:absolute;
+
+top:50%;
+left:50%;
+
+width:120px;
+height:120px;
+
+border:2px solid rgba(255,255,255,0.6);
+
+border-radius:50%;
+
+transform:translate(-50%,-50%);
 
 }
 
@@ -745,4 +788,119 @@ right:15%;
 top:40px;
 left:50%;
 transform:translateX(-50%);
+}
+
+
+/* PENALTY BOX */
+
+.penalty-box{
+
+position:absolute;
+
+left:50%;
+
+transform:translateX(-50%);
+
+width:70%;
+
+height:90px;
+
+border:2px solid rgba(255,255,255,0.6);
+
+}
+
+.penalty-box.top{
+
+top:0;
+
+border-bottom:none;
+
+}
+
+.penalty-box.bottom{
+
+bottom:0;
+
+border-top:none;
+
+}
+
+
+/* GOAL BOX */
+
+.goal-box{
+
+position:absolute;
+
+left:50%;
+
+transform:translateX(-50%);
+
+width:40%;
+
+height:40px;
+
+border:2px solid rgba(255,255,255,0.6);
+
+}
+
+.goal-box.top{
+
+top:0;
+
+border-bottom:none;
+
+}
+
+.goal-box.bottom{
+
+bottom:0;
+
+border-top:none;
+
+}
+
+/* CORNER ARCS */
+
+.corner{
+
+position:absolute;
+
+width:40px;
+height:40px;
+
+border:2px solid rgba(255,255,255,0.7);
+
+}
+
+.corner.tl{
+top:0;
+left:0;
+border-right:none;
+border-bottom:none;
+border-radius:0 0 40px 0;
+}
+
+.corner.tr{
+top:0;
+right:0;
+border-left:none;
+border-bottom:none;
+border-radius:0 0 0 40px;
+}
+
+.corner.bl{
+bottom:0;
+left:0;
+border-right:none;
+border-top:none;
+border-radius:0 40px 0 0;
+}
+
+.corner.br{
+bottom:0;
+right:0;
+border-left:none;
+border-top:none;
+border-radius:40px 0 0 0;
 }
