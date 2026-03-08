@@ -33,3 +33,47 @@ document.getElementById(tab.dataset.tab).classList.add("active");
 });
 
 });
+
+/* MATCH STATUS SYSTEM */
+
+const matchStatus = "live"; 
+let matchMinute = 63;
+
+const statusBadge = document.querySelector(".status-badge");
+const timeDisplay = document.getElementById("matchTime");
+
+
+if(matchStatus === "live"){
+
+statusBadge.textContent = "LIVE";
+statusBadge.className = "status-badge live";
+
+timeDisplay.textContent = matchMinute + "'";
+
+setInterval(()=>{
+
+matchMinute++;
+
+timeDisplay.textContent = matchMinute + "'";
+
+},60000);
+
+}
+
+else if(matchStatus === "finished"){
+
+statusBadge.textContent = "FT";
+statusBadge.className = "status-badge finished";
+
+timeDisplay.textContent = "";
+
+}
+
+else{
+
+statusBadge.textContent = "Scheduled";
+statusBadge.className = "status-badge scheduled";
+
+timeDisplay.textContent = "16:00";
+
+}
