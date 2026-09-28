@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+/*
+ * EKSU Sports design tokens.
+ * Components use these via Tailwind utilities (bg-brand-700, text-ink-muted,
+ * border-line, text-live …). Never hard-code colour values in components.
+ */
+@theme {
+  /* Brand — EKSU burgundy */
+  --color-brand-50: #fbf2f4;
+  --color-brand-100: #f5dfe4;
+  --color-brand-200: #ebbdc8;
+  --color-brand-300: #d98a9d;
+  --color-brand-500: #a8284a;
+  --color-brand-600: #8f1d3b;
+  --color-brand-700: #761530;
+  --color-brand-800: #5c1025;
+  --color-brand-900: #420b1a;
+
+  /* Accent — EKSU gold/orange */
+  --color-accent-100: #fdf0d5;
+  --color-accent-300: #fbc964;
+  --color-accent-400: #f8b52f;
+  --color-accent-500: #f29b0c;
+  --color-accent-700: #9a5a00; /* accent text on light surfaces (AA) */
+
+  /* Neutrals */
+  --color-canvas: #f4f2f1; /* app background */
+  --color-surface: #ffffff; /* cards, rows */
+  --color-subtle: #f0edec; /* inset / hover */
+  --color-line: #e5e0de; /* borders, dividers */
+  --color-line-strong: #d3ccc9;
+  --color-ink: #1c1719; /* primary text */
+  --color-ink-muted: #564d50; /* secondary text */
+  --color-ink-faint: #736a6d; /* tertiary text, still AA on white */
+
+  /* Live state */
+  --color-live: #d7261e;
+  --color-live-soft: #fdecea;
+
+  /* Outcomes */
+  --color-win: #15803d;
+  --color-draw: #6b6466;
+  --color-loss: #c0262d;
+
+  /* Status */
+  --color-warn: #9a5a00;
+  --color-warn-soft: #fdf3dc;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-barlow), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 0.75rem;
+
+  --animate-live-pulse: live-pulse 1.8s ease-out infinite;
+
+  @keyframes live-pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.55;
+    }
+    70%,
+    100% {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+}
+
+:root {
+  color-scheme: light;
+  --header-h: 3.5rem;
+  --bottom-nav-h: 4rem;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Visible, consistent keyboard focus everywhere. */
+:focus-visible {
+  outline: 2px solid var(--color-accent-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
