@@ -1,0 +1,65 @@
+"use client";
+
+import { useEffect, useRef, type ReactNode } from "react";
+
+/**
+ * Accessible bottom sheet built on the native <dialog>: focus is trapped,
+ * Escape closes, and the page behind is inert. Centred on larger screens.
+ */
+export function Sheet({
+  open,
+  onClose,
+  title,
+  children,
+  footer,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: ReactNode;
+  children: ReactNode;
+  /** Sticky action area (e.g. the confirm button). */
+  footer?: ReactNode;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const d = ref.current;
+    if (!d) return;
+    if (open && !d.open) d.showModal();
+    if (!open && d.open) d.close();
+  }, [open]);
+
+  return (
+    <dialog
+      ref={ref}
+      onCancel={(e) => {
+        e.preventDefault();
+        onClose();
+      }}
+      onClick={(e) => {
+        if (e.target === ref.current) onClose();
+      }}
+      aria-labelledby="sheet-title"
+      className="fixed inset-x-0 top-auto bottom-0 m-0 mx-auto flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/55 open:flex sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2 sm:rounded-2xl [&:not([open])]:hidden"
+    >
+      {open && (
+        <>
+          <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
+            <h2 id="sheet-title" className="font-display text-xl font-extrabold tracking-tight uppercase">
+              {title}
+            </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              className="h-11 min-w-11 rounded-lg border border-line px-3 text-sm font-bold text-ink-muted hover:bg-subtle"
+            >
+              Cancel
+            </button>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">{children}</div>
+          {footer && <div className="border-t border-line bg-surface px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">{footer}</div>}
+        </>
+      )}
+    </dialog>
+  );
+}

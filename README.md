@@ -14,6 +14,8 @@ npm install
 npm run dev      # http://localhost:3000
 npm run build    # production build
 npm run lint
+npm run typecheck
+npm run test:operator   # operator engine journey test (Node test runner)
 ```
 
 ## Routes
@@ -30,11 +32,57 @@ npm run lint
 | `/matches/[id]` | Match centre — Summary, Line-ups, Stats, H2H |
 | `/teams/[id]` | Team — position, form, next fixture, results |
 
+## Match Operator Console (`/op`)
+
+A separate, utilitarian app for the staff member controlling a live match.
+Not linked from the public site and marked `noindex`. **Demo only**: mock
+signed-in operator, mock assignments, no backend, no auth, no realtime.
+
+| Route | Purpose |
+| --- | --- |
+| `/op` | My matches — Today (live first) / Upcoming / Completed |
+| `/op/matches` | All assignments |
+| `/op/matches/[id]` | Match prep — checklist, connection, hold-to-start |
+| `/op/matches/[id]/live` | Live console — score, clock, Goal/Card/Sub, undo, stoppage, pause, periods |
+
+Unassigned match IDs return "Not assigned to you" (404).
+
+```
+src/lib/operator/
+  types.ts       operator domain (OpMatchState, OpEvent, Assignment…)
+  clock.ts       timestamp-derived clock (periodStartedAt, offset, pauses, stoppage)
+  machine.ts     state machine: commands, allowed phases, guards, RPC names, roles
+  engine.ts      pure command application; score recomputed from non-voided events
+  seed.ts        published match → operator starting state
+  queue.ts       intent model + IntentStore seam (memory now, IndexedDB later)
+  transport.ts   MOCK delivery (online / offline / failing), strict ordering
+  store.ts       client store, mirrored to localStorage (device-only demo)
+  actions.ts     OperatorActions API: startMatch, recordEvent, voidEvent, …
+  time.ts        time source with a server-offset hook
+  data/          server-side mock operator + assignments
+src/components/operator/   console UI (sheets, flows, hold-to-confirm, timeline)
+tests/operator-engine.test.ts
+```
+
+**Persistence:** match state, prep checks and the intent queue are kept in
+this browser's `localStorage` so a refresh keeps the demo; intents that were
+mid-send return to the queue on reload. Nothing is sent to a server. Use
+"Demo controls → Reset this match" (or clear site data) to start over.
+Demo controls also simulate Online / Offline / Server failing.
+
+**Backend phase replaces:** `operatorActions` (→ authenticated RPCs named in
+`COMMANDS[…].rpc`), `transport.deliver` (→ Supabase RPC calls),
+`createMemoryIntentStore` (→ IndexedDB), `lib/operator/data` (→ RLS-scoped
+queries for the signed-in operator), `time.ts` server offset, and the mock
+operator identity (→ real auth). The state machine guards are the checks each
+RPC must enforce server-side.
+
 ## Architecture
 
 ```
 src/
-  app/                 routes, loading / error / not-found states
+  app/(public)/        public routes, loading / error / not-found states
+  app/op/              match operator console (separate chrome)
   components/
     layout/            app header, desktop nav, mobile bottom nav
     match/             match row, live card, hero, timeline, tabs, panels

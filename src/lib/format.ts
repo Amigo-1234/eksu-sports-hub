@@ -4,34 +4,47 @@
  */
 export const CAMPUS_TIME_ZONE = "Africa/Lagos";
 
-const timeFmt = new Intl.DateTimeFormat("en-GB", {
-  timeZone: CAMPUS_TIME_ZONE,
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false,
-});
+/*
+ * WAT is a fixed UTC+1 with no daylight saving, so formatting is done by hand
+ * rather than with Intl — Node and browsers ship different ICU data and would
+ * otherwise render different strings (and break hydration).
+ */
+const WAT_OFFSET_MS = 60 * 60 * 1000;
+const DAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAYS_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS_LONG = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+const pad = (n: number) => String(n).padStart(2, "0");
 
-const keyFmt = new Intl.DateTimeFormat("en-CA", {
-  timeZone: CAMPUS_TIME_ZONE,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-});
+/** A Date whose UTC fields read as campus wall-clock time. */
+const wat = (v: string | number | Date) => new Date(new Date(v).getTime() + WAT_OFFSET_MS);
 
-const shortDayFmt = new Intl.DateTimeFormat("en-GB", {
-  timeZone: "UTC",
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-});
+const timeFmt = {
+  format: (d: Date) => {
+    const w = wat(d);
+    return `${pad(w.getUTCHours())}:${pad(w.getUTCMinutes())}`;
+  },
+};
 
-const longDayFmt = new Intl.DateTimeFormat("en-GB", {
-  timeZone: "UTC",
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
+const keyFmt = {
+  format: (d: Date) => {
+    const w = wat(d);
+    return `${w.getUTCFullYear()}-${pad(w.getUTCMonth() + 1)}-${pad(w.getUTCDate())}`;
+  },
+};
+
+/** Takes a Date at UTC midnight of a campus calendar day. */
+const shortDayFmt = {
+  format: (d: Date) => `${DAYS_SHORT[d.getUTCDay()]} ${d.getUTCDate()} ${MONTHS_SHORT[d.getUTCMonth()]}`,
+};
+
+const longDayFmt = {
+  format: (d: Date) =>
+    `${DAYS_LONG[d.getUTCDay()]} ${d.getUTCDate()} ${MONTHS_LONG[d.getUTCMonth()]} ${d.getUTCFullYear()}`,
+};
 
 /** "16:00" in campus time. */
 export function formatTime(iso: string): string {
