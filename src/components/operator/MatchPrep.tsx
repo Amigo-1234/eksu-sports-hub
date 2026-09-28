@@ -4,10 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { TeamCrest } from "@/components/team/TeamCrest";
 import { formatLongDate, formatTime } from "@/lib/format";
-import { operatorActions } from "@/lib/operator/actions";
+import { operatorActions, operatorControl } from "@/lib/operator/actions";
 import { isPrepComplete, useConnection, useNow, useOpMatch, usePrep } from "@/lib/operator/hooks";
 import { canRun, PHASE_LABEL } from "@/lib/operator/machine";
-import { operatorStore } from "@/lib/operator/store";
 import type { AssignmentSeed, PrepChecks } from "@/lib/operator/types";
 import { ConnectionPill } from "./ConnectionPill";
 import { DemoControls } from "./DemoControls";
@@ -39,7 +38,10 @@ export function MatchPrep({ seed }: { seed: AssignmentSeed }) {
   const untilKickoff = now ? Date.parse(match.kickoffAt) - now : null;
   const queued = snap.intents.filter((i) => i.matchId === match.id && i.state !== "CONFIRMED").length;
 
-  const toggle = (key: keyof PrepChecks) => operatorStore.setPrep(match.id, { ...prep, [key]: !prep[key] });
+  const toggle = async (key: keyof PrepChecks) => {
+    const r = await operatorControl.savePrep(match.id, { ...prep, [key]: !prep[key] });
+    if (!r.ok) notify({ tone: "error", message: `Checklist not saved: ${r.reason}` });
+  };
 
   return (
     <div className="pt-3">
@@ -100,7 +102,7 @@ export function MatchPrep({ seed }: { seed: AssignmentSeed }) {
                   key={c.key}
                   type="button"
                   aria-pressed={prep[c.key]}
-                  onClick={() => toggle(c.key)}
+                  onClick={() => void toggle(c.key)}
                   className={`flex min-h-14 items-center gap-3 rounded-xl border-2 px-3 text-left font-bold ${
                     prep[c.key] ? "border-win bg-win/10" : "border-line-strong bg-surface"
                   }`}

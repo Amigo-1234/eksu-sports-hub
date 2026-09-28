@@ -3,9 +3,10 @@
 Live scores, fixtures, results and tables for Ekiti State University sport.
 Public frontend built with Next.js (App Router), TypeScript and Tailwind CSS v4.
 
-> **Status:** frontend preview running on **demo data**. There is no backend,
-> authentication or realtime feed yet — scores change only when the page is
-> reloaded.
+> **Status:** the public site runs on **demo data**. The match operator
+> console (`/op`) has a real **Supabase** backend (auth, RLS, RPC write path)
+> — see [docs/BACKEND.md](docs/BACKEND.md). Public pages are not connected to
+> it yet, and there is no realtime feed.
 
 ## Getting started
 
@@ -15,8 +16,12 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 npm run lint
 npm run typecheck
-npm run test:operator   # operator engine journey test (Node test runner)
+npm run test:operator   # operator engine + reconciliation tests
+npm run test:db         # pgTAP database tests (needs `npx supabase start`)
+npm run test:backend    # API tests against local Supabase
 ```
+
+Backend setup (local Supabase, dev accounts, hosted project): **[docs/BACKEND.md](docs/BACKEND.md)**.
 
 ## Routes
 
@@ -35,8 +40,9 @@ npm run test:operator   # operator engine journey test (Node test runner)
 ## Match Operator Console (`/op`)
 
 A separate, utilitarian app for the staff member controlling a live match.
-Not linked from the public site and marked `noindex`. **Demo only**: mock
-signed-in operator, mock assignments, no backend, no auth, no realtime.
+Not linked from the public site and marked `noindex`. Backed by Supabase when
+`NEXT_PUBLIC_OPERATOR_BACKEND=supabase` (sign-in at `/op/login`); the
+original in-browser demo remains available with `=mock`.
 
 | Route | Purpose |
 | --- | --- |
@@ -55,27 +61,21 @@ src/lib/operator/
   engine.ts      pure command application; score recomputed from non-voided events
   seed.ts        published match → operator starting state
   queue.ts       intent model + IntentStore seam (memory now, IndexedDB later)
-  transport.ts   MOCK delivery (online / offline / failing), strict ordering
-  store.ts       client store, mirrored to localStorage (device-only demo)
+  canonical.ts   server (RPC) state → operator state
+  backends/      mockOperatorBackend | supabaseOperatorBackend (RPC delivery)
+  transport.ts   ordered delivery, retry, discard
+  store.ts       cache + optimistic layer; reconcile() = server state + pending replay
   actions.ts     OperatorActions API: startMatch, recordEvent, voidEvent, …
-  time.ts        time source with a server-offset hook
-  data/          server-side mock operator + assignments
+  time.ts        time source; server offset measured via server_time()
+  data/          mockOperatorDataSource | supabaseOperatorDataSource (server reads)
 src/components/operator/   console UI (sheets, flows, hold-to-confirm, timeline)
 tests/operator-engine.test.ts
 ```
 
-**Persistence:** match state, prep checks and the intent queue are kept in
-this browser's `localStorage` so a refresh keeps the demo; intents that were
-mid-send return to the queue on reload. Nothing is sent to a server. Use
-"Demo controls → Reset this match" (or clear site data) to start over.
-Demo controls also simulate Online / Offline / Server failing.
-
-**Backend phase replaces:** `operatorActions` (→ authenticated RPCs named in
-`COMMANDS[…].rpc`), `transport.deliver` (→ Supabase RPC calls),
-`createMemoryIntentStore` (→ IndexedDB), `lib/operator/data` (→ RLS-scoped
-queries for the signed-in operator), `time.ts` server offset, and the mock
-operator identity (→ real auth). The state machine guards are the checks each
-RPC must enforce server-side.
+**Persistence:** with the Supabase backend, Postgres is the source of truth;
+the browser keeps only a cache and the queue of not-yet-sent actions
+(`localStorage`, IndexedDB later). With the mock backend, state lives only in
+the browser.
 
 ## Architecture
 

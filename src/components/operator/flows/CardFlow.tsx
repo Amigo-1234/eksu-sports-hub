@@ -47,6 +47,7 @@ export function CardFlow({
       <ChosenTeam team={team} side={side} label="Card" onChange={() => { setSide(null); setShirt(null); setCard(null); setError(null); }} />
       <ErrorNote message={error} />
       <ShirtGrid
+        side={side}
         legend="1. Player"
         value={shirt}
         onChange={(n) => { setShirt(n); setCard(null); }}

@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { TeamCrest } from "@/components/team/TeamCrest";
 import { computeScore } from "@/lib/operator/engine";
-import { isPrepComplete, useOperatorSnapshot } from "@/lib/operator/hooks";
+import { isPrepComplete, seedState, useOperatorSnapshot } from "@/lib/operator/hooks";
 import { isLivePhase, PHASE_LABEL } from "@/lib/operator/machine";
-import { seedMatchState } from "@/lib/operator/seed";
 import type { AssignmentSeed, OpMatchState } from "@/lib/operator/types";
 import { dateKey, formatShortDate, formatTime } from "@/lib/format";
 
@@ -130,7 +129,7 @@ export function AssignmentList({
   const snap = useOperatorSnapshot();
   const rows: Row[] = seeds.map((seed) => {
     const prep = snap.prep[seed.match.id] ?? seed.assignment.prep;
-    return { seed, state: snap.matches[seed.match.id] ?? seedMatchState(seed.match), prepDone: isPrepComplete(prep) };
+    return { seed, state: snap.matches[seed.match.id] ?? seedState(seed), prepDone: isPrepComplete(prep) };
   });
 
   const byKickoff = (a: Row, b: Row) => a.seed.match.kickoffAt.localeCompare(b.seed.match.kickoffAt);

@@ -21,6 +21,11 @@ export interface NewEvent {
   side: Side;
   shirt: number | null;
   shirtIn?: number | null;
+  /** Client-generated event id (idempotency key). Generated if absent. */
+  id?: string;
+  /** Minute captured when the operator recorded it (kept for replays). */
+  minute?: number;
+  addedTime?: number;
 }
 
 export type CommandInput =
@@ -197,18 +202,22 @@ export function applyCommand(state: OpMatchState, input: CommandInput, ctx: Appl
     }
 
     case "RECORD_EVENT": {
+      // Replaying an event the state already contains is a no-op (idempotent).
+      if (input.event.id && state.events.some((e) => e.id === input.event.id)) {
+        return { ok: true, state, eventId: input.event.id };
+      }
       const problem = validateEvent(state, input.event, now);
       if (problem) return { ok: false, reason: problem };
       const clock = displayClock(state.clock, now);
       const event: OpEvent = {
-        id: ctx.newId(),
+        id: input.event.id ?? ctx.newId(),
         matchId: state.matchId,
         type: input.event.type,
         side: input.event.side,
         shirt: input.event.shirt,
         ...(input.event.type === "SUBSTITUTION" ? { shirtIn: input.event.shirtIn ?? null } : {}),
-        minute: clock.minute,
-        addedTime: clock.addedTime,
+        minute: input.event.minute ?? clock.minute,
+        addedTime: input.event.addedTime ?? clock.addedTime,
         recordedAt: now,
         voided: null,
         intentId: ctx.intentId,

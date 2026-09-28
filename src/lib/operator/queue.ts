@@ -22,12 +22,15 @@ export interface Intent {
   state: IntentState;
   attempts: number;
   lastError: string | null;
+  /** Created while the device was offline (reported to the server). */
+  queuedOffline?: boolean;
 }
 
 export interface IntentStore {
   all(): Intent[];
   put(intent: Intent): void;
   update(id: string, patch: Partial<Intent>): Intent | null;
+  remove(id: string): void;
   /** Drop confirmed intents older than `before` (housekeeping). */
   prune(before: number): void;
   clearMatch(matchId: string): void;
@@ -48,6 +51,9 @@ export function createMemoryIntentStore(initial: Intent[] = []): IntentStore {
         return updated;
       });
       return updated;
+    },
+    remove(id) {
+      items = items.filter((i) => i.id !== id);
     },
     prune(before) {
       items = items.filter((i) => !(i.state === "CONFIRMED" && i.clientTimestamp < before));

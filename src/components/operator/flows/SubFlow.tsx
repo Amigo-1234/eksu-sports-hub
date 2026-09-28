@@ -56,6 +56,7 @@ export function SubFlow({
 
       {off === null ? (
         <ShirtGrid
+          side={side}
           legend="↓ Player coming OFF"
           tone="off"
           value={off}
@@ -65,6 +66,7 @@ export function SubFlow({
         />
       ) : (
         <ShirtGrid
+          side={side}
           legend="↑ Player coming ON"
           tone="on"
           value={on}

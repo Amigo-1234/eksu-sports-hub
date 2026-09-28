@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { operatorActions } from "@/lib/operator/actions";
 import { computeScore, lastUndoable } from "@/lib/operator/engine";
-import { useOperatorSnapshot, useNow, useOpMatch } from "@/lib/operator/hooks";
+import { useCanonicalSync, useOperatorSnapshot, useNow, useOpMatch } from "@/lib/operator/hooks";
 import { availableCommands, PHASE_LABEL } from "@/lib/operator/machine";
 import { operatorStore } from "@/lib/operator/store";
 import type { AssignmentSeed, OpEvent, Side } from "@/lib/operator/types";
@@ -17,6 +17,8 @@ import { CorrectionFlow, FinaliseFlow, PauseFlow, StoppageFlow } from "./flows/S
 import { SubFlow } from "./flows/SubFlow";
 import { EVENT_LABEL } from "./labels";
 import { OpTimeline } from "./OpTimeline";
+import { SquadContext } from "./pickers";
+import { TakeOverBanner } from "./TakeOverBanner";
 import { QueueBanner } from "./QueueBanner";
 import { Scoreboard } from "./Scoreboard";
 import { Sheet } from "./Sheet";
@@ -38,6 +40,11 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
   const notify = useFeedback();
   const [sheet, setSheet] = useState<SheetKind | null>(null);
   const matchId = seed.match.id;
+  useCanonicalSync(matchId);
+  const squads = seed.squads
+    ? { home: seed.squads.home.map((p) => p.shirt), away: seed.squads.away.map((p) => p.shirt) }
+    : null;
+  const inControl = snap.inControl[matchId] !== false;
   const { homeTeam, awayTeam } = seed.match;
 
   if (!snap.hydrated || !snap.matches[matchId]) {
@@ -80,12 +87,13 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
   const completed = state.phase === "FULL_TIME" || state.phase === "ABANDONED" || state.phase === "CANCELLED" || state.phase === "POSTPONED";
 
   return (
-    <>
+    <SquadContext.Provider value={squads}>
       <h1 className="sr-only">
         Live console: {homeTeam.name} versus {awayTeam.name}
       </h1>
       <Scoreboard seed={seed} state={state} now={now} />
       <QueueBanner />
+      {!completed && !inControl && <TakeOverBanner matchId={matchId} />}
 
       {completed ? (
         <section className="mt-4 rounded-2xl border-[3px] border-ink p-4 text-center" aria-live="polite">
@@ -100,7 +108,7 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
             Back to my matches
           </Link>
         </section>
-      ) : (
+      ) : !inControl ? null : (
         <ActionPad
           state={state}
           available={available}
@@ -157,7 +165,7 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
           <FinaliseFlow seed={seed} state={state} onDone={() => { close(); notify({ tone: "success", message: `Full-time confirmed · ${scoreLine()}` }); }} />
         )}
       </Sheet>
-    </>
+    </SquadContext.Provider>
   );
 }
 

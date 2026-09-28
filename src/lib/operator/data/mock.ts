@@ -4,7 +4,7 @@
  */
 import type { Assignment, Operator } from "../types";
 
-export const demoOperator: Operator = { id: "op-demo-1", displayName: "Demo Operator" };
+export const demoOperator: Operator = { id: "op-demo-1", displayName: "Demo Operator", roles: ["OPERATOR"] };
 
 const ready = { atVenue: true, teamsPresent: true, officialsReady: true };
 const notReady = { atVenue: false, teamsPresent: false, officialsReady: false };

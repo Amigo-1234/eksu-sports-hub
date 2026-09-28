@@ -61,6 +61,7 @@ export function GoalFlow({
         </div>
       </fieldset>
       <ShirtGrid
+        side={playerSide}
         legend={kind === "OWN_GOAL" ? `Scorer (own goal by ${playerTeam.shortName}) — optional` : "Scorer — optional"}
         value={shirt}
         onChange={setShirt}

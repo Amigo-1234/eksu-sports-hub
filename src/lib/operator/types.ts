@@ -27,7 +27,9 @@ export type OpEventType =
   | "YELLOW_CARD"
   | "SECOND_YELLOW"
   | "RED_CARD"
-  | "SUBSTITUTION";
+  | "SUBSTITUTION"
+  /** Recorded by the backend model; never changes the score. */
+  | "PENALTY_MISS";
 
 /** Network/sync state of an event, mirrored from its intent. */
 export type SyncState = "PENDING" | "SENDING" | "CONFIRMED" | "FAILED";
@@ -48,8 +50,10 @@ export interface OpEvent {
   recordedAt: number;
   /** Set when the event is undone or corrected. Events are never deleted. */
   voided: { at: number; reason: string } | null;
-  /** Intent that carries this event to the server (null for seeded history). */
+  /** Intent that carries this event to the server (null once server-confirmed). */
   intentId: string | null;
+  /** Server-assigned order (absent until confirmed). */
+  seq?: number;
 }
 
 export type PauseReason = "INJURY" | "WEATHER" | "CROWD" | "TECHNICAL" | "OTHER";
@@ -66,7 +70,8 @@ export interface OpLogEntry {
     | "PAUSED"
     | "RESUMED"
     | "STOPPAGE_SET"
-    | "EVENT_VOIDED";
+    | "EVENT_VOIDED"
+    | "OPERATOR_TAKEOVER";
   detail?: string;
 }
 
@@ -91,6 +96,8 @@ export interface PrepChecks {
 export interface Operator {
   id: string;
   displayName: string;
+  /** Role codes, e.g. ["OPERATOR"]. */
+  roles: string[];
 }
 
 export interface Assignment {
@@ -101,8 +108,19 @@ export interface Assignment {
   prep: PrepChecks;
 }
 
+export interface SquadMember {
+  playerId: string;
+  shirt: number;
+}
+
 /** Everything the console needs for one assigned match (serialisable). */
 export interface AssignmentSeed {
   assignment: Assignment;
   match: MatchDetail;
+  /** Supabase backend: authoritative state at page load. */
+  canonical?: OpMatchState;
+  /** Supabase backend: whether this user currently controls the match. */
+  inControl?: boolean;
+  /** Supabase backend: real squads (shirt ↔ player). Mock uses demo shirts. */
+  squads?: { home: SquadMember[]; away: SquadMember[] };
 }

@@ -20,6 +20,7 @@ function EventIcon({ e }: { e: OpEvent }) {
   if (e.type === "RED_CARD") return <CardGlyph kind="RED" size={26} />;
   if (e.type === "SECOND_YELLOW") return <CardGlyph kind="SECOND_YELLOW" size={26} />;
   if (e.type === "SUBSTITUTION") return <span className="text-xl font-black">⇅</span>;
+  if (e.type === "PENALTY_MISS") return <span className="text-lg font-black">✕</span>;
   return <span className="text-xl">⚽︎</span>;
 }
 
@@ -37,6 +38,8 @@ function logText(l: OpLogEntry): string | null {
       return `Clock paused · ${PAUSE_LABEL[l.detail as PauseReason] ?? l.detail}`;
     case "RESUMED":
       return "Clock resumed";
+    case "OPERATOR_TAKEOVER":
+      return "Operator control changed";
     case "STOPPAGE_SET":
       return l.detail === "+0" ? "Stoppage cleared" : `Stoppage announced ${l.detail}`;
     default:

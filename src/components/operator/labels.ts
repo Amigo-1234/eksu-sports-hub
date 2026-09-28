@@ -8,6 +8,7 @@ export const EVENT_LABEL: Record<OpEventType, string> = {
   SECOND_YELLOW: "Second yellow",
   RED_CARD: "Red card",
   SUBSTITUTION: "Substitution",
+  PENALTY_MISS: "Penalty missed",
 };
 
 export const PAUSE_REASONS: { value: PauseReason; label: string }[] = [

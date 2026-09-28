@@ -1,11 +1,15 @@
 "use client";
 
+import { createContext, useContext } from "react";
 import { TeamCrest } from "@/components/team/TeamCrest";
 import type { PlayerStatus } from "@/lib/operator/engine";
 import type { Side } from "@/lib/operator/types";
 import type { Team } from "@/lib/types";
 
 export const DEMO_SHIRTS = Array.from({ length: 25 }, (_, i) => i + 1);
+
+/** Real squad shirt numbers per side (Supabase backend); null → demo numbers. */
+export const SquadContext = createContext<{ home: number[]; away: number[] } | null>(null);
 
 /** Two very large targets, laid out like the scoreboard (home left, away right). */
 export function TeamPicker({
@@ -73,6 +77,7 @@ export type ShirtTone = "neutral" | "off" | "on";
  * current action are disabled with a visible text reason.
  */
 export function ShirtGrid({
+  side,
   legend,
   value,
   onChange,
@@ -81,6 +86,8 @@ export function ShirtGrid({
   allowUnknown = false,
   tone = "neutral",
 }: {
+  /** Whose squad to show. */
+  side: Side;
   legend: string;
   value: number | null;
   onChange: (shirt: number | null) => void;
@@ -90,6 +97,8 @@ export function ShirtGrid({
   allowUnknown?: boolean;
   tone?: ShirtTone;
 }) {
+  const squads = useContext(SquadContext);
+  const shirts = squads ? squads[side] : DEMO_SHIRTS;
   const selectedCls = {
     neutral: "border-ink bg-ink text-white",
     off: "border-loss bg-loss text-white",
@@ -98,9 +107,12 @@ export function ShirtGrid({
   return (
     <fieldset>
       <legend className="mb-1 text-base font-bold">{legend}</legend>
-      <p className="mb-2 text-xs font-semibold text-accent-700">Demo squad — shirt numbers only</p>
+      <p className="mb-2 text-xs font-semibold text-accent-700">
+        {squads ? "Squad — shirt numbers" : "Demo squad — shirt numbers only"}
+      </p>
+      {shirts.length === 0 && <p className="mb-2 text-sm font-bold text-live">No squad registered for this team.</p>}
       <div className="grid grid-cols-5 gap-2">
-        {DEMO_SHIRTS.map((n) => {
+        {shirts.map((n) => {
           const status = statuses.get(n);
           const reason = unavailable?.(n, status) ?? null;
           const selected = value === n;

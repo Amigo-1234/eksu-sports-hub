@@ -1,30 +1,30 @@
 /**
- * MOCK transport. Simulates delivering intents to the server so the UI can
- * show PENDING → SENDING → CONFIRMED / FAILED. Nothing leaves the browser.
+ * Delivers queued intents through the configured backend, strictly in order.
  *
- * Production replaces `deliver()` with the authenticated Supabase RPC call
- * named by `intent.action`. Intents are sent strictly in order; a failure
- * stops the queue until the operator retries, so the server never sees
- * commands out of sequence.
+ * - success   → CONFIRMED; canonical state (if returned) is reconciled
+ * - transient → back to PENDING; retried automatically (every RPC is
+ *               idempotent on its intent/event id, so retries are safe)
+ * - rejected  → FAILED; the queue stops until the operator retries or discards
  */
+import { getOperatorBackend } from "./backends/index.ts";
 import { operatorStore } from "./store.ts";
 
-const SIMULATED_LATENCY_MS = 700;
-
+const RETRY_MS = 4000;
 let flushing = false;
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
-async function deliver(): Promise<{ ok: true } | { ok: false; error: string }> {
-  await new Promise((r) => setTimeout(r, SIMULATED_LATENCY_MS));
-  if (!operatorStore.isOnline()) return { ok: false, error: "Connection lost while sending" };
-  if (operatorStore.get().networkSim === "failing") {
-    return { ok: false, error: "Server rejected the request (simulated)" };
-  }
-  return { ok: true };
+function scheduleRetry() {
+  if (retryTimer) return;
+  retryTimer = setTimeout(() => {
+    retryTimer = null;
+    void flushQueue();
+  }, RETRY_MS);
 }
 
 export async function flushQueue() {
   if (flushing) return;
   flushing = true;
+  const backend = getOperatorBackend();
   try {
     while (operatorStore.isOnline()) {
       const intents = operatorStore.get().intents;
@@ -32,11 +32,14 @@ export async function flushQueue() {
       const next = intents.find((i) => i.state === "PENDING");
       if (!next) break;
       operatorStore.intents.update(next.id, { state: "SENDING", attempts: next.attempts + 1 });
-      const result = await deliver();
+      const result = await backend.deliver({ ...next, attempts: next.attempts + 1 });
       if (result.ok) {
         operatorStore.intents.update(next.id, { state: "CONFIRMED", lastError: null });
-      } else if (!operatorStore.isOnline()) {
+        if (result.canonical) operatorStore.reconcile(next.matchId, result.canonical, result.inControl);
+      } else if (result.retryable || !operatorStore.isOnline()) {
         operatorStore.intents.update(next.id, { state: "PENDING", lastError: result.error });
+        scheduleRetry();
+        break;
       } else {
         operatorStore.intents.update(next.id, { state: "FAILED", lastError: result.error });
       }
@@ -50,6 +53,14 @@ export async function flushQueue() {
 export function retryFailed() {
   for (const i of operatorStore.get().intents) {
     if (i.state === "FAILED") operatorStore.intents.update(i.id, { state: "PENDING" });
+  }
+  void flushQueue();
+}
+
+/** Drop rejected intents (the server said no); local state rolls back. */
+export function discardFailed() {
+  for (const i of operatorStore.get().intents) {
+    if (i.state === "FAILED") operatorStore.intents.discard(i.id);
   }
   void flushQueue();
 }

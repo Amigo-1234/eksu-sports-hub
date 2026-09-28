@@ -3,13 +3,15 @@ import Link from "next/link";
 import { AssignmentList } from "@/components/operator/AssignmentList";
 import { getNow } from "@/lib/data";
 import { dateKey } from "@/lib/format";
-import { getAssignmentSeeds, getCurrentOperator } from "@/lib/operator/data";
+import { operatorDataSource } from "@/lib/operator/data";
+import { requireOperator } from "@/lib/operator/session";
 
 export const metadata: Metadata = { title: "Assignments" };
 
 export default async function AllAssignments() {
-  const operator = await getCurrentOperator();
-  const [seeds, now] = await Promise.all([getAssignmentSeeds(operator.id), getNow()]);
+  const { operator, allowed } = await requireOperator();
+  if (!allowed || !operator) return null;
+  const [seeds, now] = await Promise.all([operatorDataSource().getAssignmentSeeds(operator), getNow()]);
   return (
     <>
       <div className="pt-4">
