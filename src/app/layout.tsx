@@ -23,11 +23,11 @@ export const metadata: Metadata = {
   description:
     "Live scores, fixtures, results and tables for Ekiti State University sport.",
   applicationName: "EKSU Sports Hub",
-  appleWebApp: { capable: true, title: "EKSU Sports", statusBarStyle: "black-translucent" },
+  appleWebApp: { capable: true, title: "EKSU Sports", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#5c1025",
+  themeColor: "#ffffff",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

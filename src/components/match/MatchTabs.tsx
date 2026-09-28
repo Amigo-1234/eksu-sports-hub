@@ -36,7 +36,7 @@ export function MatchTabs({ tabs, initial }: { tabs: TabDef[]; initial?: string 
         role="tablist"
         aria-label="Match information"
         onKeyDown={onKeyDown}
-        className="sticky top-[var(--header-h)] z-30 -mx-3 flex border-b border-line bg-canvas/95 px-3 backdrop-blur sm:mx-0 sm:px-0"
+        className="sticky top-[calc(var(--header-h)+5px)] z-30 -mx-3 flex border-b border-line bg-canvas/95 px-3 backdrop-blur sm:mx-0 sm:px-0"
       >
         {tabs.map((t, i) => {
           const selected = t.id === active;

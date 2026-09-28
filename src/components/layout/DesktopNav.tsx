@@ -17,13 +17,13 @@ export function DesktopNav({ liveCount }: { liveCount: number }) {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={`flex h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold transition-colors ${
-                  active ? "bg-white text-brand-800" : "text-white/85 hover:bg-white/10 hover:text-white"
+                  active ? "bg-brand-700 text-white" : "text-ink-muted hover:bg-subtle hover:text-ink"
                 }`}
               >
                 {href === "/live" && liveCount > 0 && (
                   <span className="relative flex size-2" aria-hidden="true">
-                    <span className="absolute inset-0 rounded-full bg-live motion-safe:animate-live-pulse" />
-                    <span className={`relative size-2 rounded-full ${active ? "bg-live" : "bg-accent-400"}`} />
+                    <span className={`absolute inset-0 rounded-full motion-safe:animate-live-pulse ${active ? "bg-white" : "bg-live"}`} />
+                    <span className={`relative size-2 rounded-full ${active ? "bg-white" : "bg-live"}`} />
                   </span>
                 )}
                 {label}

@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     display: "standalone",
     background_color: "#f4f2f1",
-    theme_color: "#5c1025",
-    icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
+    theme_color: "#ffffff",
+    icons: [{ src: "/brand/eksu-crest-192.png", sizes: "192x192", type: "image/png" }],
   };
 }
