@@ -1,6 +1,6 @@
 begin;
 \ir helpers.inc
-select plan(28);
+select plan(30);
 
 -- Fixtures: an operator assigned to m1, an operator with no assignment,
 -- a signed-in user with no role, and an admin.
@@ -17,6 +17,18 @@ select is(
   (select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace
    where n.nspname = 'public' and c.relkind = 'r' and not (c.relrowsecurity and c.relforcerowsecurity))::int,
   0, 'RLS enabled and forced on every public table');
+
+-- Private helpers are not executable by client roles (except RLS helpers).
+select is(
+  (select coalesce(string_agg(p.proname, ',' order by p.proname), '')
+   from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'private' and has_function_privilege('anon', p.oid, 'execute')),
+  'has_role,is_staff', 'anon can execute only the RLS helpers in private');
+select is(
+  (select coalesce(string_agg(p.proname, ',' order by p.proname), '')
+   from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'private' and has_function_privilege('authenticated', p.oid, 'execute')),
+  'has_role,is_staff', 'authenticated can execute only the RLS helpers in private');
 
 -- ── anon ──────────────────────────────────────────────────────────────────
 select tests.login_anon();

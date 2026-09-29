@@ -118,6 +118,21 @@ Textlocal) configured in Supabase → Authentication → Providers → Phone, an
 replacing `LoginForm` with `signInWithOtp({ phone })` + `verifyOtp`. Nothing
 else changes: authorisation depends only on `auth.uid()`.
 
+## Hosted project (deployed 2026-09-29)
+
+| | |
+| --- | --- |
+| Project | `eksu-sports-hub` · ref `lkvdoeomyhbtinpvvbfr` · eu-west-2 (London) · Free plan |
+| API URL | `https://lkvdoeomyhbtinpvvbfr.supabase.co` |
+| Migrations applied | `20260928000100` … `20260928000600` (history versions aligned with this repo) |
+| Pending | `20260928000700_harden_private_functions.sql` — not yet applied remotely |
+| Seed | **not** run (no development data on the hosted project) |
+| Auth users | none yet |
+
+The hosted verification (47 checks: RLS per role, every RPC, idempotency,
+voids, discipline rules, clock/periods, takeover, FT lock, audit immutability,
+standings) ran inside a transaction that was rolled back, so nothing persisted.
+
 ## Connecting a hosted Supabase project
 1. Create a project; note the project ref, URL, publishable and secret keys.
 2. `npx supabase link --project-ref <ref>` then `npx supabase db push`
