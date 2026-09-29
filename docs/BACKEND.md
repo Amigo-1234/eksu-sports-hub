@@ -124,12 +124,12 @@ else changes: authorisation depends only on `auth.uid()`.
 | --- | --- |
 | Project | `eksu-sports-hub` · ref `lkvdoeomyhbtinpvvbfr` · eu-west-2 (London) · Free plan |
 | API URL | `https://lkvdoeomyhbtinpvvbfr.supabase.co` |
-| Migrations applied | `20260928000100` … `20260928000600` (history versions aligned with this repo) |
-| Pending | `20260928000700_harden_private_functions.sql` — not yet applied remotely |
+| Migrations applied | `20260928000100` … `20260928000700` (history versions aligned with this repo) |
 | Seed | **not** run (no development data on the hosted project) |
 | Auth users | none yet |
 
-The hosted verification (47 checks: RLS per role, every RPC, idempotency,
+The hosted verification (47 checks after 000600; 55 checks after 000700, adding
+private-helper denial and RLS-helper behaviour: RLS per role, every RPC, idempotency,
 voids, discipline rules, clock/periods, takeover, FT lock, audit immutability,
 standings) ran inside a transaction that was rolled back, so nothing persisted.
 
