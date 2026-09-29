@@ -28,7 +28,7 @@ async function signIn(email) {
 }
 const userId = async (c) => (await c.auth.getUser()).data.user.id;
 
-let primary, primary2, backup, other, anon, matchId, players;
+let primary, primary2, backup, other, anon, adminUser, matchId, players;
 
 before(async () => {
   [primary, primary2, backup, other] = await Promise.all(
@@ -47,10 +47,30 @@ before(async () => {
     { match_id: matchId, user_id: await userId(backup), role: "BACKUP" },
   ]);
   assert.ifError(a.error);
+  // Kick-off needs confirmed line-ups: prepared through the real RPCs by an admin.
+  adminUser = await signIn("admin@dev.eksu.test");
+  for (const team of [HOME, AWAY]) await confirmLineup(adminUser, matchId, team);
   const sq = await primary.rpc("operator_match_state", { p_match_id: matchId });
   assert.ifError(sq.error);
   players = sq.data.squads;
 });
+
+/** Shirts 1–11 start in a 4-4-2 (No. 10 captain), 12–18 on the bench. */
+async function confirmLineup(client, match, team) {
+  const st = await client.rpc("lineup_editor_state", { p_match_id: match, p_team_id: team });
+  assert.ifError(st.error);
+  const squad = st.data.squad.filter((p) => p.eligibility === "CLEARED" && p.shirt_number <= 18);
+  const lineup = squad.map((p) => ({
+    player_id: p.player_id,
+    role: p.shirt_number <= 11 ? "STARTER" : "SUBSTITUTE",
+    slot: p.shirt_number <= 11 ? p.shirt_number - 1 : null,
+    captain: p.shirt_number === 10,
+  }));
+  const saved = await client.rpc("save_lineup", { p_match_id: match, p_team_id: team, p_formation: "4-4-2", p_players: lineup });
+  assert.ifError(saved.error);
+  const confirmed = await client.rpc("confirm_lineup", { p_match_id: match, p_team_id: team });
+  assert.ifError(confirmed.error);
+}
 
 const rpc = async (c, fn, args) => {
   const { data, error } = await c.rpc(fn, args);
@@ -188,3 +208,92 @@ test("admin surface: an ADMIN can use it, and same-team fixtures are rejected", 
   assert.ifError(live.error);
   assert.ok(Array.isArray(live.data));
 });
+
+// ── Screening, squads and line-ups ────────────────────────────────────────────
+test("screening data and student numbers are private through the API", async () => {
+  const idsAnon = await anon.from("player_identities").select("student_id");
+  assert.ok(idsAnon.error, "anon cannot read student numbers");
+  const idsOp = await primary.from("player_identities").select("student_id");
+  assert.deepEqual(idsOp.data, [], "operator reads no student numbers (RLS)");
+  const scrAnon = await anon.from("player_screenings").select("status");
+  assert.ok(scrAnon.error, "anon cannot read screenings");
+  const scrOp = await primary.from("player_screenings").select("status");
+  assert.deepEqual(scrOp.data, [], "operator reads no screenings");
+  const playersAnon = await anon.from("players").select("id");
+  assert.ok(playersAnon.error, "anon cannot read the player register");
+  const decide = await rpc(primary, "admin_decide_screening", { p_screening_id: randomUUID(), p_status: "CLEARED" });
+  assert.equal(decide.error?.code, "EK403", "operator cannot screen players");
+  const reg = await rpc(primary, "admin_register_player", {
+    p_display_name: "X", p_student_id: "API/1", p_faculty_id: null, p_department_id: null, p_team_id: HOME,
+    p_season_id: "30000000-0000-4000-8000-000000000001",
+  });
+  assert.equal(reg.error?.code, "EK403", "operator cannot register players");
+});
+
+test("line-up tables cannot be written directly; editor access follows assignments", async () => {
+  const l = await primary.from("match_lineups").insert({ match_id: matchId, team_id: HOME });
+  assert.ok(l.error, "no direct line-up writes");
+  const lp = await primary.from("lineup_players").insert({ lineup_id: randomUUID(), player_id: randomUUID(), shirt_number: 5, role: "STARTER" });
+  assert.ok(lp.error, "no direct line-up player writes");
+  const sp = await primary.from("squad_players").insert({ squad_id: randomUUID(), player_id: randomUUID(), shirt_number: 5 });
+  assert.ok(sp.error, "no direct squad writes");
+  const anonLineups = await anon.from("match_lineups").select("id");
+  assert.ok(anonLineups.error, "anon cannot read line-up tables (drafts stay private)");
+  const mine = await rpc(primary, "lineup_editor_state", { p_match_id: matchId, p_team_id: HOME });
+  assert.ifError(mine.error);
+  assert.ok(!JSON.stringify(mine.data).toLowerCase().includes("student"), "operator editor carries no student numbers");
+  assert.ok(mine.data.squad.every((p) => p.eligibility === "CLEARED"), "operator sees only eligible players");
+  const notMine = await rpc(other, "lineup_editor_state", { p_match_id: matchId, p_team_id: HOME });
+  assert.equal(notMine.error?.code, "EK403", "unassigned operator refused");
+  const anonEditor = await rpc(anon, "lineup_editor_state", { p_match_id: matchId, p_team_id: HOME });
+  assert.ok(anonEditor.error, "anon refused");
+});
+
+test("public feed: confirmed line-ups with on-field state, no internal fields", async () => {
+  const { data, error } = await anon.rpc("public_match_feed", { p_match_id: matchId });
+  assert.ifError(error);
+  assert.equal(data.lineups.length, 2);
+  const text = JSON.stringify(data.lineups);
+  for (const k of ["player_id", "student", "eligibility", "screen"]) assert.ok(!text.includes(k), `no ${k} in public line-ups`);
+  assert.equal(data.lineups[0].players.filter((p) => p.captain).length, 1);
+});
+
+test("substitutions follow the confirmed line-up and update the public on-field view", async () => {
+  const s = await rpc(backup, "operator_match_state", { p_match_id: matchId });
+  const inControl = s.data.in_control ? backup : primary;
+  const bad = await rpc(inControl, "record_event", {
+    p_match_id: matchId, p_event_id: randomUUID(), p_type: "SUBSTITUTION", p_team_id: AWAY, p_minute: 35,
+    p_player_id: pid("away", 12), p_related_player_id: pid("away", 14),
+  });
+  assert.equal(bad.error?.code, "EK422", "player off must be on the pitch");
+  const ok = await rpc(inControl, "record_event", {
+    p_match_id: matchId, p_event_id: randomUUID(), p_type: "SUBSTITUTION", p_team_id: AWAY, p_minute: 35,
+    p_player_id: pid("away", 7), p_related_player_id: pid("away", 14),
+  });
+  assert.ifError(ok.error);
+  const { data } = await anon.rpc("public_match_feed", { p_match_id: matchId });
+  const away = data.lineups.find((l) => l.team_id === AWAY).players;
+  assert.equal(away.find((p) => p.shirt_number === 7).on_field, false);
+  assert.equal(away.find((p) => p.shirt_number === 14).on_field, true);
+  assert.equal(away.find((p) => p.shirt_number === 14).on_minute, 35);
+});
+
+test("kick-off is blocked without confirmed line-ups unless an admin overrides", async () => {
+  const m = await rpc(adminUser, "admin_create_match", {
+    p_competition_id: COMP, p_stage_id: null, p_group_id: null, p_round_label: "API no line-ups", p_home_team_id: HOME,
+    p_away_team_id: AWAY, p_venue_id: null, p_scheduled_at: new Date().toISOString(),
+  });
+  assert.ifError(m.error);
+  assert.ifError((await rpc(adminUser, "admin_assign_operators", { p_match_id: m.data, p_primary: await userId(primary), p_backup: null })).error);
+  const blocked = await rpc(primary, "start_match", { p_match_id: m.data, p_intent_id: randomUUID() });
+  assert.equal(blocked.error?.code, "EK409");
+  const opOverride = await rpc(primary, "admin_set_lineup_override", { p_match_id: m.data, p_reason: "x" });
+  assert.equal(opOverride.error?.code, "EK403", "operators cannot bypass line-ups");
+  assert.ifError((await rpc(adminUser, "admin_set_lineup_override", { p_match_id: m.data, p_reason: "API test: sheets unavailable" })).error);
+  const started = await rpc(primary, "start_match", { p_match_id: m.data, p_intent_id: randomUUID() });
+  assert.ifError(started.error);
+  assert.equal(started.data.match.status, "1H");
+  // Leave no live test match behind for the admin monitor.
+  assert.ifError((await rpc(adminUser, "admin_set_match_outcome", { p_match_id: m.data, p_status: "ABANDONED", p_reason: "API test cleanup" })).error);
+});
+

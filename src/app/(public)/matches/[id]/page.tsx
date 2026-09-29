@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { HeadToHeadPanel, NotAvailablePanel, type PreMatchTeam } from "@/components/match/MatchPanels";
-import { LiveMatchHero, LiveMatchProvider, LiveSummaryPanel } from "@/components/realtime/LiveMatch";
+import { LiveLineupsPanel, LiveMatchHero, LiveMatchProvider, LiveSummaryPanel } from "@/components/realtime/LiveMatch";
 import { MatchTabs } from "@/components/match/MatchTabs";
 import { BackLink } from "@/components/ui/BackLink";
 import { DemoNotice } from "@/components/ui/DemoNotice";
@@ -60,7 +60,7 @@ export default async function MatchPage({ params }: PageProps<"/matches/[id]">) 
                 <LiveSummaryPanel preMatch={{ home: pre(match.homeTeam, homeForm), away: pre(match.awayTeam, awayForm) }} />
               ),
             },
-            { id: "lineups", label: "Line-ups", content: <NotAvailablePanel kind="lineups" /> },
+            { id: "lineups", label: "Line-ups", content: <LiveLineupsPanel /> },
             { id: "stats", label: "Stats", content: <NotAvailablePanel kind="stats" /> },
             { id: "h2h", label: "H2H", content: <HeadToHeadPanel match={match} meetings={meetings} serverNow={now} /> },
           ]}

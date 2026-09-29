@@ -43,6 +43,11 @@
   --color-draw: #6b6466;
   --color-loss: #c0262d;
 
+  /* Pitch (line-ups) */
+  --color-pitch: #2d6e45;
+  --color-pitch-stripe: #2a6841;
+  --color-pitch-line: #ffffffb3;
+
   /* Status */
   --color-warn: #9a5a00;
   --color-warn-soft: #fdf3dc;

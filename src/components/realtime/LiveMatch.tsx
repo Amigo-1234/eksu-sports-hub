@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { MatchHero } from "@/components/match/MatchHero";
-import { SummaryPanel, type PreMatchTeam } from "@/components/match/MatchPanels";
+import { LineupsPanel } from "@/components/match/LineupsPanel";
+import { NotAvailablePanel, SummaryPanel, type PreMatchTeam } from "@/components/match/MatchPanels";
 import { onResume, publicClient, subscribeHints } from "@/lib/realtime/client";
 import { applyFeed, knownSeq, shouldFetch } from "@/lib/realtime/matchSync";
 import { setServerTime } from "@/lib/realtime/serverTime";
@@ -107,4 +108,11 @@ export function LiveMatchHero({ serverNow }: { serverNow: number }) {
 
 export function LiveSummaryPanel({ preMatch }: { preMatch: { home: PreMatchTeam; away: PreMatchTeam } }) {
   return <SummaryPanel match={useLiveMatch()} preMatch={preMatch} />;
+}
+
+/** Line-ups tab: updates with the same realtime resync as the score (substitutions, dismissals, publication). */
+export function LiveLineupsPanel() {
+  const match = useLiveMatch();
+  // Undefined: the data source has no line-ups (demo data).
+  return match.lineups === undefined ? <NotAvailablePanel kind="lineups" /> : <LineupsPanel match={match} />;
 }

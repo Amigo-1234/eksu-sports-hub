@@ -57,3 +57,32 @@ returns uuid language sql stable security definer set search_path = '' as $$
   where s.team_id = p_team and sp.shirt_number = p_shirt;
 $$;
 grant execute on all functions in schema tests to anon, authenticated;
+
+-- Confirmed line-ups for a test match (kick-off requires them): shirts 1–11
+-- start in a 4-4-2 (No. 1 in goal, No. 10 captain), 12–18 on the bench.
+create or replace function tests.confirm_lineups(p_match uuid)
+returns void language plpgsql security definer set search_path = '' as $$
+declare m public.matches; t uuid; v_lineup uuid; f jsonb;
+begin
+  select * into m from public.matches where id = p_match;
+  select slots into f from public.formations where code = '4-4-2';
+  foreach t in array array[m.home_team_id, m.away_team_id] loop
+    insert into public.match_lineups (match_id, team_id, status, formation_code, confirmed_at)
+    values (p_match, t, 'CONFIRMED', '4-4-2', now()) returning id into v_lineup;
+    insert into public.lineup_players (lineup_id, player_id, shirt_number, role, position, slot_index, pitch_x, pitch_y,
+                                       is_captain, is_goalkeeper, sort_order)
+    select v_lineup, sp.player_id, sp.shirt_number,
+      case when sp.shirt_number <= 11 then 'STARTER' else 'SUBSTITUTE' end::public.lineup_role,
+      case when sp.shirt_number <= 11 then f -> (sp.shirt_number - 1) ->> 'position' end,
+      case when sp.shirt_number <= 11 then sp.shirt_number - 1 end,
+      case when sp.shirt_number <= 11 then (f -> (sp.shirt_number - 1) ->> 'x')::numeric end,
+      case when sp.shirt_number <= 11 then (f -> (sp.shirt_number - 1) ->> 'y')::numeric end,
+      sp.shirt_number = 10, sp.shirt_number in (1, 13), sp.shirt_number
+    from public.squad_players sp join public.squads s on s.id = sp.squad_id
+    join public.competitions c on c.id = m.competition_id
+    where s.team_id = t and s.season_id = c.season_id and sp.active;
+  end loop;
+end $$;
+select tests.confirm_lineups(tests.m1());
+select tests.confirm_lineups(tests.m2());
+grant execute on all functions in schema tests to anon, authenticated;

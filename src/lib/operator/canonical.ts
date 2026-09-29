@@ -49,6 +49,27 @@ export interface CanonicalLog {
   detail: unknown;
 }
 
+export interface CanonicalSquadPlayer {
+  player_id: string;
+  shirt_number: number;
+  name?: string | null;
+}
+
+export interface CanonicalLineup {
+  status: "DRAFT" | "CONFIRMED";
+  formation: string | null;
+  problems: string[];
+  players: {
+    player_id: string;
+    name: string | null;
+    shirt_number: number;
+    role: "STARTER" | "SUBSTITUTE";
+    position: string | null;
+    captain: boolean;
+    goalkeeper: boolean;
+  }[];
+}
+
 export interface CanonicalState {
   match: CanonicalMatch;
   events: CanonicalEvent[];
@@ -56,7 +77,9 @@ export interface CanonicalState {
   server_time?: string;
   replayed?: boolean;
   in_control?: boolean;
-  squads?: { home: { player_id: string; shirt_number: number }[]; away: { player_id: string; shirt_number: number }[] };
+  squads?: { home: CanonicalSquadPlayer[]; away: CanonicalSquadPlayer[] };
+  lineups?: { home: CanonicalLineup | null; away: CanonicalLineup | null };
+  lineup_override?: string | null;
 }
 
 const PHASE: Record<CanonicalMatch["status"], OpPhase> = {

@@ -2,7 +2,7 @@
  * Supabase row / RPC payload → public UI types. Pure and shared by the server
  * data source and the browser realtime layer.
  */
-import type { ID, MatchEvent, MatchEventType, MatchStatus, PublicClock } from "../../types";
+import type { ID, MatchEvent, MatchEventType, MatchStatus, PublicClock, PublicLineup } from "../../types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- RPC payloads are mapped explicitly below. */
 
@@ -68,4 +68,35 @@ export function sortEvents(events: MatchEvent[]): MatchEvent[] {
   return [...events].sort(
     (a, b) => a.minute - b.minute || (a.addedTime ?? 0) - (b.addedTime ?? 0) || (a.seq ?? 0) - (b.seq ?? 0),
   );
+}
+
+const num = (v: any): number | null => (v === null || v === undefined || v === "" ? null : Number(v));
+
+/** Feed line-ups (public_match_feed.lineups) → UI line-ups. Only public-safe fields exist in the payload. */
+export function toLineups(raw: any): PublicLineup[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((l: any) => ({
+    teamId: l.team_id,
+    formation: l.formation ?? null,
+    players: (Array.isArray(l.players) ? l.players : []).map((p: any) => ({
+      shirtNumber: Number(p.shirt_number),
+      name: p.name ?? null,
+      role: p.role === "STARTER" ? "STARTER" : "SUBSTITUTE",
+      position: p.position ?? null,
+      x: num(p.x),
+      y: num(p.y),
+      captain: !!p.captain,
+      goalkeeper: !!p.goalkeeper,
+      onField: !!p.on_field,
+      subbedOn: !!p.subbed_on,
+      subbedOff: !!p.subbed_off,
+      onMinute: num(p.on_minute),
+      onExtra: num(p.on_extra),
+      offMinute: num(p.off_minute),
+      offExtra: num(p.off_extra),
+      sentOff: !!p.sent_off,
+      booked: !!p.booked,
+      goals: Number(p.goals ?? 0),
+    })),
+  }));
 }

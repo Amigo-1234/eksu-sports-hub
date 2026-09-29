@@ -63,6 +63,7 @@ export function SubFlow({
           onChange={setOff}
           statuses={statuses}
           unavailable={(_, s) => (s?.sentOff ? "Sent off" : s?.subbedOff ? "Off" : null)}
+          scope="onField"
         />
       ) : (
         <ShirtGrid
@@ -73,6 +74,7 @@ export function SubFlow({
           onChange={setOn}
           statuses={statuses}
           unavailable={(n, s) => (n === off ? "Going off" : s?.subbedOff || s?.sentOff ? "Used" : s?.subbedOn ? "On" : null)}
+          scope="bench"
         />
       )}
 

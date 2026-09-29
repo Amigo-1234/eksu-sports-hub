@@ -63,6 +63,14 @@ export async function getMatchRow(id: string): Promise<(MatchRow & { competition
   return m ? (toRow(m) as any) : null;
 }
 
+export interface TeamLineupSummary {
+  status: "DRAFT" | "CONFIRMED";
+  formation: string | null;
+  confirmed_at: string | null;
+  problems: string[];
+  players: { player_id: string; name: string | null; shirt_number: number; role: "STARTER" | "SUBSTITUTE"; captain: boolean }[];
+}
+
 export interface MatchInspection {
   state: {
     match: LiveMatch["match"] & { seq: number; home_team_id: string; away_team_id: string };
@@ -73,7 +81,16 @@ export interface MatchInspection {
     }[];
     server_time: string;
   };
-  match: { started_at: string | null; finished_at: string | null; active_operator_name: string | null; status_note: string | null };
+  match: {
+    started_at: string | null;
+    finished_at: string | null;
+    active_operator_name: string | null;
+    status_note: string | null;
+    lineup_override_reason: string | null;
+    lineup_override_at: string | null;
+    lineup_override_by_name: string | null;
+  };
+  lineups: { home: TeamLineupSummary | null; away: TeamLineupSummary | null };
   periods: { period: number; started_at: string; ended_at: string | null }[];
   recorders: Record<string, string>;
   assignments: { user_id: string; role: "PRIMARY" | "BACKUP"; active: boolean; assigned_at: string; revoked_at: string | null; prep_completed_at: string | null; display_name: string; email: string }[];

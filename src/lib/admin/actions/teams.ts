@@ -4,7 +4,7 @@ import { revalidatePath, updateTag } from "next/cache";
 import { PUBLIC_DATA_TAG } from "@/lib/data/cacheTags";
 import { redirect } from "next/navigation";
 import type { ActionState } from "../types";
-import { adminAction, bool, check, id, int, Invalid, ok, oneOf, optionalId, slugify, text } from "./util";
+import { adminAction, check, id, Invalid, ok, oneOf, optionalId, slugify, text } from "./util";
 
 const done = (msg: string) => {
   revalidatePath("/admin", "layout");
@@ -14,7 +14,6 @@ const done = (msg: string) => {
 
 const KINDS = ["FACULTY", "DEPARTMENT", "OTHER"] as const;
 const CATEGORIES = ["MEN", "WOMEN", "MIXED"] as const;
-const POSITIONS = ["GK", "DF", "MF", "FW"] as const;
 const HEX = /^#[0-9a-fA-F]{6}$/;
 
 function teamFields(fd: FormData) {
@@ -72,60 +71,5 @@ export async function createSquad(_: ActionState, fd: FormData): Promise<ActionS
   return adminAction(async ({ db }) => {
     check(await db.from("squads").insert({ team_id: id(fd, "team_id", "Team"), season_id: id(fd, "season_id", "Season") }));
     return done("Squad created.");
-  });
-}
-
-async function clearCaptain(db: Parameters<Parameters<typeof adminAction>[0]>[0]["db"], squadId: string, except?: string) {
-  let q = db.from("squad_players").update({ is_captain: false }).eq("squad_id", squadId).eq("is_captain", true);
-  if (except) q = q.neq("id", except);
-  check(await q);
-}
-
-export async function addSquadPlayer(_: ActionState, fd: FormData): Promise<ActionState> {
-  return adminAction(async ({ db }) => {
-    const squad_id = id(fd, "squad_id", "Squad");
-    const shirt_number = int(fd, "shirt_number", "Shirt number", 1, 99);
-    const display_name = text(fd, "display_name", { label: "Player name", max: 80 }) || null;
-    const position = String(fd.get("position") ?? "") ? oneOf(fd, "position", POSITIONS, "position") : null;
-    const is_captain = bool(fd, "is_captain");
-    // Check the shirt first so we never leave an orphan player behind.
-    const taken = check(await db.from("squad_players").select("id").eq("squad_id", squad_id).eq("shirt_number", shirt_number)) as unknown[];
-    if (taken.length) throw new Invalid(`Shirt ${shirt_number} is already taken in this squad.`);
-    const player = check(await db.from("players").insert({ display_name }).select("id").single()) as { id: string };
-    if (is_captain) await clearCaptain(db, squad_id);
-    const res = await db.from("squad_players").insert({ squad_id, player_id: player.id, shirt_number, position, is_captain });
-    if (res.error) {
-      await db.from("players").delete().eq("id", player.id);
-      check(res);
-    }
-    return done(`Player #${shirt_number} added.`);
-  });
-}
-
-export async function updateSquadPlayer(_: ActionState, fd: FormData): Promise<ActionState> {
-  return adminAction(async ({ db }) => {
-    const rowId = id(fd, "id", "Squad player");
-    const squad_id = id(fd, "squad_id", "Squad");
-    const player_id = id(fd, "player_id", "Player");
-    const is_captain = bool(fd, "is_captain");
-    const position = String(fd.get("position") ?? "") ? oneOf(fd, "position", POSITIONS, "position") : null;
-    if (is_captain) await clearCaptain(db, squad_id, rowId);
-    check(
-      await db
-        .from("squad_players")
-        .update({ shirt_number: int(fd, "shirt_number", "Shirt number", 1, 99), position, is_captain })
-        .eq("id", rowId),
-    );
-    check(await db.from("players").update({ display_name: text(fd, "display_name", { label: "Player name", max: 80 }) || null }).eq("id", player_id));
-    return done("Player updated.");
-  });
-}
-
-export async function removeSquadPlayer(_: ActionState, fd: FormData): Promise<ActionState> {
-  return adminAction(async ({ db }) => {
-    check(await db.from("squad_players").delete().eq("id", id(fd, "id", "Squad player")));
-    // Remove the player record too when they are in no other squad (else it stays).
-    await db.from("players").delete().eq("id", id(fd, "player_id", "Player"));
-    return done("Player removed from the squad.");
   });
 }

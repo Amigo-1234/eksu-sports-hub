@@ -37,6 +37,12 @@ export function MatchPrep({ seed }: { seed: AssignmentSeed }) {
   const canStart = canRun(state, "START_MATCH");
   const untilKickoff = now ? Date.parse(match.kickoffAt) - now : null;
   const queued = snap.intents.filter((i) => i.matchId === match.id && i.state !== "CONFIRMED").length;
+  // Live backend: kick-off needs both line-ups confirmed (or an admin override).
+  const live = !!seed.squads;
+  const lineupsReady =
+    !live ||
+    !!seed.lineupOverride ||
+    (["home", "away"] as const).every((s) => seed.lineups?.[s]?.status === "CONFIRMED" && (seed.lineups?.[s]?.problems.length ?? 0) === 0);
 
   const toggle = async (key: keyof PrepChecks) => {
     const r = await operatorControl.savePrep(match.id, { ...prep, [key]: !prep[key] });
@@ -92,6 +98,14 @@ export function MatchPrep({ seed }: { seed: AssignmentSeed }) {
         </ul>
       </section>
 
+      {live ? (
+        <LineupsPrep seed={seed} scheduled={state.phase === "SCHEDULED"} />
+      ) : (
+        <p className="mt-4 rounded-xl border-2 border-dashed border-line-strong px-3 py-2 text-sm text-ink-muted">
+          Demo: line-ups use real squads and screening, so they need the live backend.
+        </p>
+      )}
+
       {state.phase === "SCHEDULED" ? (
         <>
           <fieldset className="mt-4 rounded-2xl border-2 border-line bg-surface p-4">
@@ -121,11 +135,12 @@ export function MatchPrep({ seed }: { seed: AssignmentSeed }) {
 
           <div
             role="status"
-            className={`mt-4 rounded-2xl px-4 py-4 text-center ${ready ? "bg-win text-white" : "border-2 border-dashed border-line-strong text-ink-muted"}`}
+            className={`mt-4 rounded-2xl px-4 py-4 text-center ${ready && lineupsReady ? "bg-win text-white" : "border-2 border-dashed border-line-strong text-ink-muted"}`}
           >
             <p className="font-display text-2xl font-extrabold tracking-wide uppercase">
-              {ready ? "✓ Ready for match" : "Not ready"}
+              {ready && lineupsReady ? "✓ Ready for match" : "Not ready"}
             </p>
+            {!lineupsReady && <p className="text-sm font-semibold">Both line-ups must be confirmed before kick-off.</p>}
             {!ready && <p className="text-sm font-semibold">Complete the checklist to enable Start.</p>}
           </div>
 
@@ -145,8 +160,8 @@ export function MatchPrep({ seed }: { seed: AssignmentSeed }) {
               tone="go"
               label="Hold to start match"
               durationMs={2000}
-              disabled={!ready || !canStart.ok || !snap.hydrated}
-              hint={ready ? "Press and hold for 2 seconds at kick-off" : "Complete the checklist first"}
+              disabled={!ready || !lineupsReady || !canStart.ok || !snap.hydrated}
+              hint={!lineupsReady ? "Confirm both line-ups first" : ready ? "Press and hold for 2 seconds at kick-off" : "Complete the checklist first"}
               onConfirm={() => {
                 const r = operatorActions.startMatch(match.id);
                 if (r.ok) {
@@ -175,5 +190,69 @@ export function MatchPrep({ seed }: { seed: AssignmentSeed }) {
 
       <DemoControls matchId={match.id} />
     </div>
+  );
+}
+
+/** Both teams' line-ups: status, formation and a way to review/confirm them. */
+function LineupsPrep({ seed, scheduled }: { seed: AssignmentSeed; scheduled: boolean }) {
+  const { match } = seed;
+  return (
+    <section aria-labelledby="lineups" className="mt-4 rounded-2xl border-2 border-line bg-surface p-4">
+      <h2 id="lineups" className="font-bold">
+        Line-ups
+      </h2>
+      {seed.lineupOverride && (
+        <p className="mt-2 rounded-xl bg-accent-100 px-3 py-2 text-sm font-semibold">
+          Admin override: kick-off is allowed without confirmed line-ups. Reason: {seed.lineupOverride}
+        </p>
+      )}
+      <div className="mt-2 grid gap-3 sm:grid-cols-2">
+        {(["home", "away"] as const).map((side) => {
+          const team = side === "home" ? match.homeTeam : match.awayTeam;
+          const l = seed.lineups?.[side] ?? null;
+          const starters = l?.players.filter((p) => p.role === "STARTER") ?? [];
+          const subs = l?.players.filter((p) => p.role === "SUBSTITUTE") ?? [];
+          const captain = l?.players.find((p) => p.captain);
+          const ok = l?.status === "CONFIRMED" && l.problems.length === 0;
+          return (
+            <div key={side} className={`rounded-xl border-2 p-3 ${ok ? "border-win" : "border-line-strong"}`}>
+              <div className="flex items-center gap-2">
+                <TeamCrest team={team} size="md" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-extrabold tracking-widest text-ink-muted uppercase">{side === "home" ? "Home" : "Away"}</p>
+                  <p className="truncate font-bold">{team.shortName}</p>
+                </div>
+                <span
+                  className={`shrink-0 rounded px-1.5 py-0.5 text-[11px] font-extrabold uppercase ${
+                    ok ? "bg-win text-white" : l?.status === "CONFIRMED" ? "bg-live text-white" : l ? "bg-accent-100 text-ink" : "bg-subtle text-ink-muted"
+                  }`}
+                >
+                  {ok ? "✓ Confirmed" : l?.status === "CONFIRMED" ? "Needs attention" : l ? "Draft" : "Not prepared"}
+                </span>
+              </div>
+              {l && (
+                <p className="mt-2 text-sm text-ink-muted">
+                  {l.formation ?? "No formation"} · {starters.length} starting · {subs.length} subs
+                  {captain ? ` · C No. ${captain.shirt}` : ""}
+                </p>
+              )}
+              {l && l.problems.length > 0 && (
+                <ul className="mt-1 list-disc pl-5 text-xs font-semibold text-live">
+                  {l.problems.slice(0, 3).map((p) => (
+                    <li key={p}>{p}</li>
+                  ))}
+                </ul>
+              )}
+              <Link
+                href={`/op/matches/${match.id}/lineup/${side}`}
+                className="mt-3 flex h-12 items-center justify-center rounded-xl border-2 border-ink text-sm font-extrabold uppercase"
+              >
+                {!scheduled ? "View line-up" : ok ? "Review line-up" : l ? "Complete & confirm" : "Prepare line-up"}
+              </Link>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

@@ -1,7 +1,7 @@
 export interface NavItem {
   href: string;
   label: string;
-  icon: "dashboard" | "trophy" | "calendar" | "shield" | "shirt" | "users" | "clipboard" | "live" | "table" | "log" | "settings" | "season" | "building" | "pin";
+  icon: "dashboard" | "trophy" | "calendar" | "shield" | "shirt" | "users" | "clipboard" | "live" | "table" | "log" | "settings" | "season" | "building" | "pin" | "check" | "squad";
 }
 
 export const NAV: { heading?: string; items: NavItem[] }[] = [
@@ -25,6 +25,8 @@ export const NAV: { heading?: string; items: NavItem[] }[] = [
       { href: "/admin/competitions", label: "Competitions", icon: "trophy" },
       { href: "/admin/teams", label: "Teams", icon: "shield" },
       { href: "/admin/players", label: "Players", icon: "shirt" },
+      { href: "/admin/screening", label: "Screening", icon: "check" },
+      { href: "/admin/squads", label: "Squads", icon: "squad" },
       { href: "/admin/seasons", label: "Seasons", icon: "season" },
       { href: "/admin/faculties", label: "Faculties & Departments", icon: "building" },
       { href: "/admin/venues", label: "Venues", icon: "pin" },

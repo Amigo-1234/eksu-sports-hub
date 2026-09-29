@@ -111,6 +111,24 @@ export interface Assignment {
 export interface SquadMember {
   playerId: string;
   shirt: number;
+  name?: string | null;
+}
+
+/** A team's match line-up as the console sees it (names + shirts + roles). */
+export interface OpLineup {
+  status: "DRAFT" | "CONFIRMED";
+  formation: string | null;
+  /** Why it cannot be confirmed / used for kick-off (empty when fine). */
+  problems: string[];
+  players: {
+    playerId: string;
+    shirt: number;
+    name: string | null;
+    role: "STARTER" | "SUBSTITUTE";
+    position: string | null;
+    captain: boolean;
+    goalkeeper: boolean;
+  }[];
 }
 
 /** Everything the console needs for one assigned match (serialisable). */
@@ -121,6 +139,13 @@ export interface AssignmentSeed {
   canonical?: OpMatchState;
   /** Supabase backend: whether this user currently controls the match. */
   inControl?: boolean;
-  /** Supabase backend: real squads (shirt ↔ player). Mock uses demo shirts. */
+  /**
+   * Supabase backend: shirt ↔ player for event recording — the confirmed
+   * line-up when there is one, else the active squad. Mock uses demo shirts.
+   */
   squads?: { home: SquadMember[]; away: SquadMember[] };
+  /** Supabase backend: each team's line-up (null: not prepared). */
+  lineups?: { home: OpLineup | null; away: OpLineup | null };
+  /** Supabase backend: ADMIN emergency override allowing kick-off without line-ups. */
+  lineupOverride?: string | null;
 }

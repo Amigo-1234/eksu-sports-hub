@@ -191,6 +191,42 @@ export interface MatchSummary extends Match {
 export interface MatchDetail extends MatchSummary {
   /** Chronological. Empty array when no events are recorded. */
   events: MatchEvent[];
+  /**
+   * Confirmed (published) line-ups, home first. Undefined when the data
+   * source does not provide line-ups (demo data); empty when none are
+   * published yet.
+   */
+  lineups?: PublicLineup[];
+}
+
+/** A published team sheet. Public-safe: display name, shirt, position only. */
+export interface PublicLineup {
+  teamId: ID;
+  formation: string | null;
+  players: PublicLineupPlayer[];
+}
+
+export interface PublicLineupPlayer {
+  shirtNumber: number;
+  name: string | null;
+  role: "STARTER" | "SUBSTITUTE";
+  position: string | null;
+  /** Normalised pitch coordinates (0–100, attacking upwards); starters only. */
+  x: number | null;
+  y: number | null;
+  captain: boolean;
+  goalkeeper: boolean;
+  /** Derived by the server from the line-up + non-voided events. */
+  onField: boolean;
+  subbedOn: boolean;
+  subbedOff: boolean;
+  onMinute: number | null;
+  onExtra: number | null;
+  offMinute: number | null;
+  offExtra: number | null;
+  sentOff: boolean;
+  booked: boolean;
+  goals: number;
 }
 
 export interface StandingRow extends Standing {

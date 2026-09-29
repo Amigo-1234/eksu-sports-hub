@@ -68,6 +68,7 @@ export function GoalFlow({
         statuses={playerStatuses(state, playerSide)}
         unavailable={(_, s) => (s?.sentOff ? "Sent off" : s?.subbedOff ? "Off" : null)}
         allowUnknown
+        scope="onField"
       />
       <div className="sticky bottom-0 -mx-4 mt-4 border-t border-line bg-surface px-4 pt-3">
         <ConfirmButton

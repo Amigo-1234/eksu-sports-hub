@@ -8,11 +8,12 @@
  *                                also recovers any gap of missed hints)
  *   (re)subscribe / resume     → same fetch: missed messages are never replayed
  *
- * Events merge by id (duplicates are harmless), voided ids are removed, and
+ * Events merge by id (duplicates are harmless), voided ids are removed,
+ * line-ups (always complete in the feed) are replaced, and
  * the canonical score must equal the score derived from non-voided scoring
  * events — otherwise the caller does a full resync.
  */
-import { sortEvents, toEvent, toPublicClock, toPublicStatus } from "../data/supabase/map.ts";
+import { sortEvents, toEvent, toLineups, toPublicClock, toPublicStatus } from "../data/supabase/map.ts";
 import type { MatchDetail, MatchEvent, Score } from "../types.ts";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- RPC payload is mapped explicitly below. */
@@ -65,6 +66,8 @@ export function applyFeed(current: MatchDetail, feed: any): FeedResult {
     seq,
     clock: toPublicClock(m),
     events: sortEvents([...byId.values()]),
+    // Line-ups are always sent complete: replace (a reopened line-up disappears).
+    ...(Array.isArray(feed.lineups) ? { lineups: toLineups(feed.lineups) } : {}),
   };
   if (next.score) {
     const d = derivedScore(next);

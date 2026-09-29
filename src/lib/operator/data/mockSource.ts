@@ -25,4 +25,8 @@ export const mockOperatorDataSource: OperatorDataSource = {
     const match = await getMatch(matchId);
     return match ? { assignment, match } : null;
   },
+  // Line-ups need real squads and screening: live backend only.
+  async getLineupEditorState() {
+    return null;
+  },
 };

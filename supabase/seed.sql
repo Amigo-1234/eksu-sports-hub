@@ -52,19 +52,28 @@ insert into public.competition_entries (competition_id, stage_id, team_id)
 select '60000000-0000-4000-8000-000000000001', '61000000-0000-4000-8000-000000000001', t.id
 from public.teams t where t.id::text like '70000000-%';
 
--- Squads: 18 anonymous players per team, shirts 1–18.
-with sq as (
-  insert into public.squads (team_id, season_id)
-  select t.id, '30000000-0000-4000-8000-000000000001' from public.teams t where t.id::text like '70000000-%'
-  returning id
-), slots as (
-  select sq.id as squad_id, n as shirt, gen_random_uuid() as player_id
-  from sq cross join generate_series(1, 18) n
-), players as (
-  insert into public.players (id) select player_id from slots returning id
-)
-insert into public.squad_players (squad_id, player_id, shirt_number)
-select squad_id, player_id, shirt from slots;
+-- Squads: 18 anonymous players per team, shirts 1–18. Players must be
+-- screened and CLEARED before joining a squad, so each gets an obviously fake
+-- development student number and a CLEARED season screening first.
+create temp table dev_slots on commit drop as
+select t.id as team_id, t.code, n as shirt, gen_random_uuid() as player_id
+from public.teams t cross join generate_series(1, 18) n
+where t.id::text like '70000000-%';
+
+insert into public.players (id) select player_id from dev_slots;
+insert into public.player_identities (player_id, student_id)
+select player_id, format('DEV-%s-%s', code, lpad(shirt::text, 3, '0')) from dev_slots;
+insert into public.player_screenings (player_id, team_id, season_id, status, decided_at, screened_on, notes)
+select player_id, team_id, '30000000-0000-4000-8000-000000000001', 'CLEARED', now(), current_date, 'Development seed'
+from dev_slots;
+insert into public.player_screening_decisions (screening_id, from_status, to_status, notes)
+select id, null, 'CLEARED', 'Development seed' from public.player_screenings;
+
+insert into public.squads (team_id, season_id)
+select distinct team_id, '30000000-0000-4000-8000-000000000001'::uuid from dev_slots;
+insert into public.squad_players (squad_id, player_id, shirt_number, position)
+select s.id, d.player_id, d.shirt, case when d.shirt in (1, 13) then 'GK' end
+from dev_slots d join public.squads s on s.team_id = d.team_id;
 
 -- Matches. The first is the one assigned to the development operators.
 insert into public.matches (id, competition_id, stage_id, round_label, home_team_id, away_team_id, venue_id, scheduled_at) values

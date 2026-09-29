@@ -44,6 +44,15 @@ and match pages update scores, clocks and events live via Supabase Realtime
 hints + canonical refetch (`src/lib/realtime`, `src/components/realtime`). See
 docs/BACKEND.md → "Public data + realtime".
 
+## Players, screening, squads & line-ups
+
+Players are registered with a private student number, screened per team and
+season (PENDING / CLEARED / REJECTED / SUSPENDED), added to season squads once
+CLEARED, and picked for matchday line-ups (formation, XI, bench, captain) by an
+admin or the assigned operator. Kick-off needs both line-ups confirmed;
+confirmed line-ups appear on the public match page with a responsive pitch that
+follows substitutions and red cards live. See `docs/BACKEND.md`.
+
 ## Admin dashboard (`/admin`)
 
 Supabase-backed administration for ADMIN accounts: competitions, teams,

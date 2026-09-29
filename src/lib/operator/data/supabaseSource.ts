@@ -1,9 +1,10 @@
 import "server-only";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { LineupEditorState } from "@/lib/lineup";
 import type { Competition, MatchDetail, Team, Venue } from "@/lib/types";
-import { fromCanonical, type CanonicalMatch, type CanonicalState } from "../canonical";
+import { fromCanonical, type CanonicalLineup, type CanonicalMatch, type CanonicalState } from "../canonical";
 import { toPublicStatus } from "../machine";
-import type { PrepChecks } from "../types";
+import type { OpLineup, PrepChecks } from "../types";
 import type { OperatorDataSource } from "./source";
 
 const TEAM_COLS = "id, name, short_name, code, kind, category, color_primary, color_secondary";
@@ -71,6 +72,24 @@ function toPrep(p: any): PrepChecks {
   return { atVenue: !!p?.atVenue, teamsPresent: !!p?.teamsPresent, officialsReady: !!p?.officialsReady };
 }
 
+function toLineup(l: CanonicalLineup | null | undefined): OpLineup | null {
+  if (!l) return null;
+  return {
+    status: l.status,
+    formation: l.formation,
+    problems: l.problems ?? [],
+    players: (l.players ?? []).map((p) => ({
+      playerId: p.player_id,
+      shirt: p.shirt_number,
+      name: p.name,
+      role: p.role,
+      position: p.position,
+      captain: p.captain,
+      goalkeeper: p.goalkeeper,
+    })),
+  };
+}
+
 function canonicalFromRow(m: any): CanonicalState {
   const match: CanonicalMatch = { ...m };
   const events = [...(m.events ?? [])].sort((a: any, b: any) => a.seq - b.seq);
@@ -134,9 +153,23 @@ export const supabaseOperatorDataSource: OperatorDataSource = {
       canonical: fromCanonical(c),
       inControl: !!c.in_control,
       squads: {
-        home: (c.squads?.home ?? []).map((p) => ({ playerId: p.player_id, shirt: p.shirt_number })),
-        away: (c.squads?.away ?? []).map((p) => ({ playerId: p.player_id, shirt: p.shirt_number })),
+        home: (c.squads?.home ?? []).map((p) => ({ playerId: p.player_id, shirt: p.shirt_number, name: p.name ?? null })),
+        away: (c.squads?.away ?? []).map((p) => ({ playerId: p.player_id, shirt: p.shirt_number, name: p.name ?? null })),
       },
+      lineups: { home: toLineup(c.lineups?.home), away: toLineup(c.lineups?.away) },
+      lineupOverride: c.lineup_override ?? null,
     };
+  },
+
+  async getLineupEditorState(matchId, teamId) {
+    if (!/^[0-9a-f-]{36}$/i.test(matchId) || !/^[0-9a-f-]{36}$/i.test(teamId)) return null;
+    const sb = await createSupabaseServerClient();
+    // The RPC checks the active assignment and filters to eligible players.
+    const { data, error } = await sb.rpc("lineup_editor_state", { p_match_id: matchId, p_team_id: teamId });
+    if (error) {
+      if (["EK403", "EK404", "EK422"].includes(error.code ?? "")) return null;
+      throw new Error(`Could not load line-up: ${error.message}`);
+    }
+    return data as LineupEditorState;
   },
 };

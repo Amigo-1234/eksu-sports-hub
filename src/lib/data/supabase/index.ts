@@ -21,7 +21,7 @@ import { elapsedSeconds } from "../../operator/clock";
 import type { Competition, FormResult, ID, MatchDetail, MatchSummary, Sport, StandingRow, Team, Venue } from "../../types";
 import { PUBLIC_DATA_TAG } from "../cacheTags";
 import type { MatchQuery, SportsDataSource } from "../source";
-import { sortEvents, toEvent, toPublicClock, toPublicStatus } from "./map";
+import { sortEvents, toEvent, toLineups, toPublicClock, toPublicStatus } from "./map";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- PostgREST rows are mapped explicitly below. */
 
@@ -238,6 +238,7 @@ export const supabaseDataSource: SportsDataSource = {
     const detail: MatchDetail = {
       ...summary,
       events: sortEvents((f.events as any[]).filter((e) => !e.voided).map((e) => toEvent(e, id))),
+      lineups: toLineups(f.lineups),
     };
     return detail;
   },

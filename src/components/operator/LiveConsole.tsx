@@ -6,6 +6,7 @@ import { operatorActions } from "@/lib/operator/actions";
 import { computeScore, lastUndoable } from "@/lib/operator/engine";
 import { useCanonicalSync, useOperatorSnapshot, useNow, useOpMatch } from "@/lib/operator/hooks";
 import { availableCommands, PHASE_LABEL } from "@/lib/operator/machine";
+import { consoleSquads } from "@/lib/operator/lineup";
 import { operatorStore } from "@/lib/operator/store";
 import type { AssignmentSeed, OpEvent, Side } from "@/lib/operator/types";
 import { ActionPad, type SheetKind } from "./ActionPad";
@@ -41,9 +42,7 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
   const [sheet, setSheet] = useState<SheetKind | null>(null);
   const matchId = seed.match.id;
   useCanonicalSync(matchId);
-  const squads = seed.squads
-    ? { home: seed.squads.home.map((p) => p.shirt), away: seed.squads.away.map((p) => p.shirt) }
-    : null;
+  const squads = consoleSquads(seed);
   const inControl = snap.inControl[matchId] !== false;
   const { homeTeam, awayTeam } = seed.match;
 

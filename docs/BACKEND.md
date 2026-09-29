@@ -128,6 +128,47 @@ plus a server-time offset. Caching: reference data 300 s, fixture/result lists
 and standings 30 s (tag `public-data`, invalidated by admin mutations); live,
 today and match detail are always fresh.
 
+### Screening, squads and line-ups (migration 20261001001000)
+
+`PLAYER REGISTERED → SCREENING → ELIGIBILITY → SQUAD → MATCHDAY LINE-UP → OPERATOR CONFIRMATION → PUBLIC LINE-UP`
+
+- **Identity**: `player_identities` (student / matric number) is a separate
+  ADMIN-only table with a unique normalised key (case/space-insensitive).
+  Operators can read player names, never identities. Audit rows keep the
+  number masked. Verification documents can later reference `player_id`.
+- **Screening**: `player_screenings` holds the current decision per player +
+  team + season (+ optional competition); `player_screening_decisions` is the
+  append-only history. Eligibility (`private.screening_status`) is CLEARED only
+  when the season screening is CLEARED and a competition screening, if any, is
+  CLEARED too (competition scope only adds restrictions). REJECT/SUSPEND need a
+  reason; CLEAR needs a student number on file. Only ADMIN decides (no scoped
+  MANAGER model exists yet).
+- **Squads**: memberships are deactivated (`active`, `left_at`, `left_reason`),
+  never deleted; shirt/captain uniqueness applies to active members. A trigger
+  enforces CLEARED + one active squad per player per season on every write.
+- **Line-ups**: `match_lineups` (DRAFT → CONFIRMED; confirmed = public) and
+  `lineup_players` (player id, shirt snapshot, STARTER/SUBSTITUTE, position,
+  slot, pitch x/y 0–100, captain, goalkeeper). `formations` are data. Rules
+  (`private.lineup_rules`): 7–11 starters, ≤ 12 substitutes, exactly one
+  starting goalkeeper, captain must start, every player CLEARED + active squad
+  member. Writes only via `save_lineup` / `confirm_lineup` / `reopen_lineup`
+  (ADMIN or an assigned operator, before kick-off) and `admin_correct_lineup`
+  (after kick-off, reason required). A trigger locks line-ups once the match
+  leaves SCHEDULED. A screening change / squad removal that invalidates a
+  confirmed line-up of an upcoming match reopens it (audited, unpublished).
+- **Kick-off**: `start_match` requires both line-ups CONFIRMED and still valid,
+  unless `admin_set_lineup_override` recorded a reason (audited).
+- **Events**: with a confirmed line-up, `record_event` / `admin_add_event`
+  require players from it; scorers and the player going off must be on the
+  pitch; the player coming on must be an unused, undismissed substitute. On-field
+  state (`private.lineup_player_states`) = line-up + non-voided events, so voiding
+  a substitution restores it; the confirmed XI is never rewritten.
+- **Public**: `public_match_feed` returns `lineups` (confirmed only; display name,
+  shirt, position, captain, goalkeeper, on-field/sub/card state — no ids,
+  identities or screening data). Confirm/reopen/correct bump `seq` and send the
+  usual `match_changed` hint, so the public page reconciles through the existing
+  realtime resync.
+
 ## Authentication
 Email + password through Supabase Auth (works without external services).
 Public sign-up is disabled (`[auth] enable_signup = false`); accounts are

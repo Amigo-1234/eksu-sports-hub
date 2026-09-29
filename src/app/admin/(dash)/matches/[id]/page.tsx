@@ -12,9 +12,10 @@ import { clockLabel } from "@/lib/admin/clock";
 import { eventLabel } from "@/components/admin/LiveMatchCard";
 import { Badge, btn, Card, Empty, Field, inputCls, PageTitle, StatusBadge } from "@/components/admin/ui";
 import { clearAssignments, rescheduleMatch, setMatchOutcome, updateFixture, voidEvent } from "@/lib/admin/actions/matches";
+import { setLineupOverride } from "@/lib/admin/actions/lineups";
 import { recomputeStandings } from "@/lib/admin/actions/competitions";
 import { listCompetitionOptions } from "@/lib/admin/data/competitions";
-import { getMatchRow, inspectMatch, listEventTypes } from "@/lib/admin/data/matches";
+import { getMatchRow, inspectMatch, listEventTypes, type TeamLineupSummary } from "@/lib/admin/data/matches";
 import { listVenues } from "@/lib/admin/data/reference";
 import { listAssignableOperators } from "@/lib/admin/data/staff";
 import { listTeamRefs, squadsForMatch } from "@/lib/admin/data/teams";
@@ -134,6 +135,75 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/ad
                   ))}
                 </ul>
               </>
+            )}
+          </Card>
+
+          <Card
+            title="Line-ups"
+            id="lineups"
+            description={
+              status === "SCHEDULED"
+                ? "Both line-ups must be confirmed before the operator can start the match. Confirmed line-ups are public."
+                : "Line-ups are locked once the match has started. Corrections are audited."
+            }
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              {(["home", "away"] as const).map((side) => (
+                <LineupSummary
+                  key={side}
+                  side={side}
+                  team={side === "home" ? row.home.short_name : row.away.short_name}
+                  lineup={detail.lineups[side]}
+                  href={`/admin/matches/${id}/lineup/${side}`}
+                  scheduled={status === "SCHEDULED"}
+                />
+              ))}
+            </div>
+            {status === "SCHEDULED" && (
+              <div className="mt-4 rounded-lg border border-line bg-canvas p-3 text-sm">
+                <h3 className="font-extrabold uppercase">Emergency kick-off override</h3>
+                {detail.match.lineup_override_reason ? (
+                  <>
+                    <p className="mt-1">
+                      <Badge tone="warn">Override active</Badge> {detail.match.lineup_override_reason}
+                    </p>
+                    <p className="text-xs text-ink-muted">
+                      Recorded {formatWatDateTime(detail.match.lineup_override_at)} by {detail.match.lineup_override_by_name ?? "an administrator"}. The
+                      operator can start without confirmed line-ups.
+                    </p>
+                    <div className="mt-2">
+                      <ConfirmAction
+                        action={setLineupOverride}
+                        hidden={{ match_id: id, clear: "1" }}
+                        trigger="Remove override"
+                        triggerClass={btn.small}
+                        tone="primary"
+                        title="Require confirmed line-ups again?"
+                        confirmLabel="Remove override"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="mt-1 text-ink-muted">
+                      Only for emergencies (e.g. team sheets unavailable and the referee is ready). Operators cannot bypass line-up confirmation.
+                    </p>
+                    <div className="mt-2">
+                      <ConfirmAction
+                        action={setLineupOverride}
+                        hidden={{ match_id: id }}
+                        trigger="Allow start without line-ups"
+                        triggerClass={btn.small}
+                        title="Allow kick-off without confirmed line-ups?"
+                        body="The operator will be able to start this match even though line-ups are missing or not confirmed. This is recorded in the audit log."
+                        reason={{ label: "Reason (required)", required: true, placeholder: "e.g. Team sheets lost; referee approved kick-off" }}
+                        typeToConfirm="OVERRIDE"
+                        confirmLabel="Record override"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
             )}
           </Card>
 
@@ -378,5 +448,53 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/ad
         </div>
       </div>
     </>
+  );
+}
+
+function LineupSummary({
+  side,
+  team,
+  lineup,
+  href,
+  scheduled,
+}: {
+  side: "home" | "away";
+  team: string;
+  lineup: TeamLineupSummary | null;
+  href: string;
+  scheduled: boolean;
+}) {
+  const starters = lineup?.players.filter((p) => p.role === "STARTER").length ?? 0;
+  const subs = (lineup?.players.length ?? 0) - starters;
+  const captain = lineup?.players.find((p) => p.captain);
+  return (
+    <div className="rounded-lg border border-line p-3">
+      <p className="text-xs font-extrabold tracking-wide text-ink-muted uppercase">{side === "home" ? "Home" : "Away"}</p>
+      <p className="flex flex-wrap items-center gap-2 font-bold">
+        {team}
+        {!lineup ? (
+          <Badge tone="bad">Not prepared</Badge>
+        ) : lineup.status === "CONFIRMED" ? (
+          <Badge tone="ok">Confirmed</Badge>
+        ) : (
+          <Badge tone="warn">Draft</Badge>
+        )}
+      </p>
+      {lineup && (
+        <p className="mt-1 text-sm text-ink-muted">
+          {lineup.formation ?? "No formation"} · {starters} starters · {subs} subs{captain ? ` · captain No. ${captain.shirt_number}` : ""}
+        </p>
+      )}
+      {lineup && lineup.problems.length > 0 && scheduled && (
+        <ul className="mt-1 list-disc pl-5 text-xs text-warn">
+          {lineup.problems.slice(0, 3).map((p) => (
+            <li key={p}>{p}</li>
+          ))}
+        </ul>
+      )}
+      <Link href={href} className={`${btn.small} mt-2`}>
+        {scheduled ? (lineup ? "Edit line-up" : "Prepare line-up") : "View / correct"}
+      </Link>
+    </div>
   );
 }

@@ -31,6 +31,7 @@ create or replace function tests.hints(p_topic text) returns bigint language sql
 grant execute on function tests.hints(text) to anon, authenticated;
 
 -- ── Operator drives the match: every change must leave realtime hints ─────
+select tests.confirm_lineups(tests.d('match'));
 select tests.login((select op from u));
 select public.start_match(tests.m1(), gen_random_uuid());
 select public.record_event(tests.m1(), tests.id('g1'), 'GOAL', tests.home(), 5, 0, tests.player(tests.home(), 9));

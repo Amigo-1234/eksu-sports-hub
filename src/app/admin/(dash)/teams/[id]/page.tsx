@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActionForm, Submit } from "@/components/admin/ActionForm";
 import { ConfirmAction } from "@/components/admin/ConfirmAction";
-import { SquadEditor } from "@/components/admin/SquadEditor";
 import { TeamFields } from "@/components/admin/TeamFields";
 import { Badge, btn, Card, Field, PageTitle, selectCls } from "@/components/admin/ui";
 import { createSquad, setTeamActive, updateTeam } from "@/lib/admin/actions/teams";
@@ -46,7 +45,7 @@ export default async function TeamPage({ params, searchParams }: PageProps<"/adm
           </>
         }
       />
-      {created && <p className="mb-4 rounded-lg border border-win/40 bg-win/10 px-3 py-2 text-sm font-semibold text-win">Team created. Register a squad below.</p>}
+      {created && <p className="mb-4 rounded-lg border border-win/40 bg-win/10 px-3 py-2 text-sm font-semibold text-win">Team created. Create a squad below, then add screened players.</p>}
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="min-w-0 space-y-6">
           {squads.length === 0 && (
@@ -54,11 +53,29 @@ export default async function TeamPage({ params, searchParams }: PageProps<"/adm
               <p className="text-sm text-ink-muted">No squads yet. Create one for a season.</p>
             </Card>
           )}
-          {squads.map((s) => (
-            <Card key={s.id} id={`squad-${s.season.id}`} title={`Squad ${s.season.name}`} description={`${s.players.length} player${s.players.length === 1 ? "" : "s"}`}>
-              <SquadEditor squad={s} />
+          {squads.length > 0 && (
+            <Card title="Squads" description="Players are screened first, then added to a season squad.">
+              <ul className="divide-y divide-line">
+                {squads.map((s) => {
+                  const captain = s.players.find((p) => p.is_captain);
+                  return (
+                    <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+                      <span className="min-w-0">
+                        <span className="block font-bold">Squad {s.season.name}</span>
+                        <span className="text-xs text-ink-muted">
+                          {s.players.length} active player{s.players.length === 1 ? "" : "s"}
+                          {captain ? ` · captain No. ${captain.shirt_number}` : ""}
+                        </span>
+                      </span>
+                      <Link href={`/admin/squads?team=${team.id}&season=${s.season.id}`} className={btn.small}>
+                        Manage squad
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
             </Card>
-          ))}
+          )}
           {missing.length > 0 && (
             <Card title="New squad">
               <ActionForm action={createSquad} className="flex flex-wrap items-end gap-3">

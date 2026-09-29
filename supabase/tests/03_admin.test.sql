@@ -88,16 +88,19 @@ select throws_ok($$ delete from public.teams where id = tests.id('team') $$, '42
 select lives_ok($$ update public.teams set active = false where id = tests.id('team') $$, 'admin deactivates team');
 
 -- ── Players and squads ─────────────────────────────────────────────────────
-select lives_ok($$ insert into public.players (id, display_name) values (tests.id('player'), 'Test Player A'), (tests.id('player2'), 'Test Player B') $$,
-  'admin creates players');
+update ids set id = (public.admin_register_player('Test Player A', 'TEST/0001', tests.id('faculty'), null, tests.id('team'),
+  '30000000-0000-4000-8000-000000000001') ->> 'player_id')::uuid where k = 'player';
+update ids set id = (public.admin_register_player('Test Player B', 'TEST/0002', tests.id('faculty'), null, tests.id('team'),
+  '30000000-0000-4000-8000-000000000001') ->> 'player_id')::uuid where k = 'player2';
+select public.admin_decide_screening(s.id, 'CLEARED') from public.player_screenings s where s.player_id in (tests.id('player'), tests.id('player2'));
+select is((select count(*) from public.players where id in (tests.id('player'), tests.id('player2')))::int, 2, 'admin registers players');
 select lives_ok($$ insert into public.squads (id, team_id, season_id) values (tests.id('squad'), tests.id('team'), '30000000-0000-4000-8000-000000000001') $$,
   'admin creates squad');
-select lives_ok($$ insert into public.squad_players (squad_id, player_id, shirt_number, position, is_captain)
-  values (tests.id('squad'), tests.id('player'), 1, 'GK', true) $$, 'admin adds captain goalkeeper');
-select throws_ok($$ insert into public.squad_players (squad_id, player_id, shirt_number) values (tests.id('squad'), tests.id('player2'), 1) $$,
-  '23505', null, 'duplicate shirt number rejected');
-select throws_ok($$ insert into public.squad_players (squad_id, player_id, shirt_number, is_captain) values (tests.id('squad'), tests.id('player2'), 2, true) $$,
-  '23505', null, 'second captain rejected');
+select lives_ok($$ select public.admin_add_squad_player(tests.id('squad'), tests.id('player'), 1, 'GK', true) $$, 'admin adds captain goalkeeper');
+select throws_ok($$ select public.admin_add_squad_player(tests.id('squad'), tests.id('player2'), 1) $$,
+  'EK409', null, 'duplicate shirt number rejected');
+select throws_ok($$ insert into public.squad_players (squad_id, player_id, shirt_number) values (tests.id('squad'), tests.id('player2'), 2) $$,
+  '42501', null, 'squad memberships are only written through the audited RPCs');
 
 -- ── Fixtures ───────────────────────────────────────────────────────────────
 select throws_ok($$ select public.admin_create_match('60000000-0000-4000-8000-000000000001', null, null, '', tests.t(3), tests.t(3), null, now()) $$,
@@ -136,6 +139,7 @@ select is((select role::text from public.operator_assignments where match_id = t
   'operator sees their assigned match');
 
 -- ── Corrections through events ─────────────────────────────────────────────
+select tests.confirm_lineups(tests.id('fx'));
 select public.start_match(tests.id('fx'), tests.id('start'));
 select public.record_event(tests.id('fx'), tests.id('g1'), 'GOAL', tests.t(3), 10, 0, tests.player(tests.t(3), 9));
 select public.record_event(tests.id('fx'), tests.id('g2'), 'GOAL', tests.t(4), 20, 0, tests.player(tests.t(4), 9));
@@ -182,6 +186,7 @@ select throws_ok($$ select public.admin_update_fixture(tests.id('fx2'), null, nu
 
 update ids set id = public.admin_create_match('60000000-0000-4000-8000-000000000001', null, null, '', tests.t(2), tests.t(3), null, now()) where k = 'fx3';
 select public.admin_assign_operators(tests.id('fx3'), (select op from u));
+select tests.confirm_lineups(tests.id('fx3'));
 select tests.login((select op from u));
 select public.start_match(tests.id('fx3'), tests.id('start3'));
 select tests.login((select admin from u));

@@ -30,7 +30,7 @@ export async function listSquads(teamId: string): Promise<Squad[]> {
   const rows = must(
     await db
       .from("squads")
-      .select("id, team_id, season:seasons(id, name, starts_on), squad_players(id, player_id, shirt_number, position, is_captain, player:players(display_name))")
+      .select("id, team_id, season:seasons(id, name, starts_on), squad_players(id, player_id, shirt_number, position, is_captain, active, player:players(display_name))")
       .eq("team_id", teamId),
     "squads",
   ) as any[];
@@ -41,6 +41,7 @@ export async function listSquads(teamId: string): Promise<Squad[]> {
       team_id: s.team_id,
       season: { id: s.season.id, name: s.season.name },
       players: (s.squad_players ?? [])
+        .filter((p: any) => p.active)
         .map((p: any) => ({
           id: p.id,
           player_id: p.player_id,
@@ -53,7 +54,11 @@ export async function listSquads(teamId: string): Promise<Squad[]> {
     }));
 }
 
-/** Players of both teams in a match's season (for correction pickers). */
+/**
+ * Players of both teams for correction pickers: the team's CONFIRMED match
+ * line-up when there is one (the only players who can appear in events),
+ * otherwise the active season squad.
+ */
 export async function squadsForMatch(matchId: string) {
   const { db } = await adminDb();
   const m = must(
@@ -61,17 +66,26 @@ export async function squadsForMatch(matchId: string) {
     "match",
   ) as any;
   if (!m) return { home: [], away: [] };
-  const rows = must(
-    await db
+  const [squads, lineups] = await Promise.all([
+    db
       .from("squads")
-      .select("team_id, squad_players(player_id, shirt_number, player:players(display_name))")
+      .select("team_id, squad_players(player_id, shirt_number, active, player:players(display_name))")
       .eq("season_id", m.competition.season_id)
       .in("team_id", [m.home_team_id, m.away_team_id]),
-    "squads",
-  ) as any[];
-  const of = (team: string) =>
-    (rows.find((r) => r.team_id === team)?.squad_players ?? [])
+    db
+      .from("match_lineups")
+      .select("team_id, lineup_players(player_id, shirt_number, player:players(display_name))")
+      .eq("match_id", matchId)
+      .eq("status", "CONFIRMED"),
+  ]);
+  const squadRows = must(squads, "squads") as any[];
+  const lineupRows = must(lineups, "line-ups") as any[];
+  const of = (team: string) => {
+    const lineup = lineupRows.find((r) => r.team_id === team);
+    const rows = lineup ? lineup.lineup_players : (squadRows.find((r) => r.team_id === team)?.squad_players ?? []).filter((p: any) => p.active);
+    return (rows ?? [])
       .map((p: any) => ({ player_id: p.player_id as string, shirt_number: p.shirt_number as number, name: (p.player?.display_name ?? null) as string | null }))
       .sort((a: any, b: any) => a.shirt_number - b.shirt_number);
+  };
   return { home: of(m.home_team_id), away: of(m.away_team_id) };
 }
