@@ -2,16 +2,22 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * Refreshes the Supabase session cookie for operator routes and sends
- * signed-out visitors to the operator login. Authorization itself happens in
- * Postgres (RLS + RPC checks on auth.uid()); this is only session plumbing.
+ * Refreshes the Supabase session cookie for staff routes (/op, /admin, /auth)
+ * and sends signed-out visitors to the right login page. Authorization itself
+ * happens on the server (requireAdmin) and in Postgres (RLS + RPC checks on
+ * auth.uid()); this is only session plumbing.
  */
 export async function proxy(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (process.env.NEXT_PUBLIC_OPERATOR_BACKEND !== "supabase" || !url || !key) {
+  const path = request.nextUrl.pathname;
+  const area = path.startsWith("/admin") ? "admin" : path.startsWith("/auth") ? "auth" : "op";
+
+  // The operator console may run on the in-browser demo backend (no session).
+  if (area === "op" && process.env.NEXT_PUBLIC_OPERATOR_BACKEND !== "supabase") {
     return NextResponse.next({ request });
   }
+  if (!url || !key) return NextResponse.next({ request });
 
   let response = NextResponse.next({ request });
   const supabase = createServerClient(url, key, {
@@ -26,16 +32,17 @@ export async function proxy(request: NextRequest) {
   });
 
   const { data } = await supabase.auth.getUser();
-  const isLogin = request.nextUrl.pathname.startsWith("/op/login");
-  if (!data.user && !isLogin) {
-    const login = request.nextUrl.clone();
-    login.pathname = "/op/login";
-    login.searchParams.set("next", request.nextUrl.pathname);
-    return NextResponse.redirect(login);
-  }
-  return response;
+  if (data.user || area === "auth") return response;
+
+  const loginPath = area === "admin" ? "/admin/login" : "/op/login";
+  if (path.startsWith(loginPath)) return response;
+  const login = request.nextUrl.clone();
+  login.pathname = loginPath;
+  login.search = "";
+  login.searchParams.set("next", path);
+  return NextResponse.redirect(login);
 }
 
 export const config = {
-  matcher: ["/op/:path*"],
+  matcher: ["/op/:path*", "/admin/:path*", "/auth/:path*"],
 };

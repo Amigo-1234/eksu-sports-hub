@@ -37,6 +37,14 @@ Backend setup (local Supabase, dev accounts, hosted project): **[docs/BACKEND.md
 | `/matches/[id]` | Match centre — Summary, Line-ups, Stats, H2H |
 | `/teams/[id]` | Team — position, form, next fixture, results |
 
+## Admin dashboard (`/admin`)
+
+Supabase-backed administration for ADMIN accounts: competitions, teams,
+squads, fixtures, operator assignments, live monitoring, event-based
+corrections, standings, staff and a read-only audit log. Sign in at
+`/admin/login`. See **docs/ADMIN.md** for routes, security model and the
+first-administrator bootstrap.
+
 ## Match Operator Console (`/op`)
 
 A separate, utilitarian app for the staff member controlling a live match.

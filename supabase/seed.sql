@@ -42,11 +42,11 @@ insert into public.competitions (id, sport_id, season_id, name, short_name, form
 insert into public.competition_stages (id, competition_id, name, stage_order) values
   ('61000000-0000-4000-8000-000000000001', '60000000-0000-4000-8000-000000000001', 'League phase', 1);
 
-insert into public.teams (id, sport_id, name, short_name, code, kind, faculty_id, color_primary) values
-  ('70000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000001', 'DEV Science', 'Science', 'SCI', 'FACULTY', '40000000-0000-4000-8000-000000000001', '#1D4ED8'),
-  ('70000000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000001', 'DEV Engineering', 'Engineering', 'ENG', 'FACULTY', '40000000-0000-4000-8000-000000000002', '#9A3412'),
-  ('70000000-0000-4000-8000-000000000003', '20000000-0000-4000-8000-000000000001', 'DEV Arts', 'Arts', 'ART', 'FACULTY', '40000000-0000-4000-8000-000000000003', '#6D28D9'),
-  ('70000000-0000-4000-8000-000000000004', '20000000-0000-4000-8000-000000000001', 'DEV Education', 'Education', 'EDU', 'FACULTY', '40000000-0000-4000-8000-000000000004', '#047857');
+insert into public.teams (id, sport_id, name, short_name, code, slug, kind, faculty_id, color_primary) values
+  ('70000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000001', 'DEV Science', 'Science', 'SCI', 'dev-science', 'FACULTY', '40000000-0000-4000-8000-000000000001', '#1D4ED8'),
+  ('70000000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000001', 'DEV Engineering', 'Engineering', 'ENG', 'dev-engineering', 'FACULTY', '40000000-0000-4000-8000-000000000002', '#9A3412'),
+  ('70000000-0000-4000-8000-000000000003', '20000000-0000-4000-8000-000000000001', 'DEV Arts', 'Arts', 'ART', 'dev-arts', 'FACULTY', '40000000-0000-4000-8000-000000000003', '#6D28D9'),
+  ('70000000-0000-4000-8000-000000000004', '20000000-0000-4000-8000-000000000001', 'DEV Education', 'Education', 'EDU', 'dev-education', 'FACULTY', '40000000-0000-4000-8000-000000000004', '#047857');
 
 insert into public.competition_entries (competition_id, stage_id, team_id)
 select '60000000-0000-4000-8000-000000000001', '61000000-0000-4000-8000-000000000001', t.id

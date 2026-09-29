@@ -125,6 +125,7 @@ else changes: authorisation depends only on `auth.uid()`.
 | Project | `eksu-sports-hub` · ref `lkvdoeomyhbtinpvvbfr` · eu-west-2 (London) · Free plan |
 | API URL | `https://lkvdoeomyhbtinpvvbfr.supabase.co` |
 | Migrations applied | `20260928000100` … `20260928000700` (history versions aligned with this repo) |
+| Pending | `20260929000800_admin.sql` — admin dashboard support; **not yet applied** (awaiting approval) |
 | Seed | **not** run (no development data on the hosted project) |
 | Auth users | none yet |
 
@@ -139,9 +140,10 @@ standings) ran inside a transaction that was rolled back, so nothing persisted.
    (applies the migrations; do **not** run `seed.sql` on production).
 3. Authentication → Providers: keep Email enabled; turn **off** "Allow new users to sign up".
    Set Site URL to your deployment URL.
-4. Create real operator accounts in the dashboard; grant roles by inserting
-   `user_roles` rows, and create `operator_assignments` (admin tooling is a
-   later phase).
+4. Bootstrap the first administrator once (see docs/ADMIN.md → "First
+   administrator"); every later account is created from `/admin/staff`.
 5. Vercel: set `NEXT_PUBLIC_OPERATOR_BACKEND=supabase`,
-   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
-   Do **not** add `SUPABASE_SECRET_KEY` to Vercel.
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and —
+   for staff invites from the admin dashboard — `SUPABASE_SECRET_KEY` as a
+   **server-only, Sensitive** variable (never `NEXT_PUBLIC_…`). It is read only
+   by `src/lib/admin/authAdmin.ts` (a `server-only` module).

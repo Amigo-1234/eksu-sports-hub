@@ -1,14 +1,14 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { operatorBackendConfig } from "@/lib/operator/backend";
+import { supabaseEnv } from "./env";
 
 /** Per-request Supabase client acting as the signed-in user (RLS applies). */
 export async function createSupabaseServerClient() {
-  const cfg = operatorBackendConfig();
-  if (!cfg.ok || cfg.kind !== "supabase") throw new Error("Supabase operator backend is not configured");
+  const env = supabaseEnv();
+  if (!env.ok) throw new Error(env.error);
   const store = await cookies();
-  return createServerClient(cfg.url, cfg.publishableKey, {
+  return createServerClient(env.url, env.publishableKey, {
     cookies: {
       getAll: () => store.getAll(),
       setAll: (list) => {

@@ -2,15 +2,15 @@
 
 import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { operatorBackendConfig } from "@/lib/operator/backend";
+import { supabaseEnv } from "./env";
 
 let client: SupabaseClient | null = null;
 
 /** Browser Supabase client (session in cookies, shared with the server). */
 export function supabaseBrowser(): SupabaseClient {
   if (client) return client;
-  const cfg = operatorBackendConfig();
-  if (!cfg.ok || cfg.kind !== "supabase") throw new Error("Supabase operator backend is not configured");
-  client = createBrowserClient(cfg.url, cfg.publishableKey);
+  const env = supabaseEnv();
+  if (!env.ok) throw new Error(env.error);
+  client = createBrowserClient(env.url, env.publishableKey);
   return client;
 }

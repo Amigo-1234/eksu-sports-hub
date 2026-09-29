@@ -11,7 +11,8 @@
     "test:operator": "node --experimental-strip-types --no-warnings --test tests/operator-engine.test.ts tests/operator-reconcile.test.ts",
     "dev:users": "node --env-file-if-exists=.env.local scripts/dev-users.mjs",
     "test:backend": "node --env-file-if-exists=.env.local --test tests/backend/api.test.mjs",
-    "test:db": "supabase test db"
+    "test:db": "supabase test db",
+    "test:admin": "node --experimental-strip-types --no-warnings --test tests/admin-helpers.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

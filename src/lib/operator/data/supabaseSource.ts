@@ -85,13 +85,14 @@ export const supabaseOperatorDataSource: OperatorDataSource = {
     const { data } = await sb.auth.getUser();
     if (!data.user) return null;
     const [profile, roles] = await Promise.all([
-      sb.from("profiles").select("display_name").eq("id", data.user.id).maybeSingle(),
+      sb.from("profiles").select("display_name, deactivated_at").eq("id", data.user.id).maybeSingle(),
       sb.from("user_roles").select("role:roles(code)").eq("user_id", data.user.id),
     ]);
     return {
       id: data.user.id,
       displayName: profile.data?.display_name ?? data.user.email ?? "Operator",
-      roles: (roles.data ?? []).map((r: any) => r.role?.code).filter(Boolean),
+      // Deactivated staff keep their role rows but lose every permission (see private.has_role).
+      roles: profile.data?.deactivated_at ? [] : (roles.data ?? []).map((r: any) => r.role?.code).filter(Boolean),
     };
   },
 

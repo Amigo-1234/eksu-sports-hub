@@ -152,3 +152,39 @@ test("server_time is available to clients", async () => {
   assert.ifError(error);
   assert.ok(Math.abs(Date.parse(data) - Date.now()) < 60_000);
 });
+
+test("admin surface: anon and operators are refused by the API itself", async () => {
+  const season = { name: `API ${randomUUID().slice(0, 6)}`, starts_on: "2030-09-01", ends_on: "2031-07-31" };
+  for (const c of [anon, primary]) {
+    const ins = await c.from("seasons").insert(season);
+    assert.ok(ins.error, "reference-data insert must fail");
+    const r = await rpc(c, "admin_create_match", {
+      p_competition_id: COMP, p_stage_id: null, p_group_id: null, p_round_label: "", p_home_team_id: HOME,
+      p_away_team_id: AWAY, p_venue_id: null, p_scheduled_at: new Date().toISOString(),
+    });
+    assert.ok(r.error, "admin RPC must fail");
+    assert.ok(["42501", "EK403"].includes(r.error.code), `unexpected ${r.error.code}`);
+  }
+  const staff = await rpc(primary, "admin_list_staff", {});
+  assert.equal(staff.error?.code, "EK403");
+  const grant = await rpc(primary, "admin_grant_role", { p_user_id: await userId(primary), p_role: "ADMIN" });
+  assert.equal(grant.error?.code, "EK403", "operator cannot self-promote");
+  const score = await primary.from("matches").update({ home_score: 5 }).eq("id", matchId);
+  assert.ok(score.error, "score columns are not writable");
+});
+
+test("admin surface: an ADMIN can use it, and same-team fixtures are rejected", async () => {
+  const a = await signIn("admin@dev.eksu.test");
+  const staff = await rpc(a, "admin_list_staff", {});
+  assert.ifError(staff.error);
+  assert.ok(staff.data.length >= 4);
+  assert.ok(!JSON.stringify(staff.data).includes("encrypted_password"), "no credential columns exposed");
+  const same = await rpc(a, "admin_create_match", {
+    p_competition_id: COMP, p_stage_id: null, p_group_id: null, p_round_label: "", p_home_team_id: HOME,
+    p_away_team_id: HOME, p_venue_id: null, p_scheduled_at: new Date().toISOString(),
+  });
+  assert.equal(same.error?.code, "EK422");
+  const live = await rpc(a, "admin_live_matches", {});
+  assert.ifError(live.error);
+  assert.ok(Array.isArray(live.data));
+});
