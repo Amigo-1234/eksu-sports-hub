@@ -100,6 +100,25 @@ export interface Match {
   statusNote?: string;
   /** Minute play stopped, for abandoned matches. */
   abandonedMinute?: number;
+  /** Server change counter (real data only) — realtime clients compare against it. */
+  seq?: number;
+  /**
+   * Authoritative clock fields (real data only). When present the minute is
+   * derived from these (pauses, offsets) rather than from `periodStartedAt`.
+   */
+  clock?: PublicClock | null;
+}
+
+/** The server's clock state for the current period (all times ISO). */
+export interface PublicClock {
+  period: number | null;
+  periodStartedAt: ISODateTime | null;
+  periodEndedAt: ISODateTime | null;
+  periodOffsetSeconds: number;
+  clockRunning: boolean;
+  pausedAt: ISODateTime | null;
+  accumulatedPauseSeconds: number;
+  stoppageSeconds: number;
 }
 
 export type MatchEventType =
@@ -116,7 +135,8 @@ export type MatchEventType =
  * never invent identities for real students.
  */
 export interface PlayerRef {
-  shirtNumber: number;
+  /** Null when the operator recorded the event without a player. */
+  shirtNumber: number | null;
   name?: string;
 }
 
@@ -132,6 +152,8 @@ export interface MatchEvent {
   player: PlayerRef;
   /** SUBSTITUTION: player coming on. `player` is the one going off. */
   playerIn?: PlayerRef;
+  /** Server order (real data only). */
+  seq?: number;
 }
 
 export interface FormResult {

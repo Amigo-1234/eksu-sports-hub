@@ -3,7 +3,7 @@ import type { MatchDetail, MatchEvent, PlayerRef, Score } from "./types";
 import type { Side } from "./match";
 
 export function playerLabel(p: PlayerRef): string {
-  return p.name ?? `No. ${p.shirtNumber}`;
+  return p.name ?? (p.shirtNumber != null ? `No. ${p.shirtNumber}` : "Player not recorded");
 }
 
 export function eventMinute(e: MatchEvent): string {

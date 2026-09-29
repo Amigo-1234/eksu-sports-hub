@@ -20,7 +20,7 @@ export function MatchStatusLabel({
   match,
   serverNow,
 }: {
-  match: Pick<Match, "status" | "kickoffAt" | "periodStartedAt">;
+  match: Pick<Match, "status" | "kickoffAt" | "periodStartedAt" | "clock">;
   serverNow: number;
 }) {
   const { status } = match;
@@ -29,7 +29,7 @@ export function MatchStatusLabel({
     return (
       <span className="font-bold text-live">
         <span className="sr-only">Live, </span>
-        <LiveMinute status={status} periodStartedAt={match.periodStartedAt} serverNow={serverNow} />
+        <LiveMinute status={status} periodStartedAt={match.periodStartedAt} clock={match.clock} serverNow={serverNow} />
       </span>
     );
   }

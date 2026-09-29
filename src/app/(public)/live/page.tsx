@@ -7,7 +7,8 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { RefreshButton } from "@/components/ui/RefreshButton";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { LiveIcon } from "@/components/ui/icons";
-import { getMatches, getNow } from "@/lib/data";
+import { LiveScoresProvider } from "@/components/realtime/LiveScores";
+import { DATA_SOURCE_KIND, getMatches, getNow } from "@/lib/data";
 import { groupByCompetition } from "@/lib/grouping";
 
 export const metadata: Metadata = { title: "Live" };
@@ -21,7 +22,7 @@ export default async function LivePage() {
       .filter((m) => m.status === "SCHEDULED")
       .slice(0, 3);
     return (
-      <>
+      <LiveScoresProvider enabled={DATA_SOURCE_KIND === "live"} renderedLiveIds={[]}>
         <PageHeader title="Live" subtitle="Matches in progress" actions={<RefreshButton />} />
         <EmptyState
           icon={<LiveIcon size={22} />}
@@ -36,12 +37,12 @@ export default async function LivePage() {
           </section>
         )}
         <DemoNotice />
-      </>
+      </LiveScoresProvider>
     );
   }
 
   return (
-    <>
+    <LiveScoresProvider enabled={DATA_SOURCE_KIND === "live"} renderedLiveIds={live.map((m) => m.id)}>
       <PageHeader
         title="Live"
         subtitle={`${live.length} ${live.length === 1 ? "match" : "matches"} in progress`}
@@ -67,6 +68,6 @@ export default async function LivePage() {
         ))}
       </div>
       <DemoNotice />
-    </>
+    </LiveScoresProvider>
   );
 }

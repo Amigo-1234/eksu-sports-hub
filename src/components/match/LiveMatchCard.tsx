@@ -1,13 +1,40 @@
+"use client";
+
 import Link from "next/link";
 import { TeamCrest } from "@/components/team/TeamCrest";
 import { matchAccessibleLabel, matchHref } from "@/lib/match";
 import { isClockRunning } from "@/lib/status";
-import type { MatchSummary, Team } from "@/lib/types";
+import { useLiveScore } from "@/components/realtime/LiveScores";
+import { eventMinute } from "@/lib/events";
+import type { MatchEvent, MatchEventType, MatchSummary, Team } from "@/lib/types";
 import { LiveMinute } from "./LiveMinute";
 import { LiveDot } from "./MatchStatusLabel";
 
-/** Prominent card for matches in progress (home + live pages). */
-export function LiveMatchCard({ match, serverNow }: { match: MatchSummary; serverNow: number }) {
+const LAST_EVENT: Record<MatchEventType, string> = {
+  GOAL: "Goal",
+  OWN_GOAL: "Own goal",
+  PENALTY_GOAL: "Penalty",
+  PENALTY_MISS: "Penalty missed",
+  YELLOW_CARD: "Yellow card",
+  RED_CARD: "Red card",
+  SUBSTITUTION: "Substitution",
+};
+
+function lastEventText(e: MatchEvent, m: MatchSummary): string {
+  const team = e.teamId === m.homeTeamId ? m.homeTeam : m.awayTeam;
+  return `${LAST_EVENT[e.type]} ${eventMinute(e)} · ${team.shortName}`;
+}
+
+/**
+ * Prominent card for matches in progress (home + live pages). Server props
+ * are the starting point; realtime updates (score, status, clock, last event)
+ * come from the surrounding LiveScoresProvider.
+ */
+export function LiveMatchCard({ match: initial, serverNow }: { match: MatchSummary; serverNow: number }) {
+  const live = useLiveScore(initial.id);
+  const match: MatchSummary = live
+    ? { ...initial, status: live.status, score: live.score, clock: live.clock, periodStartedAt: live.periodStartedAt, seq: live.seq }
+    : initial;
   const score = match.score ?? { home: 0, away: 0 };
   return (
     <Link
@@ -25,7 +52,7 @@ export function LiveMatchCard({ match, serverNow }: { match: MatchSummary; serve
             <span className="relative size-1.5 rounded-full bg-white" />
           </span>
           {isClockRunning(match.status) ? (
-            <LiveMinute status={match.status} periodStartedAt={match.periodStartedAt} serverNow={serverNow} />
+            <LiveMinute status={match.status} periodStartedAt={match.periodStartedAt} clock={match.clock} serverNow={serverNow} />
           ) : (
             "HT"
           )}
@@ -47,7 +74,13 @@ export function LiveMatchCard({ match, serverNow }: { match: MatchSummary; serve
         <CardTeam team={match.awayTeam} />
       </div>
 
-      <p className="truncate border-t border-line bg-subtle/50 px-3.5 py-1.5 text-center text-[11px] text-ink-faint">
+      <p className="truncate border-t border-line bg-subtle/50 px-3.5 py-1.5 text-center text-[11px] text-ink-faint" aria-live="polite">
+        {live?.lastEvent ? (
+          <>
+            <span className="font-semibold text-ink-muted">{lastEventText(live.lastEvent, match)}</span>
+            <span aria-hidden="true"> · </span>
+          </>
+        ) : null}
         {match.venue.shortName}
       </p>
     </Link>

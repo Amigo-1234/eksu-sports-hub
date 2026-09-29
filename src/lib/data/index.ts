@@ -1,15 +1,25 @@
 import "server-only";
 import { connection } from "next/server";
+import { publicDataConfig } from "./config";
 import { mockDataSource } from "./mock";
 import type { SportsDataSource } from "./source";
+import { supabaseDataSource } from "./supabase";
 
 export type { MatchQuery, MatchScope, SportsDataSource } from "./source";
 
 /**
- * The active data source. Swap this for a Supabase-backed implementation of
- * `SportsDataSource` — pages and components only talk to the functions below.
+ * The active data source (see ./config — explicit, never a silent mock
+ * fallback in production). Pages and components only talk to the functions
+ * below.
  */
-const source: SportsDataSource = mockDataSource;
+const failing = (error: string): SportsDataSource =>
+  new Proxy({} as SportsDataSource, {
+    get: (_, key) => (key === "now" ? () => Date.now() : () => Promise.reject(new Error(error))),
+  });
+
+const config = publicDataConfig();
+const source: SportsDataSource =
+  config.kind === "supabase" ? supabaseDataSource : config.kind === "mock" ? mockDataSource : failing(config.error);
 
 /**
  * Match data is time-sensitive, so every read waits for a real request rather
@@ -70,4 +80,4 @@ export async function getHeadToHead(
 }
 
 /** Which backend is serving data — the UI shows a notice while this is "mock". */
-export const DATA_SOURCE_KIND: "mock" | "live" = "mock";
+export const DATA_SOURCE_KIND: "mock" | "live" = config.kind === "mock" ? "mock" : "live";

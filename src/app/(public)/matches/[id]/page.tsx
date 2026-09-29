@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { MatchHero } from "@/components/match/MatchHero";
-import { HeadToHeadPanel, NotAvailablePanel, SummaryPanel, type PreMatchTeam } from "@/components/match/MatchPanels";
+import { HeadToHeadPanel, NotAvailablePanel, type PreMatchTeam } from "@/components/match/MatchPanels";
+import { LiveMatchHero, LiveMatchProvider, LiveSummaryPanel } from "@/components/realtime/LiveMatch";
 import { MatchTabs } from "@/components/match/MatchTabs";
 import { BackLink } from "@/components/ui/BackLink";
 import { DemoNotice } from "@/components/ui/DemoNotice";
-import { getHeadToHead, getMatch, getMatches, getNow, getStandings } from "@/lib/data";
+import { DATA_SOURCE_KIND, getHeadToHead, getMatch, getMatches, getNow, getStandings } from "@/lib/data";
 import { outcomeFor } from "@/lib/match";
 import { showsScore } from "@/lib/status";
 import type { FormResult, StandingRow, Team } from "@/lib/types";
@@ -46,9 +46,10 @@ export default async function MatchPage({ params }: PageProps<"/matches/[id]">) 
   });
 
   return (
+    <LiveMatchProvider initial={match} enabled={DATA_SOURCE_KIND === "live"}>
     <div className="pt-2 sm:pt-4">
       <BackLink />
-      <MatchHero match={match} serverNow={now} />
+      <LiveMatchHero serverNow={now} />
       <div className="mt-2">
         <MatchTabs
           tabs={[
@@ -56,10 +57,7 @@ export default async function MatchPage({ params }: PageProps<"/matches/[id]">) 
               id: "summary",
               label: "Summary",
               content: (
-                <SummaryPanel
-                  match={match}
-                  preMatch={{ home: pre(match.homeTeam, homeForm), away: pre(match.awayTeam, awayForm) }}
-                />
+                <LiveSummaryPanel preMatch={{ home: pre(match.homeTeam, homeForm), away: pre(match.awayTeam, awayForm) }} />
               ),
             },
             { id: "lineups", label: "Line-ups", content: <NotAvailablePanel kind="lineups" /> },
@@ -70,5 +68,6 @@ export default async function MatchPage({ params }: PageProps<"/matches/[id]">) 
       </div>
       <DemoNotice />
     </div>
+    </LiveMatchProvider>
   );
 }

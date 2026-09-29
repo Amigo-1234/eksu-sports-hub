@@ -1,7 +1,8 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { PUBLIC_DATA_TAG } from "@/lib/data/cacheTags";
 import { redirect } from "next/navigation";
 import { fromWatInput } from "../time";
 import type { ActionState } from "../types";
@@ -15,6 +16,7 @@ import { adminAction, check, id, int, Invalid, ok, oneOf, optionalId, text } fro
 
 const done = (msg: string) => {
   revalidatePath("/admin", "layout");
+  updateTag(PUBLIC_DATA_TAG); // public pages see admin changes immediately
   return ok(msg);
 };
 

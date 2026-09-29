@@ -102,11 +102,31 @@ idempotency ledger → audit row → change hook → canonical state returned.
 state + replay of still-pending intents). `NEXT_PUBLIC_OPERATOR_BACKEND`
 selects `supabase` or `mock`; unset in production shows a configuration error.
 
-### Boundary: public site vs operator backend
-The public pages (`/`, `/live`, `/matches/[id]`, …) still read the mock data in
-`src/lib/data/mock` and show a "Preview build" notice. Scores entered in `/op`
-are authoritative in Postgres but **do not appear on the public site yet**;
-connecting `SportsDataSource` to Supabase is the next phase.
+### Public data + realtime (migration 20260930000900)
+The public site reads real data through `src/lib/data/supabase` (anonymous,
+cookie-less, publishable key). Source selection is explicit
+(`src/lib/data/config.ts`): `PUBLIC_DATA_SOURCE=supabase|mock`, defaulting to
+Supabase whenever it is configured; mock is refused on a Vercel production
+deployment and an unconfigured production build shows an error, never demo data.
+
+Public read surface (RLS): draft competitions and everything under them are
+hidden; event `payload`/`void_reason`, operator ids, profiles, squads, roles and
+the audit log are not readable by `anon`. Two public RPCs return exactly what the
+UI renders: `public_match_feed(match, after_seq)` (canonical match row + events
+after a seq, with shirt numbers, + all voided ids + server time) and
+`public_live_scores()` (live matches + last event + server time).
+
+Realtime: `private.after_match_change` (called by every operator/admin match
+RPC) sends a small hint `{match_id, seq, kind, status}` with `realtime.send` to
+private channels `match:{id}` and `scores:live` (published competitions only).
+RLS on `realtime.messages` lets anon/authenticated **listen** to those topics and
+nobody publish. Clients treat hints as "changed at seq N": duplicates (seq ≤
+known) are ignored, otherwise they fetch `public_match_feed` after the known seq
+(which also fills gaps), and they resync on (re)subscribe, tab resume, network
+return and a 30 s safety poll. The minute is derived from the server clock fields
+plus a server-time offset. Caching: reference data 300 s, fixture/result lists
+and standings 30 s (tag `public-data`, invalidated by admin mutations); live,
+today and match detail are always fresh.
 
 ## Authentication
 Email + password through Supabase Auth (works without external services).
@@ -125,6 +145,7 @@ else changes: authorisation depends only on `auth.uid()`.
 | Project | `eksu-sports-hub` · ref `lkvdoeomyhbtinpvvbfr` · eu-west-2 (London) · Free plan |
 | API URL | `https://lkvdoeomyhbtinpvvbfr.supabase.co` |
 | Migrations applied | `20260928000100` … `20260929000800` (history versions aligned with this repo; 0800 applied 2026-09-29) |
+| Pending | `20260930000900_public_realtime.sql` — public data + realtime; **must be applied before this code is deployed** |
 | Reference data | `supabase/reference.sql` applied 2026-09-29: roles ADMIN/MANAGER/OPERATOR, football, 8 event types (idempotent) |
 | Seed | **not** run (no development data on the hosted project) |
 | Auth users | none yet |

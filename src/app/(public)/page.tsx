@@ -8,7 +8,8 @@ import { DemoNotice } from "@/components/ui/DemoNotice";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { CalendarIcon, ChevronRightIcon, ClockIcon } from "@/components/ui/icons";
-import { getCompetitions, getMatches, getNow, getStandings } from "@/lib/data";
+import { LiveScoresProvider } from "@/components/realtime/LiveScores";
+import { DATA_SOURCE_KIND, getCompetitions, getMatches, getNow, getStandings } from "@/lib/data";
 import { dateKey, formatKickoff, formatLongDate } from "@/lib/format";
 import { matchHref } from "@/lib/match";
 import { isLive } from "@/lib/status";
@@ -38,6 +39,7 @@ export default async function HomePage() {
   const nothingAtAll = todays.length === 0 && upcoming.length === 0 && results.length === 0;
 
   return (
+    <LiveScoresProvider enabled={DATA_SOURCE_KIND === "live"} renderedLiveIds={live.map((m) => m.id)}>
     <div className="pt-3 sm:pt-5">
       <h1 className="sr-only">EKSU Sports — what&apos;s on</h1>
       <p className="mb-3 px-1 text-xs font-semibold tracking-wide text-ink-faint uppercase">
@@ -155,5 +157,6 @@ export default async function HomePage() {
 
       <DemoNotice />
     </div>
+    </LiveScoresProvider>
   );
 }

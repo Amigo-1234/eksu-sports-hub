@@ -3,10 +3,10 @@
 Live scores, fixtures, results and tables for Ekiti State University sport.
 Public frontend built with Next.js (App Router), TypeScript and Tailwind CSS v4.
 
-> **Status:** the public site runs on **demo data**. The match operator
-> console (`/op`) has a real **Supabase** backend (auth, RLS, RPC write path)
-> — see [docs/BACKEND.md](docs/BACKEND.md). Public pages are not connected to
-> it yet, and there is no realtime feed.
+> **Status:** the public site, match operator console (`/op`) and admin
+> dashboard (`/admin`) all run on **Supabase** (auth, RLS, RPC write path,
+> realtime live scores) — see [docs/BACKEND.md](docs/BACKEND.md). Demo data is
+> only used when explicitly selected (`PUBLIC_DATA_SOURCE=mock`, dev/testing).
 
 ## Getting started
 
@@ -36,6 +36,13 @@ Backend setup (local Supabase, dev accounts, hosted project): **[docs/BACKEND.md
 | `/competitions/[id]` | Overview, `/fixtures`, `/results`, `/table` |
 | `/matches/[id]` | Match centre — Summary, Line-ups, Stats, H2H |
 | `/teams/[id]` | Team — position, form, next fixture, results |
+
+## Public data & realtime
+
+Public pages read real Supabase data (`src/lib/data/supabase`); Home, `/live`
+and match pages update scores, clocks and events live via Supabase Realtime
+hints + canonical refetch (`src/lib/realtime`, `src/components/realtime`). See
+docs/BACKEND.md → "Public data + realtime".
 
 ## Admin dashboard (`/admin`)
 
@@ -109,11 +116,13 @@ src/
       mock/            DEMO DATA ONLY (reference data + relative-time fixture list)
 ```
 
-### Replacing the mock data
+### Data sources
 
-Implement `SportsDataSource` (e.g. with Supabase) and assign it in
-`src/lib/data/index.ts`. Pages and components never import mock data directly.
-Flip `DATA_SOURCE_KIND` to `"live"` to remove the demo-data notice.
+`SportsDataSource` has two implementations: `src/lib/data/supabase` (real data,
+the default) and `src/lib/data/mock` (demo data, only with
+`PUBLIC_DATA_SOURCE=mock` outside production). Selection lives in
+`src/lib/data/config.ts`; pages and components never import either directly.
+The "Preview build" notice only appears on demo data.
 
 ### Match status
 

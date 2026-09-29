@@ -1,12 +1,14 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { PUBLIC_DATA_TAG } from "@/lib/data/cacheTags";
 import { redirect } from "next/navigation";
 import { TIEBREAKERS, type ActionState, type Tiebreaker } from "../types";
 import { adminAction, bool, check, id, int, Invalid, ok, oneOf, optionalId, text } from "./util";
 
 const done = (msg: string) => {
   revalidatePath("/admin", "layout");
+  updateTag(PUBLIC_DATA_TAG); // public pages see admin changes immediately
   return ok(msg);
 };
 

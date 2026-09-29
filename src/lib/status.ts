@@ -1,4 +1,5 @@
-import type { MatchStatus } from "./types";
+import { displayClock } from "./operator/clock";
+import type { MatchStatus, PublicClock } from "./types";
 
 /**
  * Backend clock state machine: PRE → 1H → HT → 2H → FT.
@@ -128,4 +129,32 @@ export function computeMatchClock(
 
 export function formatMinute(minute: number, addedTime = 0): string {
   return addedTime > 0 ? `${minute}+${addedTime}'` : `${minute}'`;
+}
+
+/**
+ * Minute from the authoritative server clock fields (period start, offset,
+ * pauses) — the same maths as the operator console. `now` must already include
+ * the server-time offset.
+ */
+export function computePublicClock(
+  status: MatchStatus,
+  clock: PublicClock | null | undefined,
+  now: number,
+): (MatchClock & { paused: boolean }) | null {
+  if (!isClockRunning(status) || !clock || clock.period == null || !clock.periodStartedAt) return null;
+  const ms = (iso: string | null) => (iso ? Date.parse(iso) : null);
+  const d = displayClock(
+    {
+      period: clock.period === 2 ? 2 : 1,
+      periodOffsetSeconds: clock.periodOffsetSeconds,
+      periodStartedAt: ms(clock.periodStartedAt),
+      periodEndedAt: ms(clock.periodEndedAt),
+      clockRunning: clock.clockRunning,
+      pausedAt: ms(clock.pausedAt),
+      accumulatedPauseSeconds: clock.accumulatedPauseSeconds,
+      stoppageSeconds: clock.stoppageSeconds,
+    },
+    now,
+  );
+  return { minute: d.minute, addedTime: d.addedTime, paused: d.paused };
 }

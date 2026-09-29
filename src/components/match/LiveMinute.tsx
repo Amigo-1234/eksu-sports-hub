@@ -1,33 +1,40 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { computeMatchClock, formatMinute } from "@/lib/status";
-import type { MatchStatus } from "@/lib/types";
+import { onServerTimeChange, serverNow as deviceServerNow } from "@/lib/realtime/serverTime";
+import { computeMatchClock, computePublicClock, formatMinute } from "@/lib/status";
+import type { MatchStatus, PublicClock } from "@/lib/types";
 
 /*
- * A shared, low-frequency clock. This only advances the displayed minute
- * between page loads, computed from when the period started — it does not
- * fetch new scores or events.
+ * A shared, low-frequency clock. The minute is always derived from server
+ * timestamps (period start, pauses, offsets) and the server-time offset —
+ * never from a counter that could drift.
  */
-const TICK_MS = 15_000;
-let current = typeof window === "undefined" ? 0 : Date.now();
+const TICK_MS = 5_000;
+let current = 0;
 const listeners = new Set<() => void>();
 let timer: ReturnType<typeof setInterval> | null = null;
+let offsetUnsub: (() => void) | null = null;
+
+const emit = () => {
+  current = deviceServerNow();
+  listeners.forEach((l) => l());
+};
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
   if (!timer) {
-    current = Date.now();
-    timer = setInterval(() => {
-      current = Date.now();
-      listeners.forEach((l) => l());
-    }, TICK_MS);
+    current = deviceServerNow();
+    timer = setInterval(emit, TICK_MS);
+    offsetUnsub = onServerTimeChange(emit);
   }
   return () => {
     listeners.delete(listener);
     if (listeners.size === 0 && timer) {
       clearInterval(timer);
       timer = null;
+      offsetUnsub?.();
+      offsetUnsub = null;
     }
   };
 }
@@ -35,11 +42,14 @@ function subscribe(listener: () => void) {
 export function LiveMinute({
   status,
   periodStartedAt,
+  clock,
   serverNow,
   className = "",
 }: {
   status: MatchStatus;
   periodStartedAt: string | null;
+  /** Authoritative clock (real data). Falls back to `periodStartedAt` (demo data). */
+  clock?: PublicClock | null;
   /** Request time from the server, used for the first (hydrated) render. */
   serverNow: number;
   className?: string;
@@ -49,16 +59,17 @@ export function LiveMinute({
     () => current || serverNow,
     () => serverNow,
   );
-  const clock = computeMatchClock(status, periodStartedAt, now);
-  if (!clock) return null;
-  const text = formatMinute(clock.minute, clock.addedTime);
+  const live = clock ? computePublicClock(status, clock, now) : computeMatchClock(status, periodStartedAt, now);
+  if (!live) return null;
+  const text = formatMinute(live.minute, live.addedTime);
+  const paused = "paused" in live && live.paused;
   return (
     <span className={`tabular-nums ${className}`}>
       {text.slice(0, -1)}
-      <span className="motion-safe:animate-pulse" aria-hidden="true">
+      <span className={paused ? "" : "motion-safe:animate-pulse"} aria-hidden="true">
         &apos;
       </span>
-      <span className="sr-only">minutes</span>
+      <span className="sr-only">minutes{paused ? ", play paused" : ""}</span>
     </span>
   );
 }

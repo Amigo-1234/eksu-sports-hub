@@ -39,7 +39,7 @@ function StatusPill({ match, serverNow }: { match: MatchDetail; serverNow: numbe
         {isClockRunning(status) ? (
           <>
             <span className="sr-only">Live, {statusLongLabel(status)},</span>
-            <LiveMinute status={status} periodStartedAt={match.periodStartedAt} serverNow={serverNow} />
+            <LiveMinute status={status} periodStartedAt={match.periodStartedAt} clock={match.clock} serverNow={serverNow} />
           </>
         ) : (
           "Half-time"
