@@ -144,8 +144,8 @@ else changes: authorisation depends only on `auth.uid()`.
 | --- | --- |
 | Project | `eksu-sports-hub` · ref `lkvdoeomyhbtinpvvbfr` · eu-west-2 (London) · Free plan |
 | API URL | `https://lkvdoeomyhbtinpvvbfr.supabase.co` |
-| Migrations applied | `20260928000100` … `20260929000800` (history versions aligned with this repo; 0800 applied 2026-09-29) |
-| Pending | `20260930000900_public_realtime.sql` — public data + realtime; **must be applied before this code is deployed** |
+| Migrations applied | `20260928000100` … `20260930000900` (history versions aligned with this repo; 0900 applied 2026-09-29) |
+| Realtime partitions | `realtime.messages` daily partitions are created by Supabase when the first Realtime client connects (and maintained while clients keep connecting). Until then `realtime.send` logs a warning and match writes still succeed; clients resync on subscribe. |
 | Reference data | `supabase/reference.sql` applied 2026-09-29: roles ADMIN/MANAGER/OPERATOR, football, 8 event types (idempotent) |
 | Seed | **not** run (no development data on the hosted project) |
 | Auth users | none yet |
@@ -154,6 +154,9 @@ After 000800 an 88-check admin/security verification passed (privilege hygiene,
 anon/operator/non-staff refusal, every admin RPC, fixture validation, one-primary
 constraint, operator RPCs, void/add corrections, standings recompute, outcomes,
 roles/deactivation, delete guards, audit immutability), also rolled back.
+After 000900 an 80-check public/realtime verification ran (rolled back): 73 passed; the 7
+realtime-delivery checks failed only because no Realtime client had connected yet (no
+`realtime.messages` partitions — see above).
 The earlier hosted verification (47 checks after 000600; 55 checks after 000700, adding
 private-helper denial and RLS-helper behaviour: RLS per role, every RPC, idempotency,
 voids, discipline rules, clock/periods, takeover, FT lock, audit immutability,
