@@ -82,9 +82,8 @@ the dashboard works and the invite form explains what is missing.
 There is no sign-up. The very first ADMIN has to be bootstrapped once, by the
 project owner, without sharing any password:
 
-0. The hosted database needs its reference rows first (`roles` ADMIN/MANAGER/
-   OPERATOR, the `football` sport and its `event_types`) — the same rows as the
-   top of `supabase/seed.sql`, without any of the DEV competition data.
+0. The hosted database needs its reference rows first: run
+   `supabase/reference.sql` (roles, football, event types; idempotent).
 1. Supabase Dashboard → Authentication → Users → **Invite user** (their email).
 2. SQL editor: grant the role (replace the email):
    ```sql

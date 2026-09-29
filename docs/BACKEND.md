@@ -125,7 +125,7 @@ else changes: authorisation depends only on `auth.uid()`.
 | Project | `eksu-sports-hub` · ref `lkvdoeomyhbtinpvvbfr` · eu-west-2 (London) · Free plan |
 | API URL | `https://lkvdoeomyhbtinpvvbfr.supabase.co` |
 | Migrations applied | `20260928000100` … `20260929000800` (history versions aligned with this repo; 0800 applied 2026-09-29) |
-| Reference data | **none yet** — `roles`, `sports`, `event_types` are empty (they came from the dev seed, which is not run here) |
+| Reference data | `supabase/reference.sql` applied 2026-09-29: roles ADMIN/MANAGER/OPERATOR, football, 8 event types (idempotent) |
 | Seed | **not** run (no development data on the hosted project) |
 | Auth users | none yet |
 
