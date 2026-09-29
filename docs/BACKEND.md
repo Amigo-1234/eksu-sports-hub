@@ -124,12 +124,16 @@ else changes: authorisation depends only on `auth.uid()`.
 | --- | --- |
 | Project | `eksu-sports-hub` · ref `lkvdoeomyhbtinpvvbfr` · eu-west-2 (London) · Free plan |
 | API URL | `https://lkvdoeomyhbtinpvvbfr.supabase.co` |
-| Migrations applied | `20260928000100` … `20260928000700` (history versions aligned with this repo) |
-| Pending | `20260929000800_admin.sql` — admin dashboard support; **not yet applied** (awaiting approval) |
+| Migrations applied | `20260928000100` … `20260929000800` (history versions aligned with this repo; 0800 applied 2026-09-29) |
+| Reference data | **none yet** — `roles`, `sports`, `event_types` are empty (they came from the dev seed, which is not run here) |
 | Seed | **not** run (no development data on the hosted project) |
 | Auth users | none yet |
 
-The hosted verification (47 checks after 000600; 55 checks after 000700, adding
+After 000800 an 88-check admin/security verification passed (privilege hygiene,
+anon/operator/non-staff refusal, every admin RPC, fixture validation, one-primary
+constraint, operator RPCs, void/add corrections, standings recompute, outcomes,
+roles/deactivation, delete guards, audit immutability), also rolled back.
+The earlier hosted verification (47 checks after 000600; 55 checks after 000700, adding
 private-helper denial and RLS-helper behaviour: RLS per role, every RPC, idempotency,
 voids, discipline rules, clock/periods, takeover, FT lock, audit immutability,
 standings) ran inside a transaction that was rolled back, so nothing persisted.
