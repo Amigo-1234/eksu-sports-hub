@@ -155,8 +155,11 @@ anon/operator/non-staff refusal, every admin RPC, fixture validation, one-primar
 constraint, operator RPCs, void/add corrections, standings recompute, outcomes,
 roles/deactivation, delete guards, audit immutability), also rolled back.
 After 000900 an 80-check public/realtime verification ran (rolled back): 73 passed; the 7
-realtime-delivery checks failed only because no Realtime client had connected yet (no
-`realtime.messages` partitions — see above).
+realtime-delivery checks first failed only because no Realtime client had connected yet (no
+`realtime.messages` partitions). After the first client connected (partitions created) they
+were re-run and all passed (hint per change on `match:{id}` + `scores:live`, private channels,
+seq = canonical seq, anon/authenticated listen-only, database resync). Note: hosted
+`realtime.send` adds the message's own `id` to each payload.
 The earlier hosted verification (47 checks after 000600; 55 checks after 000700, adding
 private-helper denial and RLS-helper behaviour: RLS per role, every RPC, idempotency,
 voids, discipline rules, clock/periods, takeover, FT lock, audit immutability,
