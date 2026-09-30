@@ -173,6 +173,11 @@ today and match detail are always fresh.
   line-ups read-only (`viewer_role: VIEWER`) until an audited `take_over_match`;
   the PRIMARY is then read-only until it takes control back. No second control
   mechanism exists. After kick-off only `admin_correct_lineup` changes line-ups.
+- **Who starts the match**: the same rule. `start_match` refuses (EK403, "Take
+  control to start this match") anyone but the operator in control, or the
+  active PRIMARY while nobody has taken control; a BACKUP takes over first
+  (audited). An ADMIN assigned to the match may always start it, and an admin
+  reassigning operators returns control to the current PRIMARY.
 - **Kick-off**: `start_match` requires both line-ups CONFIRMED and still valid,
   unless `admin_set_lineup_override` recorded a reason (audited).
 - **Events**: with a confirmed line-up, `record_event` / `admin_add_event`

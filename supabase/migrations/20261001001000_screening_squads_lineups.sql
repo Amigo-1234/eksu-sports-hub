@@ -25,6 +25,7 @@
 --      Before kick-off the operator in control (matches.active_operator_id,
 --      or the active PRIMARY while nobody has taken control) manages them; a
 --      BACKUP views them until an audited take_over_match. ADMIN always may.
+--      Kick-off (start_match) follows the same control rule.
 --      Formations are data (normalised pitch coordinates 0–100).
 --   5. Match engine: kick-off requires confirmed, still-valid line-ups (or an
 --      audited ADMIN override); line-ups lock at kick-off; substitutions,
@@ -1356,6 +1357,13 @@ begin
   m := private.begin_command(p_match_id, p_intent_id, 'START_MATCH');
   if m.id is null then return private.canonical_state(p_match_id, true); end if;
   perform private.require_status(m, array['SCHEDULED']::public.match_status[], 'Starting the match');
+  -- Kick-off follows the same control rule as pre-match line-up editing:
+  -- the operator in control, or the active PRIMARY while nobody has taken
+  -- control. A BACKUP must take over (audited) first. ADMIN may intervene.
+  if not private.has_role('ADMIN') and not private.has_lineup_control(p_match_id) then
+    raise exception 'Take control to start this match: another operator is in control, or you are the backup (take over first; it is audited).'
+      using errcode = 'EK403';
+  end if;
   perform private.require_lineups_for_kickoff(m);
   v_before := private.match_snapshot(p_match_id);
 
@@ -1672,7 +1680,8 @@ begin
       'away', private.team_lineup_json(p_match_id, m.away_team_id)
     ),
     'lineup_override', m.lineup_override_reason,
-    'lineup_control', private.has_lineup_control(p_match_id)
+    -- May this user manage line-ups / start the match now (same rule for both)?
+    'lineup_control', private.has_role('ADMIN') or private.has_lineup_control(p_match_id)
   );
 end $$;
 

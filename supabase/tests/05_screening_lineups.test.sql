@@ -1,6 +1,6 @@
 begin;
 \ir helpers.inc
-select plan(149);
+select plan(163);
 
 create temp table u as select
   tests.make_user('admin5@test.local', array['ADMIN']) as admin,
@@ -54,6 +54,10 @@ create or replace function tests.hints(p_topic text) returns bigint language sql
   select count(*) from realtime.messages where topic = p_topic $$;
 create or replace function tests.elig(p_match uuid, p_team uuid, p_player uuid) returns text
   language sql stable security definer set search_path = '' as $$ select private.match_eligibility(p_match, p_team, p_player) $$;
+create or replace function tests.snap_status(p uuid) returns text language sql stable security definer set search_path = '' as $$
+  select status::text from public.matches where id = p $$;
+create or replace function tests.snap_active(p uuid) returns uuid language sql stable security definer set search_path = '' as $$
+  select active_operator_id from public.matches where id = p $$;
 create or replace function tests.status_of(p_player uuid, p_team uuid, p_season uuid, p_comp uuid default null) returns text
   language sql stable security definer set search_path = '' as $$ select private.screening_status(p_player, p_team, p_season, p_comp) $$;
 grant execute on all functions in schema tests to anon, authenticated;
@@ -350,6 +354,16 @@ select ok(tests.audits('LINEUP_REQUIREMENT_OVERRIDDEN', tests.id('m2')) = 1, 'ov
 select tests.login((select op from u));
 select lives_ok($$ select public.start_match(tests.id('m2'), tests.id('start2')) $$, 'overridden match can start');
 
+-- ═════ Kick-off control ═════════════════════════════════════════════════════
+-- The backup took control of match m above: the primary must take it back.
+select throws_ok($$ select public.start_match(tests.id('m'), tests.id('start')) $$, 'EK403', null,
+  'primary cannot start while the backup is in control');
+select tests.login((select op_backup from u));
+select throws_ok($$ select public.start_match(tests.id('mB'), gen_random_uuid()) $$, 'EK403', null, 'unassigned operator cannot start');
+select tests.login((select op from u));
+select lives_ok($$ select public.take_over_match(tests.id('m'), gen_random_uuid()) $$, 'primary takes control back (audited)');
+select ok(tests.audits('OPERATOR_TAKEOVER', tests.id('m')) = 2, 'both take-overs audited');
+
 -- ═════ Kick-off, lock, substitutions, discipline ════════════════════════════
 select lives_ok($$ select public.start_match(tests.id('m'), tests.id('start')) $$, 'kick-off with both line-ups confirmed');
 select throws_ok($$ select public.save_lineup(tests.id('m'), tests.t(1), '4-4-2', tests.lineup(tests.t(1), array[1], '{}')) $$,
@@ -415,6 +429,48 @@ select lives_ok($$ select public.admin_correct_lineup(tests.id('m'), tests.t(1),
 select ok(tests.audits('LINEUP_CORRECTED', tests.id('m')) = 1, 'correction audited');
 select is((select before_state ->> 'formation' from public.audit_log where action = 'LINEUP_CORRECTED' and match_id = tests.id('m')), '4-4-2',
   'correction audit keeps the previous line-up');
+
+-- ═════ Kick-off follows operator control ════════════════════════════════════
+reset role;
+create temp table ko (k text primary key, id uuid not null default gen_random_uuid());
+insert into ko (k) select unnest(array['a', 'b', 'c']);
+grant select, update on ko to authenticated;
+create or replace function tests.ko(k text) returns uuid language sql stable as $$ select id from ko where ko.k = $1 $$;
+grant execute on function tests.ko(text) to authenticated;
+select tests.login((select admin from u));
+update ko set id = public.admin_create_match('60000000-0000-4000-8000-000000000001', null, null, 'KO ' || k, tests.t(3), tests.t(4), null, now());
+select public.admin_assign_operators(tests.ko(k), (select op from u), (select op_backup from u)) from ko;
+select tests.confirm_lineups(tests.ko(k)) from ko;
+
+select tests.login((select op_backup from u));
+select throws_ok($$ select public.start_match(tests.ko('a'), gen_random_uuid()) $$, 'EK403',
+  'Take control to start this match: another operator is in control, or you are the backup (take over first; it is audited).',
+  'backup cannot start without taking over (clear permission error)');
+select is(tests.snap_status(tests.ko('a')), 'SCHEDULED', 'match not started by the refused backup');
+select tests.login((select op from u));
+select lives_ok($$ select public.start_match(tests.ko('a'), gen_random_uuid()) $$, 'primary starts normally when nobody has taken control');
+select is(tests.snap_active(tests.ko('a')), (select op from u), 'the starter is in control');
+
+select tests.login((select op_backup from u));
+select lives_ok($$ select public.take_over_match(tests.ko('b'), gen_random_uuid()) $$, 'backup takes over before kick-off');
+select tests.login((select op from u));
+select throws_ok($$ select public.start_match(tests.ko('b'), gen_random_uuid()) $$, 'EK403', null,
+  'primary cannot start after the backup has taken control');
+select tests.login((select op_backup from u));
+select lives_ok($$ select public.start_match(tests.ko('b'), gen_random_uuid()) $$, 'backup starts after taking over');
+select is(tests.snap_active(tests.ko('b')), (select op_backup from u), 'the backup is in control');
+
+-- ADMIN intervention: reassigning operators hands control back to the (new) primary;
+-- an ADMIN assigned to the match may start it directly.
+select tests.login((select op_backup from u));
+select public.take_over_match(tests.ko('c'), gen_random_uuid());
+select tests.login((select admin from u));
+select public.admin_assign_operators(tests.ko('c'), (select op from u), (select admin from u));
+select tests.login((select op from u));
+select ok(public.operator_match_state(tests.ko('c')) -> 'lineup_control' = 'true'::jsonb,
+  'after the admin removes the controlling backup, the primary regains control');
+select tests.login((select admin from u));
+select lives_ok($$ select public.start_match(tests.ko('c'), gen_random_uuid()) $$, 'an ADMIN assigned to the match may always start it');
 
 select * from finish();
 rollback;

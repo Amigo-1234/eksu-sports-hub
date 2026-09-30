@@ -297,6 +297,13 @@ test("pre-kick-off line-up control, and kick-off is blocked without confirmed li
   assert.ifError((await rpc(backup, "save_lineup", { p_match_id: m.data, p_team_id: HOME, p_formation: "4-3-3", p_players: [] })).error);
   const primaryNow = await rpc(primary, "save_lineup", { p_match_id: m.data, p_team_id: HOME, p_formation: "4-4-2", p_players: [] });
   assert.equal(primaryNow.error?.code, "EK403", "primary is read-only while the backup is in control");
+  // Kick-off follows the same control rule.
+  const notInControl = await rpc(primary, "start_match", { p_match_id: m.data, p_intent_id: randomUUID() });
+  assert.equal(notInControl.error?.code, "EK403", "primary cannot start while the backup is in control");
+  assert.match(notInControl.error.message, /Take control to start this match/);
+  assert.ifError((await rpc(primary, "take_over_match", { p_match_id: m.data, p_intent_id: randomUUID() })).error);
+  const backupStart = await rpc(backup, "start_match", { p_match_id: m.data, p_intent_id: randomUUID() });
+  assert.equal(backupStart.error?.code, "EK403", "backup cannot start without taking over");
   const blocked = await rpc(primary, "start_match", { p_match_id: m.data, p_intent_id: randomUUID() });
   assert.equal(blocked.error?.code, "EK409");
   const opOverride = await rpc(primary, "admin_set_lineup_override", { p_match_id: m.data, p_reason: "x" });

@@ -12,6 +12,7 @@ import { ConnectionPill } from "./ConnectionPill";
 import { DemoControls } from "./DemoControls";
 import { useFeedback } from "./Feedback";
 import { HoldButton } from "./HoldButton";
+import { TakeOverBanner } from "./TakeOverBanner";
 
 const CHECKS: { key: keyof PrepChecks; label: string }[] = [
   { key: "atVenue", label: "I am at the venue" },
@@ -43,6 +44,8 @@ export function MatchPrep({ seed }: { seed: AssignmentSeed }) {
     !live ||
     !!seed.lineupOverride ||
     (["home", "away"] as const).every((s) => seed.lineups?.[s]?.status === "CONFIRMED" && (seed.lineups?.[s]?.problems.length ?? 0) === 0);
+  // Live backend: only the operator in control starts (PRIMARY while nobody took control; BACKUP after an audited take-over).
+  const control = !live || !!seed.lineupControl;
 
   const toggle = async (key: keyof PrepChecks) => {
     const r = await operatorControl.savePrep(match.id, { ...prep, [key]: !prep[key] });
@@ -135,11 +138,12 @@ export function MatchPrep({ seed }: { seed: AssignmentSeed }) {
 
           <div
             role="status"
-            className={`mt-4 rounded-2xl px-4 py-4 text-center ${ready && lineupsReady ? "bg-win text-white" : "border-2 border-dashed border-line-strong text-ink-muted"}`}
+            className={`mt-4 rounded-2xl px-4 py-4 text-center ${ready && lineupsReady && control ? "bg-win text-white" : "border-2 border-dashed border-line-strong text-ink-muted"}`}
           >
             <p className="font-display text-2xl font-extrabold tracking-wide uppercase">
-              {ready && lineupsReady ? "✓ Ready for match" : "Not ready"}
+              {ready && lineupsReady && control ? "✓ Ready for match" : "Not ready"}
             </p>
+            {!control && <p className="text-sm font-semibold">Take control to start this match.</p>}
             {!lineupsReady && <p className="text-sm font-semibold">Both line-ups must be confirmed before kick-off.</p>}
             {!ready && <p className="text-sm font-semibold">Complete the checklist to enable Start.</p>}
           </div>
@@ -148,6 +152,14 @@ export function MatchPrep({ seed }: { seed: AssignmentSeed }) {
             <p className="mt-3 rounded-xl bg-accent-100 px-3 py-2 text-sm font-semibold">
               You are the <strong>backup</strong> operator. Only start if the primary operator is not available.
             </p>
+          )}
+          {!control && (
+            <TakeOverBanner
+              matchId={match.id}
+              title="Take control to start this match"
+              body="Another operator manages this match. As backup, take over only if they cannot start it — the take-over is recorded in the audit log."
+              onTaken={() => router.refresh()}
+            />
           )}
           {untilKickoff !== null && untilKickoff > 30 * 60_000 && (
             <p className="mt-3 rounded-xl bg-accent-100 px-3 py-2 text-sm font-semibold">
@@ -160,8 +172,16 @@ export function MatchPrep({ seed }: { seed: AssignmentSeed }) {
               tone="go"
               label="Hold to start match"
               durationMs={2000}
-              disabled={!ready || !lineupsReady || !canStart.ok || !snap.hydrated}
-              hint={!lineupsReady ? "Confirm both line-ups first" : ready ? "Press and hold for 2 seconds at kick-off" : "Complete the checklist first"}
+              disabled={!control || !ready || !lineupsReady || !canStart.ok || !snap.hydrated}
+              hint={
+                !control
+                  ? "Take control to start this match"
+                  : !lineupsReady
+                    ? "Confirm both line-ups first"
+                    : ready
+                      ? "Press and hold for 2 seconds at kick-off"
+                      : "Complete the checklist first"
+              }
               onConfirm={() => {
                 const r = operatorActions.startMatch(match.id);
                 if (r.ok) {
@@ -203,7 +223,7 @@ function LineupsPrep({ seed, scheduled }: { seed: AssignmentSeed; scheduled: boo
       </h2>
       {scheduled && !seed.lineupControl && (
         <p className="mt-2 rounded-xl bg-subtle px-3 py-2 text-sm font-semibold">
-          View only: the operator in control manages line-ups before kick-off. Open a line-up to take over (audited).
+          View only: the operator in control manages line-ups and kick-off. Take control below (audited) to edit or start.
         </p>
       )}
       {seed.lineupOverride && (
