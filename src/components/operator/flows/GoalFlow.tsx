@@ -70,7 +70,7 @@ export function GoalFlow({
         allowUnknown
         scope="onField"
       />
-      <div className="sticky bottom-0 -mx-4 mt-4 border-t border-line bg-surface px-4 pt-3">
+      <div className="sticky -bottom-4 -mx-4 mt-4 -mb-4 border-t border-line bg-surface px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <ConfirmButton
           tone="go"
           label={`Confirm goal · ${team.shortName}`}

@@ -81,7 +81,7 @@ export function CardFlow({
           <p className="mt-2 text-xs font-semibold text-ink-muted">No. {shirt} is already booked — a further caution is a second yellow.</p>
         )}
       </fieldset>
-      <div className="sticky bottom-0 -mx-4 mt-4 border-t border-line bg-surface px-4 pt-3">
+      <div className="sticky -bottom-4 -mx-4 mt-4 -mb-4 border-t border-line bg-surface px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <ConfirmButton
           tone={card === "YELLOW_CARD" ? "ink" : "danger"}
           disabled={shirt === null || card === null}

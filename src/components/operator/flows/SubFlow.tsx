@@ -78,7 +78,7 @@ export function SubFlow({
         />
       )}
 
-      <div className="sticky bottom-0 -mx-4 mt-4 border-t border-line bg-surface px-4 pt-3">
+      <div className="sticky -bottom-4 -mx-4 mt-4 -mb-4 border-t border-line bg-surface px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <ConfirmButton
           disabled={off === null || on === null}
           label={off === null ? "Choose player off" : on === null ? "Choose player on" : `Confirm: ${on} on · ${off} off`}

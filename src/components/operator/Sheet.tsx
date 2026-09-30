@@ -40,11 +40,11 @@ export function Sheet({
         if (e.target === ref.current) onClose();
       }}
       aria-labelledby="sheet-title"
-      className="fixed inset-x-0 top-auto bottom-0 m-0 mx-auto flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/55 open:flex sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2 sm:rounded-2xl [&:not([open])]:hidden"
+      className="fixed inset-x-0 top-auto bottom-0 m-0 mx-auto h-auto max-h-[92dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/55 open:flex sm:top-1/2 sm:bottom-auto sm:max-h-[88dvh] sm:-translate-y-1/2 sm:rounded-2xl [&:not([open])]:hidden"
     >
       {open && (
         <>
-          <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line px-4 py-3">
             <h2 id="sheet-title" className="font-display text-xl font-extrabold tracking-tight uppercase">
               {title}
             </h2>
@@ -56,8 +56,12 @@ export function Sheet({
               Cancel
             </button>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">{children}</div>
-          {footer && <div className="border-t border-line bg-surface px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">{footer}</div>}
+          {/* flex: 1 1 auto (not flex-1's 0% basis): WebKit/iPad collapses a 0%-basis
+              child of an auto-height column to nothing, clipping the sheet body. */}
+          <div className="min-h-0 flex-auto overflow-y-auto overscroll-contain px-4 py-4">{children}</div>
+          {footer && (
+            <div className="shrink-0 border-t border-line bg-surface px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">{footer}</div>
+          )}
         </>
       )}
     </dialog>
