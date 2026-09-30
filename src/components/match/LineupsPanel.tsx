@@ -131,7 +131,7 @@ export function LineupsPanel({ match }: { match: MatchDetail }) {
   return (
     <div className="space-y-4">
     {lineups.some((l) => l.demo) && (
-      <DemoDataNote>Demonstration team sheets for this DEMO SHOWCASE match — not official line-ups.</DemoDataNote>
+      <DemoDataNote>Demo / test team sheets for this match — not official line-ups.</DemoDataNote>
     )}
     <div className="grid gap-6 lg:grid-cols-2">
       <TeamSheet team={match.homeTeam} match={match} lineup={lineups.find((l) => l.teamId === match.homeTeamId)} />

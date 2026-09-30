@@ -59,6 +59,7 @@ export interface CanonicalLineup {
   status: "DRAFT" | "CONFIRMED";
   formation: string | null;
   problems: string[];
+  demo?: boolean;
   players: {
     player_id: string;
     name: string | null;

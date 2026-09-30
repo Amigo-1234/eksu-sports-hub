@@ -78,6 +78,7 @@ function toLineup(l: CanonicalLineup | null | undefined): OpLineup | null {
     status: l.status,
     formation: l.formation,
     problems: l.problems ?? [],
+    ...(l.demo ? { demo: true } : {}),
     players: (l.players ?? []).map((p) => ({
       playerId: p.player_id,
       shirt: p.shirt_number,

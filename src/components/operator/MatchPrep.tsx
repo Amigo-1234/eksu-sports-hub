@@ -268,12 +268,18 @@ function LineupsPrep({ seed, scheduled }: { seed: AssignmentSeed; scheduled: boo
                   ))}
                 </ul>
               )}
-              <Link
-                href={`/op/matches/${match.id}/lineup/${side}`}
-                className="mt-3 flex h-12 items-center justify-center rounded-xl border-2 border-ink text-sm font-extrabold uppercase"
-              >
-                {!scheduled || !seed.lineupControl ? "View line-up" : ok ? "Review line-up" : l ? "Complete & confirm" : "Prepare line-up"}
-              </Link>
+              {l?.demo ? (
+                <p className="mt-3 rounded-xl bg-accent-100 px-3 py-2 text-xs font-semibold">
+                  Test line-up prepared by an admin (synthetic test players) — not an official team sheet.
+                </p>
+              ) : (
+                <Link
+                  href={`/op/matches/${match.id}/lineup/${side}`}
+                  className="mt-3 flex h-12 items-center justify-center rounded-xl border-2 border-ink text-sm font-extrabold uppercase"
+                >
+                  {!scheduled || !seed.lineupControl ? "View line-up" : ok ? "Review line-up" : l ? "Complete & confirm" : "Prepare line-up"}
+                </Link>
+              )}
             </div>
           );
         })}

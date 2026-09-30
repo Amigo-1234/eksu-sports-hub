@@ -218,6 +218,15 @@ stats) without touching the official eligibility pipeline.
   the `match_events` column grants. `public_match_feed` returns `match.is_demo`,
   demo line-ups (flagged `demo: true`, same public-safe shape) and `stats`
   (labelled demonstration data) for demo matches only.
+- **Live systems tests (migration `20261004001300`)**: a demo/test match may be
+  labelled TEST (or DEMO). Its demo line-ups may use *synthetic* participants
+  (`player_id` NULL, name must contain TEST/DEMO) that exist only in the demo
+  layer: no player, identity, screening or squad row. `operator_match_state`
+  serves the test line-ups to `/op`, `record_event` on a demo/test match takes
+  those participant ids (stored as `demo_player_id`), and kick-off requires both
+  test line-ups. Official line-ups can never be created for a demo/test match;
+  official matches use the unchanged path. `20261003001200` made the demo guard
+  triggers `SECURITY DEFINER` (admin competition saves had failed).
 
 ## Authentication
 Email + password through Supabase Auth (works without external services).

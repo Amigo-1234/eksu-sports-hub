@@ -120,6 +120,8 @@ export interface OpLineup {
   formation: string | null;
   /** Why it cannot be confirmed / used for kick-off (empty when fine). */
   problems: string[];
+  /** DEMO/TEST match: a test line-up prepared by an admin (not an official team sheet). */
+  demo?: boolean;
   players: {
     playerId: string;
     shirt: number;
