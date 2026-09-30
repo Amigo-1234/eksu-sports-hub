@@ -75,7 +75,7 @@ function Scorers({ match, side }: { match: MatchDetail; side: Side }) {
   return (
     <ul className={`min-w-0 space-y-0.5 text-xs text-white/80 ${side === "home" ? "text-right" : "text-left"}`}>
       {lines.map((l) => (
-        <li key={l.label} className="truncate">
+        <li key={l.label} className="break-words">
           {l.label} <span className="text-white/60 tabular-nums">{l.minutes.join(", ")}</span>
         </li>
       ))}
@@ -94,13 +94,25 @@ export function MatchHero({ match, serverNow }: { match: MatchDetail; serverNow:
       aria-label="Scoreboard"
       className="-mx-3 overflow-hidden bg-brand-800 text-white sm:mx-0 sm:rounded-card"
     >
-      <div className="flex items-center justify-center gap-1.5 border-b border-white/10 px-4 py-2 text-center text-[11px] font-semibold tracking-wide text-white/70 uppercase">
-        <Link href={`/competitions/${match.competition.id}`} className="truncate hover:text-white hover:underline">
-          {match.competition.name}
-        </Link>
-        <span aria-hidden="true">·</span>
-        <span className="shrink-0">{match.round}</span>
-      </div>
+      {match.isDemo ? (
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-b border-white/10 px-4 py-2 text-center">
+          <Link
+            href={`/competitions/${match.competition.id}`}
+            className="rounded-full bg-accent-400 px-2.5 py-0.5 text-[11px] font-black tracking-wider text-brand-900 uppercase hover:underline"
+          >
+            Demo showcase
+          </Link>
+          <span className="text-xs font-semibold text-white/80">Not an official result</span>
+        </div>
+      ) : (
+        <div className="flex items-center justify-center gap-1.5 border-b border-white/10 px-4 py-2 text-center text-[11px] font-semibold tracking-wide text-white/70 uppercase">
+          <Link href={`/competitions/${match.competition.id}`} className="truncate hover:text-white hover:underline">
+            {match.competition.name}
+          </Link>
+          <span aria-hidden="true">·</span>
+          <span className="shrink-0">{match.round}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2 px-3 pt-5 pb-4 sm:px-8">
         <HeroTeam team={match.homeTeam} dim={winner === "away"} />

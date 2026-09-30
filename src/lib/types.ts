@@ -197,12 +197,39 @@ export interface MatchDetail extends MatchSummary {
    * published yet.
    */
   lineups?: PublicLineup[];
+  /**
+   * DEMO SHOWCASE match (real data only): demonstration data for presenting
+   * the platform. Never an official result; always labelled as such.
+   */
+  isDemo?: boolean;
+  /** Match statistics. Only DEMO SHOWCASE matches carry (demonstration) stats. */
+  stats?: MatchStats | null;
+}
+
+export interface TeamMatchStats {
+  possession: number;
+  shots: number;
+  shotsOnTarget: number;
+  corners: number;
+  fouls: number;
+  yellowCards: number;
+  redCards: number;
+}
+
+export interface MatchStats {
+  /** True for demonstration statistics (not officially collected). */
+  demo: boolean;
+  note: string;
+  home: TeamMatchStats;
+  away: TeamMatchStats;
 }
 
 /** A published team sheet. Public-safe: display name, shirt, position only. */
 export interface PublicLineup {
   teamId: ID;
   formation: string | null;
+  /** DEMO SHOWCASE team sheet (demonstration only, not an official line-up). */
+  demo?: boolean;
   players: PublicLineupPlayer[];
 }
 

@@ -82,3 +82,30 @@ test("own goals credit the opponent; HT/2H/FT statuses map through", () => {
     assert.equal(r.match.status, ui);
   }
 });
+
+test("demo showcase: named demo events, demo flag and demo stats map through; official feeds carry none", async () => {
+  const { toStats, toLineups } = await import("../src/lib/data/supabase/map.ts");
+  const feed = {
+    match: { ...row(3, 1, 0, "FT"), is_demo: true },
+    events: [{ ...ev("g1", 2, "GOAL", HOME, 12), player_name: "Amigo" }],
+    voided_ids: [],
+    lineups: [{ team_id: HOME, formation: "3-3-2", demo: true, players: [] }],
+    stats: {
+      demo: true, note: "Demonstration statistics",
+      home: { possession: 54, shots: 12, shots_on_target: 7, corners: 5, fouls: 10 },
+      away: { possession: 46, shots: 10, shots_on_target: 5, corners: 4, fouls: 12 },
+      cards: { home: { yellow: 1, red: 0 }, away: { yellow: 1, red: 0 } },
+    },
+  };
+  const r = applyFeed(base(), feed);
+  assert.equal(r.kind, "applied");
+  const m = (r as { match: MatchDetail }).match;
+  assert.equal(m.isDemo, true);
+  assert.equal(m.events[0].player.name, "Amigo");
+  assert.equal(m.lineups?.[0].demo, true);
+  assert.deepEqual(m.stats?.home, { possession: 54, shots: 12, shotsOnTarget: 7, corners: 5, fouls: 10, yellowCards: 1, redCards: 0 });
+  assert.equal(m.stats?.demo, true);
+  // Official feed: stats null, no demo flag on line-ups.
+  assert.equal(toStats(null), null);
+  assert.equal(toLineups([{ team_id: HOME, formation: "4-4-2", players: [] }])[0].demo, undefined);
+});

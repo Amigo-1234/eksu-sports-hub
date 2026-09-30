@@ -5,7 +5,7 @@ import { AlertIcon, ChartIcon, ShirtIcon, WhistleIcon } from "@/components/ui/ic
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatLongDate, formatTime } from "@/lib/format";
 import { isDisrupted, statusLongLabel } from "@/lib/status";
-import type { FormResult, MatchDetail, MatchSummary, StandingRow, Team } from "@/lib/types";
+import type { FormResult, MatchDetail, MatchSummary, StandingRow, Team, TeamMatchStats } from "@/lib/types";
 import { MatchCardList } from "./MatchList";
 import { EventTimeline } from "./EventTimeline";
 
@@ -157,8 +157,8 @@ export function HeadToHeadPanel({
   if (meetings.length === 0) {
     return (
       <EmptyState
-        title="No previous meetings"
-        description={`${match.homeTeam.shortName} and ${match.awayTeam.shortName} haven't met in a recorded competitive match yet.`}
+        title="No previous meetings recorded"
+        description={`This is the first recorded meeting between ${match.homeTeam.name} and ${match.awayTeam.name}.`}
       />
     );
   }
@@ -191,6 +191,80 @@ export function HeadToHeadPanel({
       </section>
       <h3 className="px-1 text-xs font-bold tracking-wide text-ink-muted uppercase">Previous meetings</h3>
       <MatchCardList matches={meetings} serverNow={serverNow} />
+    </div>
+  );
+}
+
+/** Compact, honest label for demonstration data (DEMO SHOWCASE matches). */
+export function DemoDataNote({ children }: { children: ReactNode }) {
+  return (
+    <p role="note" className="flex items-start gap-2 rounded-lg border border-accent-300 bg-warn-soft px-3 py-2 text-xs text-ink-muted">
+      <span className="shrink-0 rounded bg-accent-400 px-1.5 py-px text-[10px] font-black tracking-wider text-brand-900 uppercase">Demo</span>
+      <span className="min-w-0">{children}</span>
+    </p>
+  );
+}
+
+const STAT_ROWS: [label: string, key: keyof TeamMatchStats, suffix: string][] = [
+  ["Possession", "possession", "%"],
+  ["Shots", "shots", ""],
+  ["Shots on target", "shotsOnTarget", ""],
+  ["Corners", "corners", ""],
+  ["Fouls", "fouls", ""],
+  ["Yellow cards", "yellowCards", ""],
+  ["Red cards", "redCards", ""],
+];
+
+/** Side-by-side match statistics with proportional bars. */
+export function StatsPanel({ match }: { match: MatchDetail }) {
+  const stats = match.stats;
+  if (!stats) return <NotAvailablePanel kind="stats" />;
+  return (
+    <div className="mx-auto max-w-2xl space-y-3">
+      {stats.demo && <DemoDataNote>{stats.note || "Demonstration statistics — not officially collected."}</DemoDataNote>}
+      <section aria-label="Match statistics" className="rounded-card border border-line bg-surface">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b border-line px-4 py-3">
+          <span className="flex min-w-0 flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-2">
+            <TeamCrest team={match.homeTeam} size="sm" />
+            <span className="text-xs leading-tight font-bold sm:text-sm">{match.homeTeam.shortName}</span>
+          </span>
+          <h3 className="text-xs font-bold tracking-wide text-ink-muted uppercase">Match stats</h3>
+          <span className="flex min-w-0 flex-col items-end gap-1 sm:flex-row-reverse sm:items-center sm:gap-2">
+            <TeamCrest team={match.awayTeam} size="sm" />
+            <span className="text-right text-xs leading-tight font-bold sm:text-sm">{match.awayTeam.shortName}</span>
+          </span>
+        </div>
+        <dl className="divide-y divide-line px-4">
+          {STAT_ROWS.map(([label, key, suffix]) => {
+            const h = stats.home[key];
+            const a = stats.away[key];
+            const max = Math.max(h, a, 1);
+            return (
+              <div key={key} className="py-3">
+                <div className="flex items-baseline justify-between gap-3 text-sm">
+                  <span className={`w-12 font-display text-lg font-bold tabular-nums ${h > a ? "text-ink" : "text-ink-muted"}`}>
+                    {h}
+                    {suffix}
+                  </span>
+                  <dt className="min-w-0 text-center text-xs font-semibold text-ink-muted">{label}</dt>
+                  <span className={`w-12 text-right font-display text-lg font-bold tabular-nums ${a > h ? "text-ink" : "text-ink-muted"}`}>
+                    {a}
+                    {suffix}
+                  </span>
+                </div>
+                <dd className="mt-1.5 flex h-1.5 gap-1" aria-label={`${match.homeTeam.name} ${h}${suffix}, ${match.awayTeam.name} ${a}${suffix}`}>
+                  <span className="flex flex-1 justify-end overflow-hidden rounded-full bg-subtle">
+                    <span className="h-full rounded-full bg-brand-700" style={{ width: `${(h / max) * 100}%` }} />
+                  </span>
+                  <span className="flex flex-1 overflow-hidden rounded-full bg-subtle">
+                    <span className="h-full rounded-full bg-accent-400" style={{ width: `${(a / max) * 100}%` }} />
+                  </span>
+                </dd>
+              </div>
+            );
+          })}
+        </dl>
+      </section>
     </div>
   );
 }

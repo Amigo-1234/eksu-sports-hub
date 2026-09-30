@@ -54,6 +54,7 @@ function Divider({ label, score }: { label: string; score?: Score }) {
 }
 
 function EventBody({ entry, match }: { entry: TimelineEntry; match: MatchDetail }) {
+  const alignEnd = entry.side === "home";
   const { event } = entry;
   const team = event.teamId === match.homeTeamId ? match.homeTeam : match.awayTeam;
   const strong = event.type === "GOAL" || event.type === "PENALTY_GOAL" || event.type === "OWN_GOAL";
@@ -77,17 +78,17 @@ function EventBody({ entry, match }: { entry: TimelineEntry; match: MatchDetail 
 
   return (
     <div className="min-w-0 text-sm leading-tight">
-      <p className={`truncate ${strong ? "font-bold text-ink" : "font-semibold text-ink"}`}>
-        {playerLabel(event.player)}
+      <p className={`truncate ${strong ? "font-bold text-ink" : "font-semibold text-ink"}`}>{playerLabel(event.player)}</p>
+      <p className={`flex min-w-0 items-center gap-1.5 text-xs text-ink-faint ${alignEnd ? "justify-end" : ""}`}>
+        <span className="truncate">
+          {EVENT_TEXT[event.type]}
+          {event.type === "OWN_GOAL" && ` · ${team.shortName}`}
+        </span>
         {entry.scoreAfter && (
-          <span className="ml-1.5 rounded bg-ink px-1 py-px text-[11px] font-bold text-white tabular-nums">
+          <span className="shrink-0 rounded bg-ink px-1 py-px text-[11px] font-bold text-white tabular-nums">
             {entry.scoreAfter.home}–{entry.scoreAfter.away}
           </span>
         )}
-      </p>
-      <p className="truncate text-xs text-ink-faint">
-        {EVENT_TEXT[event.type]}
-        {event.type === "OWN_GOAL" && ` · ${team.shortName}`}
       </p>
     </div>
   );

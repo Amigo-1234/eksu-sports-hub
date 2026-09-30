@@ -4,6 +4,7 @@ import { BallIcon, CardIcon, ShirtIcon } from "@/components/ui/icons";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { currentPitch, startingPitch } from "@/lib/lineup";
 import type { MatchDetail, PublicLineup, PublicLineupPlayer, Team } from "@/lib/types";
+import { DemoDataNote } from "./MatchPanels";
 
 const min = (m: number | null, extra: number | null) => (m === null ? "" : extra ? `${m}+${extra}'` : `${m}'`);
 
@@ -75,15 +76,16 @@ function TeamSheet({ team, lineup, match }: { team: Team; lineup: PublicLineup |
   const onPitch = started ? currentPitch(lineup, team.id, events) : startingPitch(lineup);
   const starters = lineup.players.filter((p) => p.role === "STARTER");
   const subs = lineup.players.filter((p) => p.role === "SUBSTITUTE");
+  const startLabel = starters.length === 11 ? "Starting XI" : "Starting line-up";
   return (
     <section aria-label={heading} className="min-w-0 space-y-3">
       <TeamHeader team={team} formation={lineup.formation} />
       <div>
-        <p className="mb-1.5 text-center text-xs font-bold tracking-wide text-ink-muted uppercase">{started ? "On the pitch" : "Starting XI"}</p>
+        <p className="mb-1.5 text-center text-xs font-bold tracking-wide text-ink-muted uppercase">{!started ? startLabel : match.status === "FULL_TIME" ? "On the pitch at full-time" : "On the pitch"}</p>
         <Pitch players={onPitch} colors={team.colors} label={`${team.name} ${started ? "players on the pitch" : "starting positions"}`} />
       </div>
       <div className="rounded-card border border-line bg-surface">
-        <h3 className="border-b border-line px-3 py-2 text-xs font-bold tracking-wide text-ink-muted uppercase">Starting XI</h3>
+        <h3 className="border-b border-line px-3 py-2 text-xs font-bold tracking-wide text-ink-muted uppercase">{startLabel}</h3>
         <ol className="divide-y divide-line">
           {starters.map((p) => (
             <PlayerRow key={p.shirtNumber} p={p} />
@@ -127,9 +129,14 @@ export function LineupsPanel({ match }: { match: MatchDetail }) {
     );
   }
   return (
+    <div className="space-y-4">
+    {lineups.some((l) => l.demo) && (
+      <DemoDataNote>Demonstration team sheets for this DEMO SHOWCASE match — not official line-ups.</DemoDataNote>
+    )}
     <div className="grid gap-6 lg:grid-cols-2">
       <TeamSheet team={match.homeTeam} match={match} lineup={lineups.find((l) => l.teamId === match.homeTeamId)} />
       <TeamSheet team={match.awayTeam} match={match} lineup={lineups.find((l) => l.teamId === match.awayTeamId)} />
+    </div>
     </div>
   );
 }

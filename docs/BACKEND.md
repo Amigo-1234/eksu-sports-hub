@@ -191,6 +191,34 @@ today and match detail are always fresh.
   usual `match_changed` hint, so the public page reconciles through the existing
   realtime resync.
 
+### DEMO SHOWCASE matches (migration `20261002001100`)
+
+Demonstration matches for presenting the platform (named events, line-ups and
+stats) without touching the official eligibility pipeline.
+
+- `admin_mark_demo_match(match, reason)` (ADMIN, audited `DEMO_MATCH_MARKED`)
+  flags `matches.is_demo`. Only allowed when the competition name **and** the
+  round label contain "DEMO" and the competition holds no official matches.
+  Triggers keep it that way: the flag can never be cleared, the DEMO labels
+  cannot be removed, and a demo competition cannot receive official matches, so
+  official standings are never affected.
+- Demo participants live in `demo_match_lineups` / `demo_lineup_players`
+  (one demo match, name snapshot + shirt/position/pitch spot). Screening,
+  squads, official line-ups and `match_eligibility()` never read them: a demo
+  appearance cannot make anyone CLEARED, a squad member or eligible.
+- Demo events are `match_events` rows with `player_id` NULL and
+  `demo_player_id` → a participant of the same demo match and team
+  (trigger-enforced; never allowed on an official match). Written only by
+  `admin_demo_add_event` (audited `DEMO_EVENT_ADDED`, payload `demo: true`);
+  the score is still derived from non-voided goal events.
+- `admin_demo_set_lineup` / `admin_demo_set_stats` (audited `DEMO_LINEUP_SET`,
+  `DEMO_STATS_SET`). Demo stats exist only for demo matches; cards are derived
+  from the events.
+- The demo tables are FORCE RLS with no client grants; `demo_player_id` is not in
+  the `match_events` column grants. `public_match_feed` returns `match.is_demo`,
+  demo line-ups (flagged `demo: true`, same public-safe shape) and `stats`
+  (labelled demonstration data) for demo matches only.
+
 ## Authentication
 Email + password through Supabase Auth (works without external services).
 Public sign-up is disabled (`[auth] enable_signup = false`); accounts are

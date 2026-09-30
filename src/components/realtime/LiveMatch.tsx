@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { MatchHero } from "@/components/match/MatchHero";
 import { LineupsPanel } from "@/components/match/LineupsPanel";
-import { NotAvailablePanel, SummaryPanel, type PreMatchTeam } from "@/components/match/MatchPanels";
+import { NotAvailablePanel, StatsPanel, SummaryPanel, type PreMatchTeam } from "@/components/match/MatchPanels";
 import { onResume, publicClient, subscribeHints } from "@/lib/realtime/client";
 import { applyFeed, knownSeq, shouldFetch } from "@/lib/realtime/matchSync";
 import { setServerTime } from "@/lib/realtime/serverTime";
@@ -115,4 +115,9 @@ export function LiveLineupsPanel() {
   const match = useLiveMatch();
   // Undefined: the data source has no line-ups (demo data).
   return match.lineups === undefined ? <NotAvailablePanel kind="lineups" /> : <LineupsPanel match={match} />;
+}
+
+/** Stats tab (DEMO SHOWCASE matches carry demonstration stats; others show the empty state). */
+export function LiveStatsPanel() {
+  return <StatsPanel match={useLiveMatch()} />;
 }

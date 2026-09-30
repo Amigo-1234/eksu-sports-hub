@@ -2,7 +2,7 @@
  * Supabase row / RPC payload → public UI types. Pure and shared by the server
  * data source and the browser realtime layer.
  */
-import type { ID, MatchEvent, MatchEventType, MatchStatus, PublicClock, PublicLineup } from "../../types";
+import type { ID, MatchEvent, MatchEventType, MatchStats, MatchStatus, PublicClock, PublicLineup, TeamMatchStats } from "../../types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- RPC payloads are mapped explicitly below. */
 
@@ -78,6 +78,7 @@ export function toLineups(raw: any): PublicLineup[] {
   return raw.map((l: any) => ({
     teamId: l.team_id,
     formation: l.formation ?? null,
+    ...(l.demo ? { demo: true } : {}),
     players: (Array.isArray(l.players) ? l.players : []).map((p: any) => ({
       shirtNumber: Number(p.shirt_number),
       name: p.name ?? null,
@@ -99,4 +100,24 @@ export function toLineups(raw: any): PublicLineup[] {
       goals: Number(p.goals ?? 0),
     })),
   }));
+}
+
+/** Feed stats (DEMO SHOWCASE matches only) → UI stats; null when absent or incomplete. */
+export function toStats(raw: any): MatchStats | null {
+  if (!raw || !raw.home || !raw.away) return null;
+  const side = (s: any, cards: any): TeamMatchStats => ({
+    possession: Number(s.possession ?? 0),
+    shots: Number(s.shots ?? 0),
+    shotsOnTarget: Number(s.shots_on_target ?? 0),
+    corners: Number(s.corners ?? 0),
+    fouls: Number(s.fouls ?? 0),
+    yellowCards: Number(cards?.yellow ?? 0),
+    redCards: Number(cards?.red ?? 0),
+  });
+  return {
+    demo: raw.demo !== false,
+    note: String(raw.note ?? ""),
+    home: side(raw.home, raw.cards?.home),
+    away: side(raw.away, raw.cards?.away),
+  };
 }
