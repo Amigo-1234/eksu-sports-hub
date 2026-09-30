@@ -235,11 +235,11 @@ else changes: authorisation depends only on `auth.uid()`.
 | --- | --- |
 | Project | `eksu-sports-hub` · ref `lkvdoeomyhbtinpvvbfr` · eu-west-2 (London) · Free plan |
 | API URL | `https://lkvdoeomyhbtinpvvbfr.supabase.co` |
-| Migrations applied | `20260928000100` … `20260930000900` (history versions aligned with this repo; 0900 applied 2026-09-29) |
+| Migrations applied | `20260928000100` … `20261002001100` (history versions aligned with this repo; 0900 applied 2026-09-29, 1000 and 1100 applied 2026-09-30) |
 | Realtime partitions | `realtime.messages` daily partitions are created by Supabase when the first Realtime client connects (and maintained while clients keep connecting). Until then `realtime.send` logs a warning and match writes still succeed; clients resync on subscribe. |
 | Reference data | `supabase/reference.sql` applied 2026-09-29: roles ADMIN/MANAGER/OPERATOR, football, 8 event types (idempotent) |
 | Seed | **not** run (no development data on the hosted project) |
-| Auth users | none yet |
+| Auth users | 2 ADMIN accounts (created by the owner through Supabase Auth) |
 
 After 000800 an 88-check admin/security verification passed (privilege hygiene,
 anon/operator/non-staff refusal, every admin RPC, fixture validation, one-primary
@@ -255,6 +255,13 @@ The earlier hosted verification (47 checks after 000600; 55 checks after 000700,
 private-helper denial and RLS-helper behaviour: RLS per role, every RPC, idempotency,
 voids, discipline rules, clock/periods, takeover, FT lock, audit immutability,
 standings) ran inside a transaction that was rolled back, so nothing persisted.
+
+After 1000 the full pgTAP suite (01–05, 388 assertions) was run on hosted against an
+in-transaction fixture (no seed; rolled back): all passed, and the schema fingerprint
+(functions, columns, constraints, indexes, triggers, policies, grants) matched local.
+After 1100 the fingerprint again matched local exactly; the DEMO SHOWCASE match was then
+populated through the audited demo RPCs (all players stay PENDING; see the DEMO SHOWCASE
+section above).
 
 ## Connecting a hosted Supabase project
 1. Create a project; note the project ref, URL, publishable and secret keys.
