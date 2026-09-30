@@ -278,13 +278,25 @@ test("substitutions follow the confirmed line-up and update the public on-field 
   assert.equal(away.find((p) => p.shirt_number === 14).on_minute, 35);
 });
 
-test("kick-off is blocked without confirmed line-ups unless an admin overrides", async () => {
+test("pre-kick-off line-up control, and kick-off is blocked without confirmed line-ups unless an admin overrides", async () => {
   const m = await rpc(adminUser, "admin_create_match", {
     p_competition_id: COMP, p_stage_id: null, p_group_id: null, p_round_label: "API no line-ups", p_home_team_id: HOME,
     p_away_team_id: AWAY, p_venue_id: null, p_scheduled_at: new Date().toISOString(),
   });
   assert.ifError(m.error);
-  assert.ifError((await rpc(adminUser, "admin_assign_operators", { p_match_id: m.data, p_primary: await userId(primary), p_backup: null })).error);
+  assert.ifError((await rpc(adminUser, "admin_assign_operators", { p_match_id: m.data, p_primary: await userId(primary), p_backup: await userId(backup) })).error);
+  // Pre-kick-off line-up control: PRIMARY edits; BACKUP views until an audited take-over.
+  const view = await rpc(backup, "lineup_editor_state", { p_match_id: m.data, p_team_id: HOME });
+  assert.ifError(view.error);
+  assert.equal(view.data.viewer_role, "VIEWER");
+  assert.equal(view.data.editable, false);
+  const denied = await rpc(backup, "save_lineup", { p_match_id: m.data, p_team_id: HOME, p_formation: "4-4-2", p_players: [] });
+  assert.equal(denied.error?.code, "EK403", "backup cannot edit before taking over");
+  assert.ifError((await rpc(primary, "save_lineup", { p_match_id: m.data, p_team_id: HOME, p_formation: "4-4-2", p_players: [] })).error);
+  assert.ifError((await rpc(backup, "take_over_match", { p_match_id: m.data, p_intent_id: randomUUID() })).error);
+  assert.ifError((await rpc(backup, "save_lineup", { p_match_id: m.data, p_team_id: HOME, p_formation: "4-3-3", p_players: [] })).error);
+  const primaryNow = await rpc(primary, "save_lineup", { p_match_id: m.data, p_team_id: HOME, p_formation: "4-4-2", p_players: [] });
+  assert.equal(primaryNow.error?.code, "EK403", "primary is read-only while the backup is in control");
   const blocked = await rpc(primary, "start_match", { p_match_id: m.data, p_intent_id: randomUUID() });
   assert.equal(blocked.error?.code, "EK409");
   const opOverride = await rpc(primary, "admin_set_lineup_override", { p_match_id: m.data, p_reason: "x" });

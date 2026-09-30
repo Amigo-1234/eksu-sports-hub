@@ -158,6 +158,7 @@ export const supabaseOperatorDataSource: OperatorDataSource = {
       },
       lineups: { home: toLineup(c.lineups?.home), away: toLineup(c.lineups?.away) },
       lineupOverride: c.lineup_override ?? null,
+      lineupControl: !!c.lineup_control,
     };
   },
 

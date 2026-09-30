@@ -148,4 +148,6 @@ export interface AssignmentSeed {
   lineups?: { home: OpLineup | null; away: OpLineup | null };
   /** Supabase backend: ADMIN emergency override allowing kick-off without line-ups. */
   lineupOverride?: string | null;
+  /** Supabase backend: may this operator manage line-ups now (in control, or PRIMARY while nobody took control)? */
+  lineupControl?: boolean;
 }

@@ -37,7 +37,7 @@ export function SquadEditor({
 }: {
   squadId: string;
   members: SquadMemberRow[];
-  candidates: { player_id: string; name: string | null }[];
+  candidates: { player_id: string; name: string | null; conflict: string | null }[];
   scopeLabel: string;
 }) {
   const active = members.filter((m) => m.active);
@@ -117,8 +117,9 @@ export function SquadEditor({
                     Choose a cleared player
                   </option>
                   {candidates.map((c) => (
-                    <option key={c.player_id} value={c.player_id}>
+                    <option key={c.player_id} value={c.player_id} disabled={!!c.conflict}>
                       {c.name ?? "Unnamed player"}
+                      {c.conflict ? ` — already plays for ${c.conflict}` : ""}
                     </option>
                   ))}
                 </select>

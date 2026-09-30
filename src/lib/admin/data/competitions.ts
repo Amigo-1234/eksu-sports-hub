@@ -36,7 +36,7 @@ export async function getCompetition(id: string): Promise<CompetitionDetail | nu
     .from("competitions")
     .select(
       `id, name, short_name, description, status, format, category, season_id, sport_id, points_win, points_draw, points_loss,
-       tiebreakers, extra_time_enabled, penalties_enabled,
+       tiebreakers, extra_time_enabled, penalties_enabled, allow_multi_team_players,
        competition_stages(id, name, stage_order, has_table, competition_groups(id, name)),
        competition_entries(id, stage_id, group_id, team:teams(${TEAM_REF})),
        matches(id)`,

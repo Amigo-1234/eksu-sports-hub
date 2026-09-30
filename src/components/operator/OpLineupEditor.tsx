@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { LineupBuilder } from "@/components/lineup/LineupBuilder";
 import type { LineupEditorState, LineupResult } from "@/lib/lineup";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { TakeOverBanner } from "./TakeOverBanner";
 
 function message(e: PostgrestError): string {
   if (e.code === "EK401" || e.code === "PGRST301" || e.code === "PGRST303") return "Your session has expired — sign in again.";
@@ -28,9 +29,21 @@ export function OpLineupEditor({ initial, backHref }: { initial: LineupEditorSta
     router.refresh();
     return { ok: true, state: data as LineupEditorState };
   };
+  const viewOnly = initial.viewer_role === "VIEWER" && initial.match.status === "SCHEDULED";
   return (
     <>
+      {viewOnly && (
+        <div className="mb-4">
+          <TakeOverBanner
+            matchId={matchId}
+            title="View only"
+            body={`${initial.in_control ?? "The primary operator"} manages line-ups before kick-off. Take over only if they cannot continue — the take-over is recorded in the audit log.`}
+            onTaken={() => router.refresh()}
+          />
+        </div>
+      )}
       <LineupBuilder
+        key={initial.viewer_role}
         initial={initial}
         actions={{
           save: (formation, players) => rpc("save_lineup", { p_formation: formation, p_players: players }),

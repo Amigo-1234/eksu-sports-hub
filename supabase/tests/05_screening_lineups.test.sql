@@ -1,17 +1,18 @@
 begin;
 \ir helpers.inc
-select plan(127);
+select plan(149);
 
 create temp table u as select
   tests.make_user('admin5@test.local', array['ADMIN']) as admin,
   tests.make_user('op5@test.local', array['OPERATOR']) as op,
   tests.make_user('op5b@test.local', array['OPERATOR']) as op_other,
   tests.make_user('mgr5@test.local', array['MANAGER']) as mgr,
+  tests.make_user('op5c@test.local', array['OPERATOR']) as op_backup,
   tests.make_user('fan5@test.local') as nobody;
 grant select on u to anon, authenticated;
 
 create temp table ids (k text primary key, id uuid not null default gen_random_uuid());
-insert into ids (k) select unnest(array['p1', 'p2', 'p3', 'season2', 'm', 'm2', 'start', 'start2', 'sub', 'g14', 'red5', 'red16']);
+insert into ids (k) select unnest(array['p1', 'p2', 'p3', 'season2', 'm', 'm2', 'start', 'start2', 'sub', 'g14', 'red5', 'red16', 'mech', 'civil', 'cupA', 'p4', 'p5', 'mA', 'mB']);
 grant select, update on ids to anon, authenticated;
 create or replace function tests.id(k text) returns uuid language sql stable as $$ select id from ids where ids.k = id.k $$;
 create or replace function tests.t(n int) returns uuid language sql immutable as $$
@@ -51,6 +52,8 @@ create or replace function tests.lineup_role(p_match uuid, p_team uuid, p_shirt 
   where l.match_id = p_match and l.team_id = p_team and lp.shirt_number = p_shirt $$;
 create or replace function tests.hints(p_topic text) returns bigint language sql security definer set search_path = '' as $$
   select count(*) from realtime.messages where topic = p_topic $$;
+create or replace function tests.elig(p_match uuid, p_team uuid, p_player uuid) returns text
+  language sql stable security definer set search_path = '' as $$ select private.match_eligibility(p_match, p_team, p_player) $$;
 create or replace function tests.status_of(p_player uuid, p_team uuid, p_season uuid, p_comp uuid default null) returns text
   language sql stable security definer set search_path = '' as $$ select private.screening_status(p_player, p_team, p_season, p_comp) $$;
 grant execute on all functions in schema tests to anon, authenticated;
@@ -151,7 +154,7 @@ select throws_ok($$ select public.admin_open_screening(tests.id('p1'), tests.t(2
   'EK409', null, 'a screening scope cannot be opened twice');
 select public.admin_decide_screening(tests.scr(tests.id('p1'), tests.t(2)), 'CLEARED');
 select throws_ok($$ select public.admin_add_squad_player(tests.squad(tests.t(2)), tests.id('p1'), 30) $$,
-  'EK409', null, 'a player cannot be in two squads in the same season');
+  'EK409', null, 'a player cannot be in two squads whose teams meet in the same competition');
 select throws_ok($$ select public.admin_set_squad_player_active((select id from public.squad_players where player_id = tests.id('p1') and squad_id = tests.squad(tests.t(1))), false) $$,
   'EK422', null, 'removing a player from a squad needs a reason');
 select lives_ok($$ select public.admin_set_squad_player_active((select id from public.squad_players where player_id = tests.id('p1') and squad_id = tests.squad(tests.t(1))), false, 'Transferred to Engineering') $$,
@@ -173,12 +176,58 @@ select is((select tests.status_of(tests.id('p1'), tests.t(2), '30000000-0000-400
 select public.admin_decide_screening(s.id, 'CLEARED') from public.player_screenings s
   where s.player_id = tests.id('p1') and s.competition_id = '60000000-0000-4000-8000-000000000001';
 
+-- ═════ Competition-aware squads ═════════════════════════════════════════════
+-- Department team in an inter-departmental cup + faculty team (DEV Engineering)
+-- in the inter-faculty league, same season.
+insert into public.teams (id, sport_id, name, short_name, code, slug, kind, faculty_id) values
+  (tests.id('mech'), '20000000-0000-4000-8000-000000000001', 'TEST Mechanical Engineering', 'Mech Eng', 'MEE', 'test-mech', 'DEPARTMENT', '40000000-0000-4000-8000-000000000002'),
+  (tests.id('civil'), '20000000-0000-4000-8000-000000000001', 'TEST Civil Engineering', 'Civil Eng', 'CVE', 'test-civil', 'DEPARTMENT', '40000000-0000-4000-8000-000000000002');
+insert into public.competitions (id, sport_id, season_id, name, short_name)
+values (tests.id('cupA'), '20000000-0000-4000-8000-000000000001', '30000000-0000-4000-8000-000000000001', 'TEST Inter-Departmental Cup', 'Dept Cup');
+insert into public.competition_entries (competition_id, team_id) values (tests.id('cupA'), tests.id('mech')), (tests.id('cupA'), tests.id('civil'));
+insert into public.squads (team_id, season_id) values
+  (tests.id('mech'), '30000000-0000-4000-8000-000000000001'), (tests.id('civil'), '30000000-0000-4000-8000-000000000001');
+update ids set id = (public.admin_register_player('Dayo Dual', 'EKSU/2021/044', null, null, tests.id('mech'),
+  '30000000-0000-4000-8000-000000000001') ->> 'player_id')::uuid where k = 'p4';
+select public.admin_decide_screening(tests.scr(tests.id('p4'), tests.id('mech')), 'CLEARED');
+select public.admin_open_screening(tests.id('p4'), tests.t(2), '30000000-0000-4000-8000-000000000001');
+select public.admin_decide_screening(tests.scr(tests.id('p4'), tests.t(2)), 'CLEARED');
+select lives_ok($$ select public.admin_add_squad_player(tests.squad(tests.id('mech')), tests.id('p4'), 7) $$,
+  'player joins Department A (Competition A)');
+select lives_ok($$ select public.admin_add_squad_player(tests.squad(tests.t(2)), tests.id('p4'), 40) $$,
+  'same season, the same player also joins Faculty A (Competition B)');
+select is((select count(*) from public.squad_players where player_id = tests.id('p4') and active)::int, 2, 'two active memberships in one season');
+update ids set id = public.admin_create_match(tests.id('cupA'), null, null, 'Cup R1', tests.id('mech'), tests.id('civil'), null, now() + interval '2 days') where k = 'mA';
+update ids set id = public.admin_create_match('60000000-0000-4000-8000-000000000001', null, null, 'League', tests.t(2), tests.t(3), null, now() + interval '3 days') where k = 'mB';
+select is(tests.elig(tests.id('mA'), tests.id('mech'), tests.id('p4')) || '/' || tests.elig(tests.id('mB'), tests.t(2), tests.id('p4')), 'CLEARED/CLEARED',
+  'eligible for Department A in Competition A and for Faculty A in Competition B');
+select lives_ok($$ select public.save_lineup(tests.id('mA'), tests.id('mech'), '4-4-2',
+  jsonb_build_array(jsonb_build_object('player_id', tests.id('p4'), 'role', 'STARTER', 'slot', 5))) $$, 'selected for the department in the cup');
+select lives_ok($$ select public.save_lineup(tests.id('mB'), tests.t(2), '4-4-2',
+  jsonb_build_array(jsonb_build_object('player_id', tests.id('p4'), 'role', 'STARTER', 'slot', 5))) $$, 'and for the faculty in the league');
+-- Opposing teams inside one competition.
+update ids set id = (public.admin_register_player('Opeyemi Opposed', 'EKSU/2021/045', null, null, tests.id('civil'),
+  '30000000-0000-4000-8000-000000000001') ->> 'player_id')::uuid where k = 'p5';
+select public.admin_decide_screening(tests.scr(tests.id('p5'), tests.id('civil')), 'CLEARED');
+select public.admin_open_screening(tests.id('p5'), tests.id('mech'), '30000000-0000-4000-8000-000000000001');
+select public.admin_decide_screening(tests.scr(tests.id('p5'), tests.id('mech')), 'CLEARED');
+select public.admin_add_squad_player(tests.squad(tests.id('civil')), tests.id('p5'), 9);
+select throws_ok($$ select public.admin_add_squad_player(tests.squad(tests.id('mech')), tests.id('p5'), 9) $$,
+  'EK409', null, 'a player cannot represent two opposing teams in the same competition');
+select throws_ok($$ insert into public.competition_entries (competition_id, team_id) values ('60000000-0000-4000-8000-000000000001', tests.id('mech')) $$,
+  'EK409', null, 'entering a team that shares an active player with an entered team is refused');
+update public.competitions set allow_multi_team_players = true where id = tests.id('cupA');
+select lives_ok($$ select public.admin_add_squad_player(tests.squad(tests.id('mech')), tests.id('p5'), 9) $$,
+  'allowed when the competition''s rules explicitly permit it');
+select throws_ok($$ update public.competitions set allow_multi_team_players = false where id = tests.id('cupA') $$,
+  'EK409', null, 'the rule cannot be switched off while players represent two of its teams');
+
 -- ═════ Line-ups ═════════════════════════════════════════════════════════════
 update ids set id = public.admin_create_match('60000000-0000-4000-8000-000000000001', '61000000-0000-4000-8000-000000000001', null, 'Lineups',
   tests.t(1), tests.t(2), '50000000-0000-4000-8000-000000000001', now() + interval '1 hour') where k = 'm';
 update ids set id = public.admin_create_match('60000000-0000-4000-8000-000000000001', '61000000-0000-4000-8000-000000000001', null, 'Override',
   tests.t(3), tests.t(4), '50000000-0000-4000-8000-000000000002', now() + interval '1 hour') where k = 'm2';
-select public.admin_assign_operators(tests.id('m'), (select op from u));
+select public.admin_assign_operators(tests.id('m'), (select op from u), (select op_backup from u));
 select public.admin_assign_operators(tests.id('m2'), (select op from u));
 -- Suspend home No. 5 before anyone builds a line-up.
 select public.admin_decide_screening(tests.scr(tests.player(tests.t(1), 5), tests.t(1)), 'SUSPENDED', 'Two-match ban');
@@ -273,6 +322,25 @@ select lives_ok($$ select public.reopen_lineup(tests.id('m'), tests.t(1), 'Capta
 select ok(tests.audits('LINEUP_REOPENED', tests.id('m')) = 1, 'reopen audited');
 select public.confirm_lineup(tests.id('m'), tests.t(1));
 
+-- Pre-kick-off control: PRIMARY manages, BACKUP views until an audited take-over, ADMIN always may.
+select tests.login((select op_backup from u));
+select is(public.lineup_editor_state(tests.id('m'), tests.t(1)) ->> 'viewer_role', 'VIEWER', 'backup sees line-ups read-only');
+select ok(not (public.lineup_editor_state(tests.id('m'), tests.t(1)) ->> 'editable')::boolean, 'backup editor is not editable');
+select throws_ok($$ select public.reopen_lineup(tests.id('m'), tests.t(1), 'Backup change') $$, 'EK403', null, 'backup cannot reopen before taking over');
+select throws_ok($$ select public.save_lineup(tests.id('m'), tests.t(2), '4-3-3', '[]') $$, 'EK403', null, 'backup cannot edit before taking over');
+select lives_ok($$ select public.take_over_match(tests.id('m'), gen_random_uuid()) $$, 'backup takes over before kick-off');
+select ok(tests.audits('OPERATOR_TAKEOVER', tests.id('m')) = 1, 'take-over audited');
+select lives_ok($$ select public.reopen_lineup(tests.id('m'), tests.t(1), 'Late change by backup') $$, 'backup in control reopens');
+select tests.login((select op from u));
+select throws_ok($$ select public.confirm_lineup(tests.id('m'), tests.t(1)) $$, 'EK403', null, 'primary is read-only while the backup is in control');
+select is(public.lineup_editor_state(tests.id('m'), tests.t(1)) ->> 'viewer_role', 'VIEWER', 'primary now views read-only');
+select tests.login((select op_backup from u));
+select lives_ok($$ select public.confirm_lineup(tests.id('m'), tests.t(1)) $$, 'backup in control confirms');
+select tests.login((select admin from u));
+select lives_ok($$ select public.reopen_lineup(tests.id('m'), tests.t(1), 'Admin check'); select public.confirm_lineup(tests.id('m'), tests.t(1)) $$,
+  'admin may always intervene');
+select tests.login((select op from u));
+
 -- Kick-off override (match 2 has no line-ups).
 select throws_ok($$ select public.start_match(tests.id('m2'), tests.id('start2')) $$, 'EK409', null, 'match start without confirmed line-ups is blocked');
 select throws_ok($$ select public.admin_set_lineup_override(tests.id('m2'), 'Team sheets lost') $$, 'EK403', null, 'operator cannot override');
@@ -288,6 +356,9 @@ select throws_ok($$ select public.save_lineup(tests.id('m'), tests.t(1), '4-4-2'
   'EK409', null, 'line-up locked after kick-off');
 select throws_ok($$ select public.reopen_lineup(tests.id('m'), tests.t(1), 'x') $$, 'EK409', null, 'cannot reopen after kick-off');
 select throws_ok($$ select public.admin_correct_lineup(tests.id('m'), tests.t(1), '4-4-2', '[]', 'x') $$, 'EK403', null, 'operator cannot correct after kick-off');
+select tests.login((select op_backup from u));
+select throws_ok($$ select public.save_lineup(tests.id('m'), tests.t(1), '4-4-2', '[]') $$, 'EK403', null, 'backup stays locked out after kick-off');
+select tests.login((select op from u));
 reset role;
 select throws_ok($$ update public.lineup_players set is_captain = false where lineup_id = (select id from public.match_lineups where match_id = tests.id('m') limit 1) $$,
   'EK409', null, 'even a direct write cannot rewrite a started match''s line-up');

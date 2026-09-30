@@ -172,7 +172,8 @@ export interface SquadMemberRow {
 export async function getSquad(teamId: string, seasonId: string): Promise<{
   squad: { id: string } | null;
   members: SquadMemberRow[];
-  candidates: { player_id: string; name: string | null }[];
+  /** CLEARED for this team + season; `conflict` names a team they already represent in a shared competition. */
+  candidates: { player_id: string; name: string | null; conflict: string | null }[];
 }> {
   const { db } = await adminDb();
   return must(await db.rpc("admin_squad", { p_team_id: teamId, p_season_id: seasonId }), "squad") as never;

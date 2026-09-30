@@ -391,7 +391,13 @@ export function LineupBuilder({ initial, actions }: { initial: LineupEditorState
             </button>
           </div>
         )}
-        {!state.editable && !correcting && (
+        {!state.editable && !correcting && state.match.status === "SCHEDULED" && state.viewer_role === "VIEWER" && (
+          <p className="text-sm text-ink-muted">
+            View only: {state.in_control ? `${state.in_control} is in control and manages` : "the primary operator manages"} line-ups before kick-off.
+            To edit, take over the match (recorded in the audit log).
+          </p>
+        )}
+        {!state.editable && !correcting && state.match.status !== "SCHEDULED" && (
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm text-ink-muted">
               The match has started: this line-up is part of the match record.

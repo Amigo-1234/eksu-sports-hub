@@ -25,7 +25,7 @@ can use it; everyone else sees `/admin/unauthorized`.
 | `/admin/teams` · `/new` · `/[id]` | Teams (search, slug, colours, faculty/department, activate/deactivate) and squads |
 | `/admin/players` · `/[id]` | Player register (name, private student number, faculty/department) → detail: screening decisions + history, squad memberships, line-up appearances, eligibility |
 | `/admin/screening` | Screening queue (PENDING / CLEARED / REJECTED / SUSPENDED) with filters: team, season, competition, faculty, department, name, student number. CLEAR / REJECT / SUSPEND / RETURN TO PENDING, each confirmed; REJECT and SUSPEND need a reason |
-| `/admin/squads` | Team → season → squad: add CLEARED players only, shirt/position/captain, deactivate with reason (history kept), ineligible members flagged |
+| `/admin/squads` | Team → season → squad: add CLEARED players only (players already representing a team in a shared competition are shown and blocked), shirt/position/captain, deactivate with reason (history kept), ineligible members flagged. Competition settings hold the "players may represent more than one entered team" rule (off by default) |
 | `/admin/matches/[id]/lineup/[home\|away]` | Line-up builder: formation, starting XI by position, substitutes, captain → save draft → confirm (public). After kick-off: ADMIN correction with an audited reason. The match page also holds the audited emergency kick-off override |
 | `/admin/seasons`, `/admin/faculties`, `/admin/venues` | Reference data |
 | `/admin/staff` · `/[id]` | Staff accounts, roles, activation, invite / password links, assignments |

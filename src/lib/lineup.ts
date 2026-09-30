@@ -9,7 +9,16 @@
 export type LineupRole = "STARTER" | "SUBSTITUTE";
 export type LineupStatus = "DRAFT" | "CONFIRMED";
 /** Screening outcome for this match. Operators only ever see CLEARED / INELIGIBLE. */
-export type Eligibility = "CLEARED" | "PENDING" | "REJECTED" | "SUSPENDED" | "NOT_SCREENED" | "NOT_IN_SQUAD" | "INELIGIBLE";
+export type Eligibility =
+  | "CLEARED"
+  | "PENDING"
+  | "REJECTED"
+  | "SUSPENDED"
+  | "NOT_SCREENED"
+  | "NOT_IN_SQUAD"
+  /** Also represents another team entered in this competition. */
+  | "CONFLICT"
+  | "INELIGIBLE";
 
 export interface FormationSlot {
   position: string;
@@ -60,7 +69,10 @@ export interface EditorLineupPlayer {
 
 /** Shape returned by the `lineup_editor_state` RPC. */
 export interface LineupEditorState {
-  viewer_role: "ADMIN" | "OPERATOR";
+  /** VIEWER: assigned operator not in control (e.g. BACKUP before a take-over) — read-only. */
+  viewer_role: "ADMIN" | "OPERATOR" | "VIEWER";
+  /** Operator currently in control of the match, if any. */
+  in_control?: string | null;
   match: {
     id: string;
     status: string;
@@ -122,6 +134,7 @@ export const ELIGIBILITY_LABEL: Record<Eligibility, string> = {
   SUSPENDED: "Suspended",
   NOT_SCREENED: "Not screened",
   NOT_IN_SQUAD: "Not in squad",
+  CONFLICT: "Plays for another team in this competition",
   INELIGIBLE: "Not eligible",
 };
 

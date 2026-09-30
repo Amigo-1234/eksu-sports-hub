@@ -201,6 +201,11 @@ function LineupsPrep({ seed, scheduled }: { seed: AssignmentSeed; scheduled: boo
       <h2 id="lineups" className="font-bold">
         Line-ups
       </h2>
+      {scheduled && !seed.lineupControl && (
+        <p className="mt-2 rounded-xl bg-subtle px-3 py-2 text-sm font-semibold">
+          View only: the operator in control manages line-ups before kick-off. Open a line-up to take over (audited).
+        </p>
+      )}
       {seed.lineupOverride && (
         <p className="mt-2 rounded-xl bg-accent-100 px-3 py-2 text-sm font-semibold">
           Admin override: kick-off is allowed without confirmed line-ups. Reason: {seed.lineupOverride}
@@ -247,7 +252,7 @@ function LineupsPrep({ seed, scheduled }: { seed: AssignmentSeed; scheduled: boo
                 href={`/op/matches/${match.id}/lineup/${side}`}
                 className="mt-3 flex h-12 items-center justify-center rounded-xl border-2 border-ink text-sm font-extrabold uppercase"
               >
-                {!scheduled ? "View line-up" : ok ? "Review line-up" : l ? "Complete & confirm" : "Prepare line-up"}
+                {!scheduled || !seed.lineupControl ? "View line-up" : ok ? "Review line-up" : l ? "Complete & confirm" : "Prepare line-up"}
               </Link>
             </div>
           );

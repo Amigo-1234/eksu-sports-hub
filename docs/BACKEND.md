@@ -143,19 +143,36 @@ today and match detail are always fresh.
   CLEARED too (competition scope only adds restrictions). REJECT/SUSPEND need a
   reason; CLEAR needs a student number on file. Only ADMIN decides (no scoped
   MANAGER model exists yet).
-- **Squads**: memberships are deactivated (`active`, `left_at`, `left_reason`),
-  never deleted; shirt/captain uniqueness applies to active members. A trigger
-  enforces CLEARED + one active squad per player per season on every write.
+- **Squads** stay team + season: one squad per team per season serves every
+  competition the team is entered in (`competition_entries`), so squads carry no
+  competition column and nothing is duplicated. Memberships are deactivated
+  (`active`, `left_at`, `left_reason`), never deleted; shirt/captain uniqueness
+  applies to active members. A trigger requires a CLEARED screening for the
+  squad's team + season.
+- **Competition-aware representation**: a player may be active in several teams'
+  squads in one season (e.g. Mechanical Engineering in the inter-departmental
+  cup and Faculty of Engineering in the inter-faculty league). What is refused
+  is representing two teams entered in the SAME competition, unless that
+  competition sets `allow_multi_team_players`. Enforced from every side:
+  squad membership (`private.team_conflict`), entering a team, switching the
+  competition rule off (`private.competition_conflict`), and line-up
+  eligibility (`CONFLICT`, defence in depth).
 - **Line-ups**: `match_lineups` (DRAFT → CONFIRMED; confirmed = public) and
   `lineup_players` (player id, shirt snapshot, STARTER/SUBSTITUTE, position,
   slot, pitch x/y 0–100, captain, goalkeeper). `formations` are data. Rules
   (`private.lineup_rules`): 7–11 starters, ≤ 12 substitutes, exactly one
   starting goalkeeper, captain must start, every player CLEARED + active squad
   member. Writes only via `save_lineup` / `confirm_lineup` / `reopen_lineup`
-  (ADMIN or an assigned operator, before kick-off) and `admin_correct_lineup`
+  before kick-off and `admin_correct_lineup`
   (after kick-off, reason required). A trigger locks line-ups once the match
   leaves SCHEDULED. A screening change / squad removal that invalidates a
   confirmed line-up of an upcoming match reopens it (audited, unpublished).
+- **Who edits before kick-off**: ADMIN always; among assigned operators only
+  the one in control — `matches.active_operator_id` (the existing match-control
+  model), or the active PRIMARY while nobody has taken control. A BACKUP sees
+  line-ups read-only (`viewer_role: VIEWER`) until an audited `take_over_match`;
+  the PRIMARY is then read-only until it takes control back. No second control
+  mechanism exists. After kick-off only `admin_correct_lineup` changes line-ups.
 - **Kick-off**: `start_match` requires both line-ups CONFIRMED and still valid,
   unless `admin_set_lineup_override` recorded a reason (audited).
 - **Events**: with a confirmed line-up, `record_event` / `admin_add_event`

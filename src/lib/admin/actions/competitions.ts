@@ -45,6 +45,7 @@ function competitionFields(fd: FormData) {
     tiebreakers: tiebreakers(fd),
     extra_time_enabled: bool(fd, "extra_time_enabled"),
     penalties_enabled: bool(fd, "penalties_enabled"),
+    allow_multi_team_players: bool(fd, "allow_multi_team_players"),
   };
 }
 

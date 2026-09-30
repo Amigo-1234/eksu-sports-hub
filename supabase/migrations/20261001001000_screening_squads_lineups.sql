@@ -15,7 +15,16 @@
 --      the competition screening (when one exists) is CLEARED too.
 --   3. Squads: memberships are deactivated, never deleted; only CLEARED
 --      players can join (enforced by trigger, whatever the write path).
+--      Squads stay team + season: a team's squad serves every competition the
+--      team is entered in (competition_entries). A player may be in several
+--      teams' squads in a season (e.g. a department team in the
+--      inter-departmental cup and the faculty team in the inter-faculty
+--      league), but never in two teams entered in the SAME competition,
+--      unless that competition allows it (allow_multi_team_players).
 --   4. Line-ups: one per match + team, DRAFT → CONFIRMED (confirmed = public).
+--      Before kick-off the operator in control (matches.active_operator_id,
+--      or the active PRIMARY while nobody has taken control) manages them; a
+--      BACKUP views them until an audited take_over_match. ADMIN always may.
 --      Formations are data (normalised pitch coordinates 0–100).
 --   5. Match engine: kick-off requires confirmed, still-valid line-ups (or an
 --      audited ADMIN override); line-ups lock at kick-off; substitutions,
@@ -156,8 +165,52 @@ create unique index squad_players_active_shirt on public.squad_players (squad_id
 drop index public.squad_players_one_captain;
 create unique index squad_players_one_captain on public.squad_players (squad_id) where is_captain and active;
 
+-- Competition rule: may one player represent more than one entered team?
+alter table public.competitions add column allow_multi_team_players boolean not null default false;
+
+/*
+ * The conflict a membership of p_team would create: another team the player
+ * is ACTIVE in (same season) that shares a competition with p_team where
+ * multi-team players are not allowed (optionally only p_competition).
+ * Returns e.g. "DEV Engineering (both in DEV Inter-Faculty League)", or null.
+ */
+create or replace function private.team_conflict(p_player uuid, p_team uuid, p_season uuid, p_competition uuid default null)
+returns text language sql stable security definer set search_path = '' as $$
+  select format('%s (both in %s)', ot.name, c.name)
+  from public.squad_players sp
+  join public.squads os on os.id = sp.squad_id
+  join public.teams ot on ot.id = os.team_id
+  join public.competition_entries eo on eo.team_id = os.team_id
+  join public.competition_entries et on et.competition_id = eo.competition_id and et.team_id = p_team
+  join public.competitions c on c.id = eo.competition_id
+  where sp.player_id = p_player and sp.active and os.team_id <> p_team and os.season_id = p_season
+    and c.season_id = p_season and not c.allow_multi_team_players
+    and (p_competition is null or c.id = p_competition)
+  order by c.name, ot.name
+  limit 1;
+$$;
+
+/* First player active in two teams entered in this competition (when it does not allow that), or null. */
+create or replace function private.competition_conflict(p_competition uuid)
+returns text language sql stable security definer set search_path = '' as $$
+  select format('%s is in both the %s and %s squads', coalesce(p.display_name, 'a player'), t1.name, t2.name)
+  from public.competitions c
+  join public.competition_entries e1 on e1.competition_id = c.id
+  join public.competition_entries e2 on e2.competition_id = c.id and e2.team_id > e1.team_id
+  join public.squads s1 on s1.team_id = e1.team_id and s1.season_id = c.season_id
+  join public.squads s2 on s2.team_id = e2.team_id and s2.season_id = c.season_id
+  join public.squad_players a on a.squad_id = s1.id and a.active
+  join public.squad_players b on b.squad_id = s2.id and b.active and b.player_id = a.player_id
+  join public.players p on p.id = a.player_id
+  join public.teams t1 on t1.id = e1.team_id
+  join public.teams t2 on t2.id = e2.team_id
+  where c.id = p_competition and not c.allow_multi_team_players
+  limit 1;
+$$;
+
 -- Eligibility at the data layer: whatever writes squad_players, a player must
--- be CLEARED for the squad's team + season, and in one active squad per season.
+-- be CLEARED for the squad's team + season, and must not represent two teams
+-- entered in the same competition (unless that competition allows it).
 create or replace function private.guard_squad_player()
 returns trigger language plpgsql security definer set search_path = '' as $$
 declare s public.squads; v_status text; v_other text;
@@ -169,16 +222,10 @@ begin
       raise exception 'Only screened and CLEARED players can join a squad (this player is %)',
         replace(lower(v_status), '_', ' ') using errcode = 'EK422';
     end if;
-    select t.name into v_other
-    from public.squad_players sp
-    join public.squads o on o.id = sp.squad_id
-    join public.teams t on t.id = o.team_id
-    where sp.player_id = new.player_id and sp.active and sp.id <> new.id
-      and o.season_id = s.season_id and o.id <> s.id and t.sport_id = (select sport_id from public.teams where id = s.team_id)
-    limit 1;
+    v_other := private.team_conflict(new.player_id, s.team_id, s.season_id, null);
     if v_other is not null then
-      raise exception 'This player is already in the % squad this season. Deactivate that membership first.', v_other
-        using errcode = 'EK409';
+      raise exception 'This player is already active for %. A player cannot represent two teams in the same competition unless its rules allow it.',
+        v_other using errcode = 'EK409';
     end if;
   end if;
   if tg_op = 'UPDATE' and old.active and not new.active then
@@ -192,6 +239,25 @@ end $$;
 
 create trigger squad_players_guard before insert or update on public.squad_players
   for each row execute function private.guard_squad_player();
+
+-- The same rule from the other side: entering a team, or switching a
+-- competition to "one team per player", must not create a conflict.
+create or replace function private.guard_competition_players()
+returns trigger language plpgsql security definer set search_path = '' as $$
+declare v_conflict text := private.competition_conflict(
+  (to_jsonb(new) ->> case when tg_table_name = 'competitions' then 'id' else 'competition_id' end)::uuid);
+begin
+  if v_conflict is not null then
+    raise exception '%: a player cannot represent two teams in the same competition unless its rules allow it', v_conflict
+      using errcode = 'EK409';
+  end if;
+  return null;
+end $$;
+
+create trigger competition_entries_players after insert or update of competition_id, team_id on public.competition_entries
+  for each row execute function private.guard_competition_players();
+create trigger competitions_multi_team_players after update of allow_multi_team_players, season_id on public.competitions
+  for each row execute function private.guard_competition_players();
 
 -- ── 5. Formations (data, not CSS) ──────────────────────────────────────────
 -- Coordinates are from the team's own perspective, attacking upwards:
@@ -345,17 +411,28 @@ returns smallint language sql stable security definer set search_path = '' as $$
   where s.team_id = p_team and s.season_id = p_season and sp.player_id = p_player and sp.active;
 $$;
 
-/* Eligibility of a player for a match: active squad member + effective CLEARED. */
+/*
+ * Eligibility of a player for a match: active squad member, effective
+ * CLEARED, and not representing another team in the match's competition.
+ */
 create or replace function private.match_eligibility(p_match_id uuid, p_team uuid, p_player uuid)
 returns text language plpgsql stable security definer set search_path = '' as $$
-declare v_season uuid; v_comp uuid;
+declare v_season uuid; v_comp uuid; v_status text;
 begin
   select c.season_id, c.id into v_season, v_comp
   from public.matches m join public.competitions c on c.id = m.competition_id where m.id = p_match_id;
   if private.active_squad_shirt(p_player, p_team, v_season) is null then
     return 'NOT_IN_SQUAD';
   end if;
-  return private.screening_status(p_player, p_team, v_season, v_comp);
+  v_status := private.screening_status(p_player, p_team, v_season, v_comp);
+  if v_status <> 'CLEARED' then
+    return v_status;
+  end if;
+  -- Defence in depth (the squad/entry triggers already prevent it).
+  if private.team_conflict(p_player, p_team, v_season, v_comp) is not null then
+    return 'CONFLICT';
+  end if;
+  return 'CLEARED';
 end $$;
 
 /*
@@ -442,7 +519,7 @@ begin
   loop
     if p.elig <> 'CLEARED' then
       v := v || format('%s is not eligible (%s)', btrim(private.player_label(p.player_id, p.shirt_number)),
-        replace(lower(p.elig), '_', ' '));
+        case p.elig when 'CONFLICT' then 'also represents another team in this competition' else replace(lower(p.elig), '_', ' ') end);
     end if;
   end loop;
   if p_mode = 'draft' then
@@ -472,7 +549,29 @@ begin
 end $$;
 
 -- ── 9. Authorisation helpers ───────────────────────────────────────────────
--- Line-up editors: ADMIN on any match, or an operator actively assigned to it.
+/*
+ * Pre-kick-off line-up control reuses the match-control model: the operator
+ * in control (matches.active_operator_id, set by the audited take_over_match)
+ * manages line-ups; while nobody has taken control (or the controller is no
+ * longer assigned) that is the active PRIMARY. A BACKUP only views until it
+ * takes over, so two assigned operators never edit concurrently.
+ */
+create or replace function private.has_lineup_control(p_match_id uuid)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (
+    select 1
+    from public.matches m
+    join public.operator_assignments a on a.match_id = m.id and a.user_id = auth.uid() and a.active
+    where m.id = p_match_id
+      and (m.active_operator_id = auth.uid()
+        or (a.role = 'PRIMARY' and not exists (
+              select 1 from public.operator_assignments c
+              where c.match_id = m.id and c.user_id = m.active_operator_id and c.active)))
+  );
+$$;
+
+-- Line-up access: 'ADMIN' (any match), 'OPERATOR' (assigned and in control),
+-- 'VIEWER' (assigned, not in control: read-only). Everyone else is refused.
 create or replace function private.lineup_editor_role(p_match_id uuid)
 returns text language plpgsql stable security definer set search_path = '' as $$
 begin
@@ -485,7 +584,7 @@ begin
   if private.is_staff() and exists (
     select 1 from public.operator_assignments a where a.match_id = p_match_id and a.user_id = auth.uid() and a.active
   ) then
-    return 'OPERATOR';
+    return case when private.has_lineup_control(p_match_id) then 'OPERATOR' else 'VIEWER' end;
   end if;
   raise exception 'Match not found or not assigned to you' using errcode = 'EK403';
 end $$;
@@ -886,6 +985,9 @@ begin
     if v_elig = 'NOT_IN_SQUAD' then
       raise exception '% is not in this team''s squad for the season', coalesce(nullif(v_label, ''), 'That player') using errcode = 'EK422';
     end if;
+    if v_elig = 'CONFLICT' then
+      raise exception '% also represents another team in this competition and cannot be selected', v_label using errcode = 'EK422';
+    end if;
     if v_elig <> 'CLEARED' then
       raise exception '% is not eligible (%): only CLEARED players can be selected', v_label, replace(lower(v_elig), '_', ' ')
         using errcode = 'EK422';
@@ -985,11 +1087,16 @@ $$;
 -- Lock the match row and check the caller may edit its line-ups before kick-off.
 create or replace function private.begin_lineup_edit(p_match_id uuid, p_team_id uuid)
 returns public.matches language plpgsql security definer set search_path = '' as $$
-declare m public.matches;
+declare m public.matches; v_role text;
 begin
-  perform private.lineup_editor_role(p_match_id);
+  -- Lock first so a concurrent take-over cannot interleave with the check.
   select * into m from public.matches where id = p_match_id for update;
-  if not found then
+  v_role := private.lineup_editor_role(p_match_id);
+  if v_role = 'VIEWER' then
+    raise exception 'Only the operator in control manages line-ups before kick-off. Take over the match first (audited).'
+      using errcode = 'EK403';
+  end if;
+  if m.id is null then
     raise exception 'Match not found' using errcode = 'EK404';
   end if;
   if p_team_id is null or p_team_id not in (m.home_team_id, m.away_team_id) then
@@ -1183,7 +1290,9 @@ begin
       'lineup_override', m.lineup_override_reason),
     'team', jsonb_build_object('id', t.id, 'name', t.name, 'short_name', t.short_name, 'code', t.code,
       'color_primary', t.color_primary, 'color_secondary', t.color_secondary),
-    'editable', m.status = 'SCHEDULED',
+    'editable', m.status = 'SCHEDULED' and v_role <> 'VIEWER',
+    'in_control', (select display_name from public.profiles p where p.id = m.active_operator_id
+                   and exists (select 1 from public.operator_assignments a where a.match_id = m.id and a.user_id = p.id and a.active)),
     'rules', private.lineup_rules(),
     'formations', coalesce((select jsonb_agg(jsonb_build_object('code', f.code, 'name', f.name, 'slots', f.slots) order by f.sort_order)
       from public.formations f where f.active), '[]'::jsonb),
@@ -1562,7 +1671,8 @@ begin
       'home', private.team_lineup_json(p_match_id, m.home_team_id),
       'away', private.team_lineup_json(p_match_id, m.away_team_id)
     ),
-    'lineup_override', m.lineup_override_reason
+    'lineup_override', m.lineup_override_reason,
+    'lineup_control', private.has_lineup_control(p_match_id)
   );
 end $$;
 
@@ -1771,7 +1881,8 @@ begin
         order by sp.active desc, sp.shirt_number)
       from public.squad_players sp join public.players p on p.id = sp.player_id where sp.squad_id = s.id), '[]'::jsonb),
     -- CLEARED for this team + season and not yet in the squad: ready to add.
-    'candidates', coalesce((select jsonb_agg(jsonb_build_object('player_id', p.id, 'name', p.display_name) order by p.display_name)
+    'candidates', coalesce((select jsonb_agg(jsonb_build_object('player_id', p.id, 'name', p.display_name,
+        'conflict', private.team_conflict(p.id, p_team_id, p_season_id, null)) order by p.display_name)
       from public.player_screenings ps join public.players p on p.id = ps.player_id
       where ps.team_id = p_team_id and ps.season_id = p_season_id and ps.competition_id is null and ps.status = 'CLEARED'
         and not exists (select 1 from public.squad_players sp where sp.squad_id = s.id and sp.player_id = p.id)), '[]'::jsonb)

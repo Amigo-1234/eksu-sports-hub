@@ -93,6 +93,12 @@ export function CompetitionFields({ c, seasons, sports }: { c?: CompetitionDetai
       <div className="sm:col-span-2">
         <Check name="extra_time_enabled" label="Extra time" defaultChecked={c?.extra_time_enabled} hint="Competition rule. The operator console currently records regulation time (two halves) only." />
         <Check name="penalties_enabled" label="Penalty shoot-outs" defaultChecked={c?.penalties_enabled} hint="Competition rule. Shoot-outs are not yet recorded by the operator console." />
+        <Check
+          name="allow_multi_team_players"
+          label="Players may represent more than one entered team"
+          defaultChecked={c?.allow_multi_team_players}
+          hint="Off (normal): a player active in two teams' squads cannot play for both in this competition. Playing for different teams in different competitions is always allowed."
+        />
       </div>
     </div>
   );

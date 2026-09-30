@@ -96,6 +96,7 @@ export interface CompetitionDetail {
   tiebreakers: Tiebreaker[];
   extra_time_enabled: boolean;
   penalties_enabled: boolean;
+  allow_multi_team_players: boolean;
   stages: Stage[];
   entries: Entry[];
   match_count: number;

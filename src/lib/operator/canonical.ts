@@ -80,6 +80,7 @@ export interface CanonicalState {
   squads?: { home: CanonicalSquadPlayer[]; away: CanonicalSquadPlayer[] };
   lineups?: { home: CanonicalLineup | null; away: CanonicalLineup | null };
   lineup_override?: string | null;
+  lineup_control?: boolean;
 }
 
 const PHASE: Record<CanonicalMatch["status"], OpPhase> = {
