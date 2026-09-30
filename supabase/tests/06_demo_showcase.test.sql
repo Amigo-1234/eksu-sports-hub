@@ -1,6 +1,6 @@
 begin;
 \ir helpers.inc
-select plan(53);
+select plan(56);
 
 create temp table u as select
   tests.make_user('admin6@test.local', array['ADMIN']) as admin,
@@ -179,6 +179,15 @@ select ok(public.public_match_feed(tests.id('demo'))::text !~* '(TST-DEMO|studen
   'demo feed exposes no identities, screening or ids');
 select ok(public.public_match_feed(tests.id('official')) -> 'stats' = 'null'::jsonb
   and not (public.public_match_feed(tests.id('official')) -> 'match' ->> 'is_demo')::boolean, 'official matches carry no demo stats');
+
+-- ── Admin UI writes (signed-in ADMIN, RLS path) still work with the guards ──
+select tests.login((select admin from u));
+select lives_ok($$ update public.competitions set name = 'DEV Inter-Faculty League (renamed)', points_win = 3
+  where id = '60000000-0000-4000-8000-000000000001' $$, 'a signed-in admin can still save an official competition');
+select throws_ok($$ update public.competitions set name = 'Official Cup' where id = tests.id('comp') $$, 'EK422', null,
+  'a signed-in admin still cannot drop DEMO from a demo competition');
+select lives_ok($$ update public.competitions set name = 'TEST DEMO SHOWCASE (renamed)' where id = tests.id('comp') $$,
+  'a demo competition can be renamed while it keeps DEMO');
 
 select * from finish();
 rollback;
