@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { DesktopNav } from "./DesktopNav";
 import { EksuLogo } from "./EksuLogo";
-import { TrophyIcon } from "@/components/ui/icons";
+import { ShirtIcon, TrophyIcon } from "@/components/ui/icons";
 
 /** Compact branded app bar. Primary nav lives here on md+, in BottomNav on phones. */
 export function AppHeader({ liveCount }: { liveCount: number }) {
@@ -41,6 +41,13 @@ export function AppHeader({ liveCount }: { liveCount: number }) {
               {liveCount} Live
             </Link>
           )}
+          <Link
+            href="/register"
+            aria-label="Register"
+            className="grid size-10 place-items-center rounded-full text-brand-700 hover:bg-brand-50"
+          >
+            <ShirtIcon size={21} />
+          </Link>
           <Link
             href="/competitions"
             aria-label="Competitions"

@@ -1,7 +1,7 @@
 export interface NavItem {
   href: string;
   label: string;
-  icon: "dashboard" | "trophy" | "calendar" | "shield" | "shirt" | "users" | "clipboard" | "live" | "table" | "log" | "settings" | "season" | "building" | "pin" | "check" | "squad";
+  icon: "dashboard" | "trophy" | "calendar" | "shield" | "shirt" | "users" | "clipboard" | "live" | "table" | "log" | "settings" | "season" | "building" | "pin" | "check" | "squad" | "inbox";
 }
 
 export const NAV: { heading?: string; items: NavItem[] }[] = [
@@ -24,6 +24,7 @@ export const NAV: { heading?: string; items: NavItem[] }[] = [
     items: [
       { href: "/admin/competitions", label: "Competitions", icon: "trophy" },
       { href: "/admin/teams", label: "Teams", icon: "shield" },
+      { href: "/admin/registrations", label: "Registrations", icon: "inbox" },
       { href: "/admin/players", label: "Players", icon: "shirt" },
       { href: "/admin/screening", label: "Screening", icon: "check" },
       { href: "/admin/squads", label: "Squads", icon: "squad" },

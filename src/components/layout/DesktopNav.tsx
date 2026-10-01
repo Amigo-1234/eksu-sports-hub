@@ -16,7 +16,7 @@ export function DesktopNav({ liveCount }: { liveCount: number }) {
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold transition-colors ${
+                className={`flex h-9 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold whitespace-nowrap transition-colors lg:px-3.5 ${
                   active ? "bg-brand-700 text-white" : "text-ink-muted hover:bg-subtle hover:text-ink"
                 }`}
               >

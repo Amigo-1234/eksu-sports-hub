@@ -4,6 +4,7 @@ import {
   HomeIcon,
   LiveIcon,
   ResultsIcon,
+  ShirtIcon,
   TableIcon,
   TrophyIcon,
 } from "@/components/ui/icons";
@@ -23,6 +24,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/results", label: "Results", icon: ResultsIcon, inBottomBar: true },
   { href: "/table", label: "Table", icon: TableIcon, inBottomBar: true },
   { href: "/competitions", label: "Competitions", icon: TrophyIcon, inBottomBar: false },
+  { href: "/register", label: "Register", icon: ShirtIcon, inBottomBar: false },
 ];
 
 export function isActivePath(pathname: string, href: string): boolean {

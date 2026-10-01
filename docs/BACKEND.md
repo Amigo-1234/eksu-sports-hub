@@ -228,6 +228,50 @@ stats) without touching the official eligibility pipeline.
   official matches use the unchanged path. `20261003001200` made the demo guard
   triggers `SECURITY DEFINER` (admin competition saves had failed).
 
+### Registration intake (migration `20261005001400`)
+A registration is a **request, never eligibility**:
+`SUBMITTED → (UNDER_REVIEW / NEEDS_CORRECTION) → ACCEPTED_FOR_SCREENING → PENDING screening → CLEARED/REJECTED/SUSPENDED (admin_decide_screening) → squad → line-up`.
+No online payments of any kind.
+
+- Tables (FORCE RLS, **no client grants at all**): `registration_windows`
+  (one per competition intake; DRAFT/OPEN/CLOSED/ARCHIVED, only OPEN inside
+  its dates accepts entries), `registrations` (public reference
+  `EKSU-{code}-{6 chars}` from a 31-symbol alphabet without 0/O/1/I, random
+  bytes; UUID internally; own status — `player_screenings.status` is untouched),
+  `registration_players` (`matric_key` = same normalisation as
+  `player_identities.student_id_key`; partial unique index on
+  `(competition_id, matric_key)` for SUBMITTED/ACCEPTED entries),
+  `registration_events` (append-only history), `private.rate_limits`.
+  `correction_token_hash/expires_at` are reserved for a later "fix your
+  registration" link (v1: NEEDS_CORRECTION + reason; the directorate contacts
+  the applicant).
+- Anonymous: `public_registration_windows()` / `public_registration_window(slug)`
+  only. Submitting (`service_submit_registration`), the status lookup
+  (`service_registration_status`: reference + a phone on the registration →
+  safe fields only) and rate limiting are `service_role`-only and called by the
+  Next.js server (`src/lib/registration/server.ts`, server-only
+  `SUPABASE_SECRET_KEY`).
+- Documents: private bucket `registration-documents` (4 MB, JPG/PNG/WebP/PDF),
+  paths `{registration uuid}/{person uuid}/{photo|id}.{ext}`. Uploads go
+  through `POST /api/register/upload` (HMAC draft token, rate limit, size +
+  MIME + extension + magic-byte check) with the secret key; there is **no**
+  client write policy. ADMIN reads via a storage SELECT policy and sees
+  10-minute signed URLs. Documents of drafts never submitted are swept after
+  24 h (`service_orphan_documents`).
+- Duplicates: same matric in the roster or a live entry for the same
+  competition → refused ("This student number may already have a
+  registration. Please contact the Sports Directorate."). An existing official
+  identity is *flagged* to the admin (not refused) and linked on accept.
+- `admin_accept_registration` (atomic): re-validates team/competition/season and
+  faculty→department, links the official player by matric key or creates
+  player + identity, links the existing season screening for that team or opens
+  a PENDING one (`private.open_screening`), marks entries ACCEPTED, audits
+  (`PLAYER_CREATED_FROM_REGISTRATION` / `PLAYER_LINKED_FROM_REGISTRATION`,
+  `REGISTRATION_ACCEPTED_FOR_SCREENING`). Never clears, never adds to a squad.
+- Admin UI: `/admin/registrations` (inbox), `/admin/registrations/[id]`,
+  `/admin/registrations/windows[/id]`. Public: `/register`,
+  `/register/[slug]{,/player,/team}`, `/register/status`.
+
 ## Authentication
 Email + password through Supabase Auth (works without external services).
 Public sign-up is disabled (`[auth] enable_signup = false`); accounts are

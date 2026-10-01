@@ -3,7 +3,8 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { supabaseEnv } from "@/lib/supabase/env";
 
 /**
- * Supabase Auth Admin API — the ONLY place the secret key is read.
+ * Supabase Auth Admin API — one of the two places the secret key is read
+ * (the other is src/lib/registration/server.ts, public registration).
  *
  * - server-only (this module cannot be imported into client bundles)
  * - SUPABASE_SECRET_KEY is never prefixed NEXT_PUBLIC, never logged and never

@@ -12,7 +12,8 @@
     "dev:users": "node --env-file-if-exists=.env.local scripts/dev-users.mjs",
     "test:backend": "node --env-file-if-exists=.env.local --test tests/backend/api.test.mjs",
     "test:db": "supabase test db",
-    "test:admin": "node --experimental-strip-types --no-warnings --test tests/admin-helpers.test.ts"
+    "test:admin": "node --experimental-strip-types --no-warnings --test tests/admin-helpers.test.ts",
+    "test:registration": "node --experimental-strip-types --no-warnings --test tests/registration.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
