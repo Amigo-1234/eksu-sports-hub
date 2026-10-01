@@ -1,7 +1,7 @@
 -- Web Push VAPID key pair in Supabase Vault.
 --
--- The pair is generated server-side once (POST /api/notifications/vapid-init)
--- and written here in one call, so the public and private halves can never
+-- The pair is generated server-side once (a temporary dispatcher-secret
+-- route, removed after production was initialised) and written here in one call, so the public and private halves can never
 -- come from different generations. Only service_role can reach these
 -- functions; browsers get the public half through
 -- GET /api/notifications/vapid-key, never the private one.

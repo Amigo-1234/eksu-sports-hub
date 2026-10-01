@@ -58,7 +58,9 @@ export type VapidInitResult =
 /**
  * One-time setup: generate a pair, validate it, and store both halves in
  * Vault in one call. Returns booleans only; the keys are never returned or
- * logged. Vault refuses to overwrite an existing pair.
+ * logged. Vault refuses to overwrite an existing pair. (Production was
+ * initialised once through a temporary route; re-expose this only for a
+ * deliberate rotation.)
  */
 export async function initialiseVapidPair(): Promise<VapidInitResult> {
   const db = serviceClient();
