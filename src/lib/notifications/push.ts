@@ -1,4 +1,5 @@
 import "server-only";
+import { createECDH } from "node:crypto";
 import webpush from "web-push";
 import { classify, type DeliveryResult } from "./delivery";
 
@@ -22,16 +23,63 @@ export interface ClaimedDelivery {
 }
 export type { DeliveryResult };
 
+/** VAPID settings, trimmed: a pasted trailing newline must not break signing. */
+function vapidDetails() {
+  return {
+    subject: (process.env.VAPID_SUBJECT ?? "").trim(),
+    publicKey: (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "").trim(),
+    privateKey: (process.env.VAPID_PRIVATE_KEY ?? "").trim(),
+  };
+}
+
 export function vapidConfigured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY && process.env.VAPID_SUBJECT);
+  const d = vapidDetails();
+  return Boolean(d.publicKey && d.privateKey && d.subject);
+}
+
+function b64urlBytes(v: string): Buffer | null {
+  return /^[A-Za-z0-9_-]+$/.test(v) ? Buffer.from(v, "base64url") : null;
+}
+
+/**
+ * Self-check of the VAPID configuration for the dispatcher's diagnostics.
+ * Booleans and lengths only; never key material.
+ */
+export function vapidStatus() {
+  const d = vapidDetails();
+  const pub = b64urlBytes(d.publicKey);
+  const priv = b64urlBytes(d.privateKey);
+  let webPushAccepts = false;
+  let pairMatches = false;
+  try {
+    webpush.getVapidHeaders("https://web.push.apple.com", d.subject, d.publicKey, d.privateKey, "aes128gcm");
+    webPushAccepts = true;
+  } catch {
+    // reported as false
+  }
+  try {
+    if (pub && priv) {
+      const ecdh = createECDH("prime256v1");
+      ecdh.setPrivateKey(priv);
+      pairMatches = ecdh.getPublicKey().equals(pub);
+    }
+  } catch {
+    // reported as false
+  }
+  return {
+    publicKeyBytes: pub?.length ?? 0,
+    publicKeyUncompressed: pub?.[0] === 4,
+    publicKeyHadWhitespace: (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "") !== d.publicKey,
+    privateKeyBytes: priv?.length ?? 0,
+    privateKeyHadWhitespace: (process.env.VAPID_PRIVATE_KEY ?? "") !== d.privateKey,
+    subjectScheme: /^mailto:/i.test(d.subject) ? "mailto" : /^https:/i.test(d.subject) ? "https" : "invalid",
+    webPushAccepts,
+    pairMatches,
+  };
 }
 
 export async function sendAll(rows: ClaimedDelivery[], concurrency = 10): Promise<DeliveryResult[]> {
-  const details = {
-    subject: process.env.VAPID_SUBJECT!,
-    publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-    privateKey: process.env.VAPID_PRIVATE_KEY!,
-  };
+  const details = vapidDetails();
   const out: DeliveryResult[] = [];
   let i = 0;
   async function worker() {

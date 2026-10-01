@@ -22,7 +22,7 @@ export async function PublicShell({ children }: { children: ReactNode }) {
   // Alerts need real match IDs (live data), the server flag and the public VAPID key.
   const alerts = DATA_SOURCE_KIND === "live" && pushNotificationsEnabled();
   return (
-    <AlertsProvider available={alerts} vapidKey={alerts ? (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "") : ""}>
+    <AlertsProvider available={alerts} vapidKey={alerts ? (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "").trim() : ""}>
       <a
         href="#main"
         className="sr-only z-50 rounded-md bg-accent-500 px-4 py-2 font-semibold text-ink focus:not-sr-only focus:fixed focus:top-2 focus:left-2"

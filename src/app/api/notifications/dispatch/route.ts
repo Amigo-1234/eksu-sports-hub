@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
-import { sendAll, vapidConfigured, type ClaimedDelivery } from "@/lib/notifications/push";
+import { sendAll, vapidConfigured, vapidStatus, type ClaimedDelivery } from "@/lib/notifications/push";
 import { pushNotificationsEnabled } from "@/lib/notifications/server";
 import { serviceClient } from "@/lib/registration/server";
 
@@ -12,6 +12,7 @@ import { serviceClient } from "@/lib/registration/server";
  * Each pass: enqueue due reminders, fan out new intents, lease due
  * deliveries, send them, report results. Safe to call concurrently and
  * repeatedly (leases + unique deliveries); never touches match state.
+ * `?check=vapid` only reports the VAPID self-check (no keys) and sends nothing.
  */
 
 export const dynamic = "force-dynamic";
@@ -28,6 +29,7 @@ function authorised(request: Request): boolean {
 
 export async function POST(request: Request) {
   if (!authorised(request)) return NextResponse.json({ ok: false }, { status: 401 });
+  if (new URL(request.url).searchParams.get("check") === "vapid") return NextResponse.json({ ok: true, vapid: vapidStatus() });
   if (!pushNotificationsEnabled() || !vapidConfigured()) return NextResponse.json({ ok: true, skipped: "disabled" });
   const db = serviceClient();
   if (!db) return NextResponse.json({ ok: false, error: "not configured" }, { status: 503 });
