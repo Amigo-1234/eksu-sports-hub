@@ -2,6 +2,7 @@ import "server-only";
 import { createECDH } from "node:crypto";
 import webpush from "web-push";
 import { classify, type DeliveryResult } from "./delivery";
+import { normaliseVapidKey } from "./flag";
 
 /*
  * Standard Web Push (RFC 8030 + VAPID RFC 8292, aes128gcm payloads) through
@@ -23,12 +24,11 @@ export interface ClaimedDelivery {
 }
 export type { DeliveryResult };
 
-/** VAPID settings, trimmed: a pasted trailing newline must not break signing. */
 function vapidDetails() {
   return {
     subject: (process.env.VAPID_SUBJECT ?? "").trim(),
-    publicKey: (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "").trim(),
-    privateKey: (process.env.VAPID_PRIVATE_KEY ?? "").trim(),
+    publicKey: normaliseVapidKey(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY),
+    privateKey: normaliseVapidKey(process.env.VAPID_PRIVATE_KEY),
   };
 }
 
@@ -39,6 +39,21 @@ export function vapidConfigured(): boolean {
 
 function b64urlBytes(v: string): Buffer | null {
   return /^[A-Za-z0-9_-]+$/.test(v) ? Buffer.from(v, "base64url") : null;
+}
+
+/** Shape of a configured key (character classes and lengths only, never the value). */
+function keyFormat(raw: string | undefined) {
+  const v = raw ?? "";
+  const t = v.trim();
+  return {
+    rawLength: v.length,
+    normalisedLength: normaliseVapidKey(v).length,
+    whitespace: v !== t || /\s/.test(t),
+    quoted: /^["'][\s\S]*["']$/.test(t),
+    padding: /=/.test(t),
+    standardAlphabet: /[+/]/.test(t),
+    otherChars: /[^A-Za-z0-9_\-+/="'\s]/.test(t),
+  };
 }
 
 /**
@@ -69,9 +84,9 @@ export function vapidStatus() {
   return {
     publicKeyBytes: pub?.length ?? 0,
     publicKeyUncompressed: pub?.[0] === 4,
-    publicKeyHadWhitespace: (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "") !== d.publicKey,
+    publicKeyFormat: keyFormat(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY),
     privateKeyBytes: priv?.length ?? 0,
-    privateKeyHadWhitespace: (process.env.VAPID_PRIVATE_KEY ?? "") !== d.privateKey,
+    privateKeyFormat: keyFormat(process.env.VAPID_PRIVATE_KEY),
     subjectScheme: /^mailto:/i.test(d.subject) ? "mailto" : /^https:/i.test(d.subject) ? "https" : "invalid",
     webPushAccepts,
     pairMatches,

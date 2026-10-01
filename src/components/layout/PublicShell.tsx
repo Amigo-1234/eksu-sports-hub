@@ -6,6 +6,7 @@ import { AlertsProvider } from "@/components/notifications/AlertsProvider";
 import { NavigationTracker } from "@/components/ui/BackLink";
 import { DATA_SOURCE_KIND, getMatches } from "@/lib/data";
 import { pushNotificationsEnabled } from "@/lib/notifications/server";
+import { normaliseVapidKey } from "@/lib/notifications/flag";
 
 async function liveMatchCount(): Promise<number> {
   try {
@@ -22,7 +23,7 @@ export async function PublicShell({ children }: { children: ReactNode }) {
   // Alerts need real match IDs (live data), the server flag and the public VAPID key.
   const alerts = DATA_SOURCE_KIND === "live" && pushNotificationsEnabled();
   return (
-    <AlertsProvider available={alerts} vapidKey={alerts ? (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "").trim() : ""}>
+    <AlertsProvider available={alerts} vapidKey={alerts ? normaliseVapidKey(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) : ""}>
       <a
         href="#main"
         className="sr-only z-50 rounded-md bg-accent-500 px-4 py-2 font-semibold text-ink focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
