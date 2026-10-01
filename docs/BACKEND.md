@@ -350,9 +350,22 @@ Anonymous, per-device notifications for followed matches and teams.
   subscription once a day. iPhone/iPad in a browser tab get the "Add to Home
   Screen" guide instead of a permission prompt; permission is only requested
   from the confirm button.
-- **Switch.** `PUSH_NOTIFICATIONS_ENABLED=true` plus
-  `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (and server-only `VAPID_PRIVATE_KEY`,
-  `VAPID_SUBJECT`, `NOTIFICATIONS_DISPATCH_SECRET`). Off (default): no alert
+- **VAPID keys (migration `20261009001800`).** The pair lives in Supabase
+  Vault (`notifications_vapid_public_key`, `notifications_vapid_private_key`),
+  generated and validated server-side in one operation, so the halves can
+  never come from different generations and nobody copies keys by hand.
+  `service_vapid_*` functions are service_role only. The dispatcher loads
+  both halves (cached 5 min per runtime); browsers fetch only the public half
+  from `GET /api/notifications/vapid-key` (`{ publicKey }`, validated as a
+  65-byte uncompressed P-256 point). `POST /api/notifications/dispatch?check=vapid`
+  (dispatcher secret) runs a booleans-only self-test: pair validation, JWT
+  signing with the private key, and verification with the served public key.
+  Vault refuses to overwrite an existing pair; rotating means deleting both
+  Vault entries deliberately and re-initialising, after which browsers
+  re-subscribe automatically (the client replaces a subscription made for a
+  different key).
+- **Switch.** `PUSH_NOTIFICATIONS_ENABLED=true` plus server-only
+  `VAPID_SUBJECT` and `NOTIFICATIONS_DISPATCH_SECRET`. Off (default): no alert
   UI, no service worker, actions refuse, dispatcher skips.
 
 ### Private audience analytics (migration `20261008001700`)

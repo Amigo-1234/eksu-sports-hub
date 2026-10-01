@@ -84,6 +84,29 @@ function sameKey(a: ArrayBuffer | null | undefined, b: Uint8Array): boolean {
   return x.length === b.length && x.every((v, i) => v === b[i]);
 }
 
+export const VAPID_KEY_URL = "/api/notifications/vapid-key";
+let vapidKeyCache: Promise<string> | null = null;
+
+/**
+ * The server's VAPID public key (served from Supabase Vault, so it always
+ * pairs with the signing key). Fetched once per page load; a failure is
+ * retried on the next attempt.
+ */
+export function fetchVapidKey(): Promise<string> {
+  vapidKeyCache ??= fetch(VAPID_KEY_URL, { cache: "no-store", credentials: "same-origin" })
+    .then(async (r) => {
+      if (!r.ok) throw new Error(`vapid key endpoint returned ${r.status}`);
+      const body = (await r.json()) as { publicKey?: unknown };
+      if (typeof body.publicKey !== "string") throw new Error("vapid key endpoint returned no key");
+      return body.publicKey;
+    })
+    .catch((e) => {
+      vapidKeyCache = null;
+      throw e;
+    });
+  return vapidKeyCache;
+}
+
 /**
  * A registration with an ACTIVE service worker. Safari (iOS Home Screen apps
  * included) rejects pushManager.subscribe() while the worker is still
@@ -109,8 +132,8 @@ export interface SubscriptionJSON {
  * The browser's push subscription for our VAPID key — reusing a valid one,
  * replacing one made for a different key, or creating it.
  */
-export async function ensureSubscription(vapidPublicKey: string): Promise<SubscriptionJSON> {
-  const key = await step("key", () => keyBytes(vapidPublicKey));
+export async function ensureSubscription(): Promise<SubscriptionJSON> {
+  const key = await step("key", async () => keyBytes(await fetchVapidKey()));
   const reg = await activeRegistration();
   let sub = await step("getSubscription", () => reg.pushManager.getSubscription());
   if (sub && !sameKey(sub.options?.applicationServerKey, key)) {

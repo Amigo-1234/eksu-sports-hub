@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import { classify } from "../src/lib/notifications/delivery.ts";
+import webpush from "web-push";
 import { pushNotificationsEnabled } from "../src/lib/notifications/flag.ts";
+import { isValidVapidPublicKey, validateVapidPair, vapidPairValid } from "../src/lib/notifications/vapid-check.ts";
 import {
   cleanPrefs,
   detectPushSupport,
@@ -103,12 +105,31 @@ test("push-service responses: 2xx sent, 404/410 gone, 408/429/5xx/network retry,
   assert.equal(classify(413), "FAILED");
 });
 
-test("feature flag: off by default, needs the flag AND the public VAPID key", () => {
+test("feature flag: off by default, on only for an explicit true-ish value", () => {
   assert.equal(pushNotificationsEnabled({}), false);
-  assert.equal(pushNotificationsEnabled({ PUSH_NOTIFICATIONS_ENABLED: "true" }), false);
+  assert.equal(pushNotificationsEnabled({ PUSH_NOTIFICATIONS_ENABLED: "true" }), true);
+  assert.equal(pushNotificationsEnabled({ PUSH_NOTIFICATIONS_ENABLED: " on " }), true);
+  assert.equal(pushNotificationsEnabled({ PUSH_NOTIFICATIONS_ENABLED: "false" }), false);
   assert.equal(pushNotificationsEnabled({ NEXT_PUBLIC_VAPID_PUBLIC_KEY: "BK" }), false);
-  assert.equal(pushNotificationsEnabled({ PUSH_NOTIFICATIONS_ENABLED: "true", NEXT_PUBLIC_VAPID_PUBLIC_KEY: "BK" }), true);
-  assert.equal(pushNotificationsEnabled({ PUSH_NOTIFICATIONS_ENABLED: "false", NEXT_PUBLIC_VAPID_PUBLIC_KEY: "BK" }), false);
+});
+
+test("VAPID: a generated pair validates; mismatched or malformed keys do not", () => {
+  const a = webpush.generateVAPIDKeys();
+  const b = webpush.generateVAPIDKeys();
+  const ok = validateVapidPair(a.publicKey, a.privateKey);
+  assert.deepEqual(ok, { publicLength87: true, privateLength43: true, publicBytes65: true, publicUncompressed: true, privateBytes32: true, pairMatches: true });
+  assert.equal(vapidPairValid(ok), true);
+  assert.equal(Buffer.from(a.publicKey, "base64url")[0], 4);
+  const mixed = validateVapidPair(a.publicKey, b.privateKey);
+  assert.equal(mixed.pairMatches, false);
+  assert.equal(vapidPairValid(mixed), false);
+  assert.equal(vapidPairValid(validateVapidPair(a.publicKey, a.privateKey.slice(0, 39))), false);
+  assert.equal(vapidPairValid(validateVapidPair(a.publicKey, a.privateKey.slice(0, 42) + "\u00d7")), false);
+  assert.equal(isValidVapidPublicKey(a.publicKey), true);
+  assert.equal(isValidVapidPublicKey(a.publicKey.slice(0, 86)), false);
+  assert.equal(isValidVapidPublicKey(a.privateKey), false);
+  assert.equal(isValidVapidPublicKey("A".repeat(87)), false); // decodes, but not a 0x04 point
+  assert.equal(isValidVapidPublicKey(undefined), false);
 });
 
 // ── Service worker (public/sw.js) in a sandbox ──────────────────────────────

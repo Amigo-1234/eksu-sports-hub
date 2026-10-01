@@ -37,7 +37,7 @@ import {
 export type EnableResult = { ok: true } | { ok: false; reason: "ios-install" | "unsupported" | "denied" | "dismissed" | "error"; message?: string };
 
 interface AlertsContext {
-  /** Feature switched on for this deployment (flag + VAPID key + live data). */
+  /** Feature switched on for this deployment (flag + live data). */
   available: boolean;
   /** null until mounted in the browser. */
   support: PushSupport | null;
@@ -70,7 +70,7 @@ function readCachedState(): NotificationState | null {
   }
 }
 
-export function AlertsProvider({ available, vapidKey, children }: { available: boolean; vapidKey: string; children: ReactNode }) {
+export function AlertsProvider({ available, children }: { available: boolean; children: ReactNode }) {
   const [support, setSupport] = useState<PushSupport | null>(null);
   const [permission, setPermission] = useState<Permission>("default");
   const [state, setState] = useState<NotificationState>(EMPTY_STATE);
@@ -135,12 +135,12 @@ export function AlertsProvider({ available, vapidKey, children }: { available: b
         }
         setLoaded(true);
         // Daily repair: a cleared/rotated subscription is re-created and re-saved.
-        if (s.kind === "supported" && perm === "granted" && vapidKey) {
+        if (s.kind === "supported" && perm === "granted") {
           const last = Number(store("synced") ?? 0);
           const sub = await existingSubscription();
           if (!sub || Date.now() - last > DAY || (r?.ok && !r.state.push_enabled)) {
             try {
-              const json = await ensureSubscription(vapidKey);
+              const json = await ensureSubscription();
               const saved = await saveSubscription(json, p, env.standalone);
               if (!cancelled && saved.ok) {
                 setState(saved.state);
@@ -162,7 +162,7 @@ export function AlertsProvider({ available, vapidKey, children }: { available: b
     return () => {
       cancelled = true;
     };
-  }, [available, vapidKey, toast]);
+  }, [available, toast]);
 
   // Permission can change in browser settings while the app is open.
   useEffect(() => {
@@ -181,7 +181,7 @@ export function AlertsProvider({ available, vapidKey, children }: { available: b
       setIosOpen(true);
       return { ok: false, reason: "ios-install" };
     }
-    if (s.kind === "unsupported" || !vapidKey) return { ok: false, reason: "unsupported" };
+    if (s.kind === "unsupported") return { ok: false, reason: "unsupported" };
     let perm = currentPermission();
     if (perm === "default") {
       perm = await requestPermission(); // first await: keeps the user activation
@@ -190,7 +190,7 @@ export function AlertsProvider({ available, vapidKey, children }: { available: b
     if (perm === "denied") return { ok: false, reason: "denied" };
     if (perm !== "granted") return { ok: false, reason: "dismissed" };
     try {
-      const json = await ensureSubscription(vapidKey);
+      const json = await ensureSubscription();
       const r = await saveSubscription(json, platform.current.platform, platform.current.standalone);
       if (!r.ok) return { ok: false, reason: "error", message: r.error };
       accept(r);
@@ -200,7 +200,7 @@ export function AlertsProvider({ available, vapidKey, children }: { available: b
       reportPushFailure(err, platform.current);
       return { ok: false, reason: "error", message: "Your browser could not set up notifications. Please try again." };
     }
-  }, [vapidKey, accept]);
+  }, [accept]);
 
   const saveMatch = useCallback(async (id: string, enabled: boolean, events: PrefKey[]) => accept(await saveMatchAlerts(id, enabled, events)), [accept]);
   const removeMatch = useCallback(async (id: string) => accept(await removeMatchAlerts(id)), [accept]);
