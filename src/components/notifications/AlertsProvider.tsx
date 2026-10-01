@@ -19,6 +19,7 @@ import {
   ensureSubscription,
   existingSubscription,
   registerWorker,
+  reportPushFailure,
   requestPermission,
   store,
   type Permission,
@@ -195,7 +196,8 @@ export function AlertsProvider({ available, vapidKey, children }: { available: b
       accept(r);
       store("synced", String(Date.now()));
       return { ok: true };
-    } catch {
+    } catch (err) {
+      reportPushFailure(err, platform.current);
       return { ok: false, reason: "error", message: "Your browser could not set up notifications. Please try again." };
     }
   }, [vapidKey, accept]);
