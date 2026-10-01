@@ -1,20 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
+import { RegistrationComingSoon } from "@/components/registration/ComingSoon";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { formatWatDateTime } from "@/lib/admin/time";
+import { publicRegistrationEnabled } from "@/lib/registration/flag";
 import { getOpenWindow } from "@/lib/registration/public";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: PageProps<"/register/[slug]">): Promise<Metadata> {
+  if (!publicRegistrationEnabled()) return { title: "Registration · Coming soon" };
   const w = await getOpenWindow((await params).slug);
   return { title: w ? `Register · ${w.competition.short_name}` : "Register" };
 }
 
 export default async function WindowPage({ params }: PageProps<"/register/[slug]">) {
+  // Old/shared links never 404: Coming soon while public registration is off,
+  // back to the list when this window is not (or no longer) open.
+  if (!publicRegistrationEnabled()) return <RegistrationComingSoon />;
   const w = await getOpenWindow((await params).slug);
-  if (!w) notFound();
+  if (!w) redirect("/register");
   return (
     <>
       <PageHeader title={w.title} subtitle={`${w.competition.name} · ${w.season.name}`} />

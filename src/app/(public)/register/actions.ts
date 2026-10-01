@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { publicRegistrationEnabled, REGISTRATION_DISABLED_MESSAGE } from "@/lib/registration/flag";
 import { getOpenWindows } from "@/lib/registration/public";
 import { cleanPhone, isUuid, normaliseReference, REFERENCE_PATTERN, type RegistrationType } from "@/lib/registration/rules";
 import { callerKey, publicMessage, serviceClient, sweepAbandonedDocuments, verifyDraft, issueDraft } from "@/lib/registration/server";
@@ -14,6 +15,7 @@ import { callerKey, publicMessage, serviceClient, sweepAbandonedDocuments, verif
 const UNAVAILABLE = "Registration is not available right now. Please try again later.";
 
 export async function startDraft(windowId: string): Promise<{ ok: true; registrationId: string; token: string } | { ok: false; error: string }> {
+  if (!publicRegistrationEnabled()) return { ok: false, error: REGISTRATION_DISABLED_MESSAGE };
   const db = serviceClient();
   if (!db || !isUuid(windowId)) return { ok: false, error: UNAVAILABLE };
   try {
@@ -55,6 +57,8 @@ const optStr = (v: unknown, max: number) => str(v, max) || null;
 const optId = (v: unknown) => (isUuid(v) ? v : null);
 
 export async function submitRegistration(input: SubmitInput): Promise<SubmitResult> {
+  // Server-side switch: a direct call to this action is refused too, not just hidden in the UI.
+  if (!publicRegistrationEnabled()) return { ok: false, error: REGISTRATION_DISABLED_MESSAGE };
   const db = serviceClient();
   if (!db) return { ok: false, error: UNAVAILABLE };
   const draft = verifyDraft(input?.token);

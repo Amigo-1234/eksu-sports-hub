@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicRegistrationEnabled, REGISTRATION_DISABLED_MESSAGE } from "@/lib/registration/flag";
 import { checkDocument, documentPath, isUuid, type DocKind } from "@/lib/registration/rules";
 import { callerKey, DOCUMENT_BUCKET, serviceClient, verifyDraft } from "@/lib/registration/server";
 
@@ -17,6 +18,7 @@ export const dynamic = "force-dynamic";
 const fail = (error: string, status = 400) => NextResponse.json({ ok: false, error }, { status });
 
 export async function POST(request: Request) {
+  if (!publicRegistrationEnabled()) return fail(REGISTRATION_DISABLED_MESSAGE, 403);
   const db = serviceClient();
   if (!db) return fail("Registration uploads are not available right now.", 503);
 

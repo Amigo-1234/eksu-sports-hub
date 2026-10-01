@@ -53,6 +53,7 @@ export interface RegistrationRow {
   reference: string;
   type: RegistrationType;
   status: RegistrationStatus;
+  source: "PUBLIC" | "ADMIN";
   submitted_at: string;
   reviewed_at: string | null;
   submitter: string;
@@ -62,6 +63,7 @@ export interface RegistrationRow {
   team: { id: string; short_name: string } | null;
   players: number;
   first_player: string | null;
+  missing_documents: number;
   flags: number;
 }
 
@@ -106,8 +108,8 @@ export interface RegistrationPerson {
   faculty: { id: string; name: string };
   department: { id: string; name: string } | null;
   team: { id: string; name: string; short_name: string };
-  photo_path: string;
-  id_path: string;
+  photo_path: string | null;
+  id_path: string | null;
   duplicates: Duplicate[];
   official_player: { id: string; name: string | null } | null;
   screening: { id: string; status: string; decided_at: string | null } | null;
@@ -122,6 +124,8 @@ export interface RegistrationDetail {
   type: RegistrationType;
   status: RegistrationStatus;
   status_reason: string | null;
+  source: "PUBLIC" | "ADMIN";
+  created_by: string | null;
   submitted_at: string;
   reviewed_at: string | null;
   reviewed_by: string | null;
@@ -142,14 +146,34 @@ export async function getRegistration(id: string): Promise<RegistrationDetail | 
   const res = await db.rpc("admin_registration_detail", { p_registration_id: id });
   if (res.error?.code === "EK404") return null;
   const detail = must(res, "registration") as RegistrationDetail;
-  const paths = detail.players.flatMap((p) => [p.photo_path, p.id_path]);
+  const paths = detail.players.flatMap((p) => [p.photo_path, p.id_path]).filter((x): x is string => Boolean(x));
   if (paths.length) {
     const signed = await db.storage.from("registration-documents").createSignedUrls(paths, SIGNED_URL_SECONDS);
     const urls = new Map((signed.data ?? []).map((s) => [s.path, s.error ? null : s.signedUrl]));
     for (const p of detail.players) {
-      p.photo_url = urls.get(p.photo_path) ?? null;
-      p.id_url = urls.get(p.id_path) ?? null;
+      p.photo_url = p.photo_path ? (urls.get(p.photo_path) ?? null) : null;
+      p.id_url = p.id_path ? (urls.get(p.id_path) ?? null) : null;
     }
   }
   return detail;
+}
+
+export interface IntakeWindow {
+  id: string;
+  title: string;
+  status: WindowStatus;
+  reference_code: string;
+  competition: { id: string; name: string; short_name: string };
+  season: string;
+  teams: { id: string; name: string; short_name: string; faculty_id: string | null }[];
+}
+export interface IntakeOptions {
+  windows: IntakeWindow[];
+  faculties: { id: string; name: string; code: string; departments: { id: string; name: string }[] }[];
+}
+
+/** Windows an admin may register into (open or closed, not archived), plus faculties/departments. */
+export async function getIntakeOptions(): Promise<IntakeOptions> {
+  const { db } = await adminDb();
+  return must(await db.rpc("admin_registration_intake_options"), "registration options") as IntakeOptions;
 }

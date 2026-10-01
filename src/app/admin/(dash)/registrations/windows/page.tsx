@@ -19,7 +19,7 @@ export default async function RegistrationWindowsPage() {
     <>
       <PageTitle
         title="Registration windows"
-        description="Each window opens public registration for one competition. Only OPEN windows inside their dates accept submissions."
+        description="Each window is the intake for one competition. Only OPEN windows inside their dates accept public submissions (and only while PUBLIC_REGISTRATION_ENABLED is on). Admins can register into any open or closed window."
         back={{ href: "/admin/registrations", label: "Registrations" }}
       />
       <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">

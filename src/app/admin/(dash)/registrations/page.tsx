@@ -7,6 +7,7 @@ import { listRegistrations, listRegistrationWindows, type RegistrationFilters } 
 import { listFaculties, listSeasons } from "@/lib/admin/data/reference";
 import { listTeamRefs } from "@/lib/admin/data/teams";
 import { formatWatDateTime } from "@/lib/admin/time";
+import { publicRegistrationEnabled } from "@/lib/registration/flag";
 import { REGISTRATION_STATUSES, STATUS_LABEL, type RegistrationStatus, type RegistrationType } from "@/lib/registration/rules";
 
 export const metadata: Metadata = { title: "Registrations" };
@@ -56,6 +57,7 @@ export default async function RegistrationsPage({ searchParams }: PageProps<"/ad
   const total = Object.values(counts).reduce((a, b) => a + (b ?? 0), 0);
   const departments = faculties.flatMap((f) => f.departments.map((d) => ({ ...d, faculty: f.name })));
   const openWindows = windows.filter((w) => w.open_now);
+  const publicEnabled = publicRegistrationEnabled();
 
   return (
     <>
@@ -63,19 +65,34 @@ export default async function RegistrationsPage({ searchParams }: PageProps<"/ad
         title="Registrations"
         description="Player and team registrations from the public form. Review, request corrections, reject, or accept for screening — acceptance opens a PENDING screening and never clears anyone."
         actions={
-          <Link href="/admin/registrations/windows" className={btn.secondary}>
-            Registration windows
-          </Link>
+          <>
+            <Link href="/admin/registrations/new?type=player" className={btn.primary}>
+              + Register player
+            </Link>
+            <Link href="/admin/registrations/new?type=team" className={btn.secondary}>
+              + Register team / roster
+            </Link>
+            <Link href="/admin/registrations/windows" className={btn.ghost}>
+              Windows
+            </Link>
+          </>
         }
       />
 
-      {openWindows.length === 0 && (
-        <p className="mb-4 rounded-lg border border-warn/40 bg-warn-soft px-3 py-2 text-sm font-semibold text-warn">
-          No registration window is accepting submissions right now.{" "}
-          <Link href="/admin/registrations/windows" className="underline">
-            Manage windows
-          </Link>
+      {!publicEnabled ? (
+        <p className="mb-4 rounded-lg border border-line bg-subtle px-3 py-2 text-sm">
+          <strong>Public self-registration is off</strong> — /register shows &ldquo;Coming soon&rdquo;. Register players and rosters here on their behalf; give
+          them the reference so they can check the status at /register/status.
         </p>
+      ) : (
+        openWindows.length === 0 && (
+          <p className="mb-4 rounded-lg border border-warn/40 bg-warn-soft px-3 py-2 text-sm font-semibold text-warn">
+            Public registration is enabled, but no window is accepting submissions right now.{" "}
+            <Link href="/admin/registrations/windows" className="underline">
+              Manage windows
+            </Link>
+          </p>
+        )
       )}
 
       <nav aria-label="Registration status" className="-mx-1 mb-4 flex gap-1 overflow-x-auto px-1 pb-1">
@@ -209,6 +226,8 @@ export default async function RegistrationsPage({ searchParams }: PageProps<"/ad
                   <p className="flex flex-wrap items-center gap-2">
                     <RegistrationBadge status={r.status} />
                     {r.flags > 0 && <Badge tone="warn">{r.flags} possible duplicate{r.flags > 1 ? "s" : ""}</Badge>}
+                    {r.source === "ADMIN" && <Badge tone="neutral">Admin-entered</Badge>}
+                    {r.missing_documents > 0 && r.status !== "ACCEPTED_FOR_SCREENING" && r.status !== "REJECTED" && <Badge tone="muted">Documents missing</Badge>}
                   </p>
                   <p className="mt-1 text-xs text-ink-muted">
                     {r.competition.short_name} · {r.season}

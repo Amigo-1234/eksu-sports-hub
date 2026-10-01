@@ -4,12 +4,15 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ShirtIcon } from "@/components/ui/icons";
 import { formatWatDateTime } from "@/lib/admin/time";
+import { RegistrationComingSoon } from "@/components/registration/ComingSoon";
+import { publicRegistrationEnabled } from "@/lib/registration/flag";
 import { getOpenWindows } from "@/lib/registration/public";
 
 export const metadata: Metadata = { title: "Register", description: "Register as a player or register your team for EKSU competitions." };
 export const dynamic = "force-dynamic";
 
 export default async function RegisterPage() {
+  if (!publicRegistrationEnabled()) return <RegistrationComingSoon />;
   const windows = await getOpenWindows();
   return (
     <>

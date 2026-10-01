@@ -272,6 +272,25 @@ No online payments of any kind.
   `/admin/registrations/windows[/id]`. Public: `/register`,
   `/register/[slug]{,/player,/team}`, `/register/status`.
 
+#### Public switch and admin-led registration (migration `20261006001500`)
+- `PUBLIC_REGISTRATION_ENABLED` (server-only env var, default **off**). Off:
+  `/register` and every `/register/...` link show "Coming soon" (never 404),
+  and the draft/submit server actions and `POST /api/register/upload` refuse
+  requests (403). `/register/status` keeps working. On: the original public
+  flow returns unchanged (also open a window in `/admin/registrations/windows`).
+- Admins register on someone's behalf at `/admin/registrations/new`
+  (`admin_create_registration`), through the same `private.intake_registration`
+  as the public path: same validation, duplicate checks, references, inbox,
+  history and Accept for screening. Admin entries are `source = 'ADMIN'`
+  (with `created_by`), may use a closed (not archived) window, and documents
+  are optional — attach them later on the registration page
+  (`POST /admin/api/registration-document`, ADMIN session, same file checks,
+  recorded by `admin_attach_registration_document`).
+- Corrections before screening: `admin_update_registration_player` /
+  `admin_update_registration_contact` — each adds an `EDITED` history event
+  naming the changed fields and a `REGISTRATION_EDITED` audit row (matric
+  numbers and phones masked). Accepted/rejected entries can no longer be edited.
+
 ## Authentication
 Email + password through Supabase Auth (works without external services).
 Public sign-up is disabled (`[auth] enable_signup = false`); accounts are

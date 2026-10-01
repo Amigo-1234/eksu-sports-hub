@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { publicRegistrationEnabled } from "../src/lib/registration/flag.ts";
 import { checkDocument, cleanPhone, documentPath, isPhone, normaliseMatric, normaliseReference, REFERENCE_PATTERN, sniffType } from "../src/lib/registration/rules.ts";
 
 const JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0, 0, 0]);
@@ -49,4 +50,14 @@ test("references", () => {
   assert.ok(REFERENCE_PATTERN.test(normaliseReference(" eksu-fc26-7k4p2d ")));
   assert.ok(!REFERENCE_PATTERN.test("EKSU-FC26-7K4P2O"), "O is not in the alphabet");
   assert.ok(!REFERENCE_PATTERN.test("EKSU-FC26-123"));
+});
+
+test("public registration is OFF unless explicitly enabled", () => {
+  assert.equal(publicRegistrationEnabled({}), false, "unset → off");
+  assert.equal(publicRegistrationEnabled({ PUBLIC_REGISTRATION_ENABLED: "false" }), false);
+  assert.equal(publicRegistrationEnabled({ PUBLIC_REGISTRATION_ENABLED: "0" }), false);
+  assert.equal(publicRegistrationEnabled({ PUBLIC_REGISTRATION_ENABLED: "maybe" }), false);
+  assert.equal(publicRegistrationEnabled({ PUBLIC_REGISTRATION_ENABLED: "true" }), true);
+  assert.equal(publicRegistrationEnabled({ PUBLIC_REGISTRATION_ENABLED: " TRUE " }), true);
+  assert.equal(publicRegistrationEnabled({ PUBLIC_REGISTRATION_ENABLED: "1" }), true);
 });
