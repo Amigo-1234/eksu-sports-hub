@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 
 /**
  * Accessible bottom sheet built on the native <dialog>: focus is trapped,
@@ -12,6 +12,7 @@ export function Sheet({
   title,
   children,
   footer,
+  closeLabel = "Cancel",
 }: {
   open: boolean;
   onClose: () => void;
@@ -19,8 +20,10 @@ export function Sheet({
   children: ReactNode;
   /** Sticky action area (e.g. the confirm button). */
   footer?: ReactNode;
+  closeLabel?: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     const d = ref.current;
@@ -39,13 +42,13 @@ export function Sheet({
       onClick={(e) => {
         if (e.target === ref.current) onClose();
       }}
-      aria-labelledby="sheet-title"
+      aria-labelledby={titleId}
       className="fixed inset-x-0 top-auto bottom-0 m-0 mx-auto h-auto max-h-[92dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/55 open:flex sm:top-1/2 sm:bottom-auto sm:max-h-[88dvh] sm:-translate-y-1/2 sm:rounded-2xl [&:not([open])]:hidden"
     >
       {open && (
         <>
           <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line px-4 py-3">
-            <h2 id="sheet-title" className="font-display text-xl font-extrabold tracking-tight uppercase">
+            <h2 id={titleId} className="font-display text-xl font-extrabold tracking-tight uppercase">
               {title}
             </h2>
             <button
@@ -53,7 +56,7 @@ export function Sheet({
               onClick={onClose}
               className="h-11 min-w-11 rounded-lg border border-line px-3 text-sm font-bold text-ink-muted hover:bg-subtle"
             >
-              Cancel
+              {closeLabel}
             </button>
           </div>
           {/* flex: 1 1 auto (not flex-1's 0% basis): WebKit/iPad collapses a 0%-basis

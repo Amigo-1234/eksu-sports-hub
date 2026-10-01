@@ -149,3 +149,33 @@ export const CardIcon = ({ color, ...p }: IconProps & { color: "yellow" | "red" 
     />
   </svg>
 );
+
+export const BellIcon = ({ filled, ...p }: IconProps & { filled?: boolean }) => (
+  <svg {...base(p)}>
+    <path d="M6 9.5a6 6 0 0 1 12 0c0 4.5 1.8 6.5 2.5 7.2H3.5C4.2 16 6 14 6 9.5Z" fill={filled ? "currentColor" : "none"} />
+    <path d="M10 20a2.2 2.2 0 0 0 4 0" />
+  </svg>
+);
+
+export const HeartIcon = ({ filled, ...p }: IconProps & { filled?: boolean }) => (
+  <svg {...base(p)}>
+    <path
+      d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20Z"
+      fill={filled ? "currentColor" : "none"}
+    />
+  </svg>
+);
+
+export const ShareIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M12 3v12M8 7l4-4 4 4" />
+    <path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1" />
+  </svg>
+);
+
+export const PlusSquareIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="3.5" y="3.5" width="17" height="17" rx="3" />
+    <path d="M12 8v8M8 12h8" />
+  </svg>
+);

@@ -2,8 +2,10 @@ import type { ReactNode } from "react";
 import { AppHeader } from "./AppHeader";
 import { BottomNav } from "./BottomNav";
 import { SiteFooter } from "./SiteFooter";
+import { AlertsProvider } from "@/components/notifications/AlertsProvider";
 import { NavigationTracker } from "@/components/ui/BackLink";
-import { getMatches } from "@/lib/data";
+import { DATA_SOURCE_KIND, getMatches } from "@/lib/data";
+import { pushNotificationsEnabled } from "@/lib/notifications/server";
 
 async function liveMatchCount(): Promise<number> {
   try {
@@ -17,8 +19,10 @@ async function liveMatchCount(): Promise<number> {
 /** Chrome for the public app: header, content area, footer, bottom nav. */
 export async function PublicShell({ children }: { children: ReactNode }) {
   const liveCount = await liveMatchCount();
+  // Alerts need real match IDs (live data), the server flag and the public VAPID key.
+  const alerts = DATA_SOURCE_KIND === "live" && pushNotificationsEnabled();
   return (
-    <>
+    <AlertsProvider available={alerts} vapidKey={alerts ? (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "") : ""}>
       <a
         href="#main"
         className="sr-only z-50 rounded-md bg-accent-500 px-4 py-2 font-semibold text-ink focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
@@ -35,6 +39,6 @@ export async function PublicShell({ children }: { children: ReactNode }) {
       <SiteFooter />
       <BottomNav liveCount={liveCount} />
       <NavigationTracker />
-    </>
+    </AlertsProvider>
   );
 }

@@ -32,6 +32,7 @@ Development accounts (password = `DEV_USER_PASSWORD`):
 | `npm run test:db` | pgTAP (105): RLS/privileges per role, state machine, scoring, idempotency, voids, discipline/squad rules, clock, takeover, audit immutability, standings |
 | `npm run test:backend` | API over HTTP with real sign-ins: parallel duplicate retries, 20 concurrent events from two sessions, direct REST writes rejected, persistence from a fresh session |
 | `npm run test:operator` | Frontend engine + canonical reconciliation |
+| `npm run test:notifications` | Alert preferences, iOS/iPadOS/unsupported detection, push-result classification, feature flag, service worker (push / click / subscription rotation in a sandbox) |
 
 ## Architecture
 
@@ -291,6 +292,67 @@ No online payments of any kind.
   `admin_update_registration_contact` — each adds an `EDITED` history event
   naming the changed fields and a `REGISTRATION_EDITED` audit row (matric
   numbers and phones masked). Accepted/rejected entries can no longer be edited.
+
+### Match alerts — Web Push, no accounts (migration `20261007001600`)
+Anonymous, per-device notifications for followed matches and teams.
+
+- **Device identity.** `service_notify_register` (service_role only) mints a
+  256-bit random token; the browser gets it only as the httpOnly, Secure,
+  SameSite=Lax cookie `eksu_alerts`, and Postgres stores only its SHA-256.
+  No names, emails, phones or accounts. Every read/write goes through the
+  Next.js server (`src/app/(public)/notifications/actions.ts`) into
+  `service_notify_*` functions with that token; all notification tables have
+  forced RLS and no grants, so no browser (anon, signed-in, or admin) can
+  enumerate devices, endpoints, keys or anyone else's follows.
+- **Preferences.** `match_notification_preferences` (enabled=false = muted)
+  and `team_notification_preferences`, with event keys REMINDER, KICKOFF, GOAL,
+  YELLOW_CARD, RED_CARD, HALF_TIME, SECOND_HALF, FULL_TIME, STATUS. A match
+  setting decides alone for that match (including mute); otherwise the union
+  of the followed teams applies. Only public matches/active teams can be
+  followed; limits 200 matches / 50 teams per device.
+- **Transactional outbox.** Deferred constraint triggers on `match_events`
+  (insert/void) and `matches` (status, kick-off time) write
+  `notification_outbox` rows in the same transaction as the match change —
+  never more than once (`event_key` unique: `EVT:<event>`, `KO:`/`HT:`/`2H:`/
+  `FT:<match>`, `ST:<status>:<match>:<kick-off>`, `REM:<match>:<kick-off>`).
+  The trigger body can never fail a match write (exceptions → warning).
+  Content is built in Postgres from canonical data (`notification_content`);
+  clients cannot submit notification text. Unknown scorers are omitted.
+  Only live-match events (1H/HT/2H) push. DEMO/TEST matches reach match
+  followers only and are prefixed "TEST · "/"DEMO · ".
+- **Voids.** A goal voided before sending is cancelled. If it was sent, a
+  `SCORE_CORRECTION` goes to exactly the devices that received it, with the
+  same tag so it replaces the goal notification; the goal is never re-sent.
+  Voided cards are silently dropped.
+- **Reminders.** `enqueue_due_reminders` (run by every dispatch) queues one
+  reminder ~15 min before kick-off per kick-off time; a moved, postponed,
+  cancelled or started match drops queued reminders.
+- **Fan-out and delivery.** `service_notification_claim` fans intents out to
+  one `notification_deliveries` row per device (`unique (outbox_id,
+  device_id)` — following both teams + the match still yields one push),
+  leases due deliveries for 2 min and returns endpoints/keys to the
+  dispatcher only. `POST /api/notifications/dispatch` (Bearer
+  `NOTIFICATIONS_DISPATCH_SECRET`) sends with `web-push` (VAPID, aes128gcm)
+  and reports back: 2xx SENT; 404/410 GONE (subscription invalidated);
+  408/429/5xx/network RETRY with backoff 30s·2ⁿ, FAILED after 5 attempts;
+  other 4xx FAILED. Intents older than 30 min expire; old rows are purged
+  after 14 days. Nothing in the dispatcher touches match state.
+- **Triggering the dispatcher.** After an outbox insert, `notification_kick()`
+  calls the route through `pg_net` when installed, configured
+  (`private.notification_config.dispatch_url`) and the Vault secret
+  `notifications_dispatch_secret` exists; `pg_cron` calls it every minute as
+  the safety net (and for reminders).
+- **Browser.** `public/sw.js` only shows pushes, routes taps (focus the match
+  tab, else reuse a window, else open one; same-origin paths only) and
+  re-registers rotated subscriptions (`POST /api/notifications/subscription`,
+  same-origin, cookie device only). No caching. The provider repairs a lost
+  subscription once a day. iPhone/iPad in a browser tab get the "Add to Home
+  Screen" guide instead of a permission prompt; permission is only requested
+  from the confirm button.
+- **Switch.** `PUSH_NOTIFICATIONS_ENABLED=true` plus
+  `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (and server-only `VAPID_PRIVATE_KEY`,
+  `VAPID_SUBJECT`, `NOTIFICATIONS_DISPATCH_SECRET`). Off (default): no alert
+  UI, no service worker, actions refuse, dispatcher skips.
 
 ## Authentication
 Email + password through Supabase Auth (works without external services).

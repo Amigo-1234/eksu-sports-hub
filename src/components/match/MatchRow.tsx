@@ -5,6 +5,7 @@ import { matchAccessibleLabel, matchHref, matchWinner } from "@/lib/match";
 import { isDisrupted, isLive, showsScore } from "@/lib/status";
 import type { MatchSummary, Team } from "@/lib/types";
 import { MatchStatusLabel } from "./MatchStatusLabel";
+import { FollowedBell } from "@/components/notifications/FollowedBell";
 
 /**
  * Dense, scannable match row used in every list. The whole row is one link
@@ -39,6 +40,7 @@ export function MatchRow({
 
       <div className="flex flex-col items-center justify-center text-center text-[13px] leading-tight">
         <MatchStatusLabel match={match} serverNow={serverNow} />
+        <FollowedBell matchId={match.id} teamIds={[match.homeTeamId, match.awayTeamId]} status={match.status} className="mt-1" />
         {showDate && (
           <span className="mt-0.5 text-[11px] font-medium text-ink-faint" aria-hidden="true">
             {formatShortDate(match.kickoffAt).replace(/^\w+ /, "")}

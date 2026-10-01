@@ -13,7 +13,8 @@
     "test:backend": "node --env-file-if-exists=.env.local --test tests/backend/api.test.mjs",
     "test:db": "supabase test db",
     "test:admin": "node --experimental-strip-types --no-warnings --test tests/admin-helpers.test.ts",
-    "test:registration": "node --experimental-strip-types --no-warnings --test tests/registration.test.ts"
+    "test:registration": "node --experimental-strip-types --no-warnings --test tests/registration.test.ts",
+    "test:notifications": "node --experimental-strip-types --no-warnings --test tests/notifications.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -21,13 +22,15 @@
     "next": "16.3.6",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
     "supabase": "^2.118.0",

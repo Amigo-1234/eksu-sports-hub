@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { HeadToHeadPanel, type PreMatchTeam } from "@/components/match/MatchPanels";
 import { LiveLineupsPanel, LiveMatchHero, LiveMatchProvider, LiveStatsPanel, LiveSummaryPanel } from "@/components/realtime/LiveMatch";
 import { MatchTabs } from "@/components/match/MatchTabs";
+import { MatchAlertsButton } from "@/components/notifications/MatchAlertsButton";
 import { BackLink } from "@/components/ui/BackLink";
 import { DemoNotice } from "@/components/ui/DemoNotice";
 import { DATA_SOURCE_KIND, getHeadToHead, getMatch, getMatches, getNow, getStandings } from "@/lib/data";
@@ -50,6 +51,14 @@ export default async function MatchPage({ params }: PageProps<"/matches/[id]">) 
     <div className="pt-2 sm:pt-4">
       <BackLink />
       <LiveMatchHero serverNow={now} />
+      <div className="mt-3 flex justify-end empty:hidden">
+        <MatchAlertsButton
+          matchId={match.id}
+          status={match.status}
+          home={{ id: match.homeTeam.id, name: match.homeTeam.name, shortName: match.homeTeam.shortName }}
+          away={{ id: match.awayTeam.id, name: match.awayTeam.name, shortName: match.awayTeam.shortName }}
+        />
+      </div>
       <div className="mt-2">
         <MatchTabs
           tabs={[

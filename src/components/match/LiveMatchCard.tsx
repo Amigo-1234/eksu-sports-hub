@@ -9,6 +9,7 @@ import { eventMinute } from "@/lib/events";
 import type { MatchEvent, MatchEventType, MatchSummary, Team } from "@/lib/types";
 import { LiveMinute } from "./LiveMinute";
 import { LiveDot } from "./MatchStatusLabel";
+import { FollowedBell } from "@/components/notifications/FollowedBell";
 
 const LAST_EVENT: Record<MatchEventType, string> = {
   GOAL: "Goal",
@@ -43,8 +44,11 @@ export function LiveMatchCard({ match: initial, serverNow }: { match: MatchSumma
       className="group block overflow-hidden rounded-card border border-line bg-surface transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-sm"
     >
       <div className="flex items-center justify-between gap-3 border-b border-line px-3.5 py-2">
-        <p className="min-w-0 truncate text-[11px] font-semibold tracking-wide text-ink-faint uppercase">
-          {match.competition.shortName} <span aria-hidden="true">·</span> {match.round}
+        <p className="flex min-w-0 items-center gap-1.5 text-[11px] font-semibold tracking-wide text-ink-faint uppercase">
+          <FollowedBell matchId={match.id} teamIds={[match.homeTeamId, match.awayTeamId]} status={match.status} className="shrink-0" />
+          <span className="truncate">
+            {match.competition.shortName} <span aria-hidden="true">·</span> {match.round}
+          </span>
         </p>
         <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-live px-2 py-0.5 text-xs font-bold text-white">
           <span className="relative inline-flex size-1.5" aria-hidden="true">

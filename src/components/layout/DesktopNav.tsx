@@ -8,7 +8,7 @@ export function DesktopNav({ liveCount }: { liveCount: number }) {
   const pathname = usePathname();
   return (
     <nav aria-label="Primary" className="ml-auto hidden md:block">
-      <ul className="flex items-center gap-1">
+      <ul className="flex items-center gap-0.5 lg:gap-1">
         {NAV_ITEMS.map(({ href, label }) => {
           const active = isActivePath(pathname, href);
           return (
@@ -16,7 +16,7 @@ export function DesktopNav({ liveCount }: { liveCount: number }) {
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex h-9 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold whitespace-nowrap transition-colors lg:px-3.5 ${
+                className={`flex h-9 items-center gap-1.5 rounded-full px-2 text-sm font-semibold whitespace-nowrap transition-colors lg:px-3.5 ${
                   active ? "bg-brand-700 text-white" : "text-ink-muted hover:bg-subtle hover:text-ink"
                 }`}
               >

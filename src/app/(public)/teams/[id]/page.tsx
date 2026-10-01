@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LiveMatchCard } from "@/components/match/LiveMatchCard";
 import { MatchCardList } from "@/components/match/MatchList";
+import { TeamFollowButton } from "@/components/notifications/TeamFollowButton";
 import { StandingsTable } from "@/components/standings/StandingsTable";
 import { FormGuide } from "@/components/team/FormGuide";
 import { TeamCrest } from "@/components/team/TeamCrest";
@@ -69,6 +70,9 @@ export default async function TeamPage({ params }: PageProps<"/teams/[id]">) {
               </li>
             ))}
           </ul>
+          <div className="mt-3 empty:hidden">
+            <TeamFollowButton teamId={team.id} teamName={team.name} />
+          </div>
         </div>
       </section>
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DesktopNav } from "./DesktopNav";
 import { EksuLogo } from "./EksuLogo";
+import { HeaderAlertsLink } from "@/components/notifications/HeaderAlertsLink";
 import { ShirtIcon, TrophyIcon } from "@/components/ui/icons";
 
 /** Compact branded app bar. Primary nav lives here on md+, in BottomNav on phones. */
@@ -19,7 +20,7 @@ export function AppHeader({ liveCount }: { liveCount: number }) {
         >
           <EksuLogo height={34} priority />
           <span
-            className="border-l border-line pl-2 font-display text-[17px] leading-none font-extrabold tracking-tight text-brand-700 uppercase max-[339px]:hidden"
+            className="border-l border-line pl-2 font-display text-[17px] leading-none font-extrabold tracking-tight text-brand-700 uppercase max-[339px]:hidden md:max-lg:hidden"
             aria-hidden="true"
           >
             Sports
@@ -27,18 +28,24 @@ export function AppHeader({ liveCount }: { liveCount: number }) {
         </Link>
 
         <DesktopNav liveCount={liveCount} />
+        <div className="hidden md:block">
+          <HeaderAlertsLink />
+        </div>
 
-        <div className="ml-auto flex items-center gap-1 md:hidden">
+        <div className="ml-auto flex items-center gap-0.5 md:hidden">
           {liveCount > 0 && (
             <Link
               href="/live"
+              aria-label={`${liveCount} live ${liveCount === 1 ? "match" : "matches"}`}
               className="flex h-9 items-center gap-1.5 rounded-full bg-live-soft px-3 text-xs font-bold tracking-wide whitespace-nowrap text-live uppercase hover:bg-live/15"
             >
               <span className="relative flex size-2" aria-hidden="true">
                 <span className="absolute inset-0 rounded-full bg-live motion-safe:animate-live-pulse" />
                 <span className="relative size-2 rounded-full bg-live" />
               </span>
-              {liveCount} Live
+              {liveCount}
+              {/* Phones keep the count only: room for the Register, Competitions and Alerts icons. */}
+              <span className="max-sm:hidden">Live</span>
             </Link>
           )}
           <Link
@@ -55,6 +62,7 @@ export function AppHeader({ liveCount }: { liveCount: number }) {
           >
             <TrophyIcon size={21} />
           </Link>
+          <HeaderAlertsLink />
         </div>
       </div>
     </header>
