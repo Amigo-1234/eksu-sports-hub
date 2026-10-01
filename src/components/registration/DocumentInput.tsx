@@ -41,6 +41,7 @@ export function DocumentInput({
   onChange,
   getToken,
   error,
+  optional = false,
 }: {
   kind: DocKind;
   label: string;
@@ -50,6 +51,7 @@ export function DocumentInput({
   onChange: (doc: UploadedDoc | null) => void;
   getToken: () => Promise<string | null>;
   error?: string;
+  optional?: boolean;
 }) {
   const id = useId();
   const [busy, setBusy] = useState(false);
@@ -87,7 +89,7 @@ export function DocumentInput({
   return (
     <div className={`rounded-card border p-3 ${shown ? "border-loss" : "border-line"} bg-surface`}>
       <p className="text-sm font-bold" id={`${id}-label`}>
-        {label} <span className="text-loss">*</span>
+        {label} {!optional && <span className="text-loss">*</span>}
       </p>
       <p className="text-xs text-ink-muted">{hint}</p>
       <div className="mt-2 flex items-center gap-3">

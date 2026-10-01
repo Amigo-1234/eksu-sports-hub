@@ -12,7 +12,8 @@ import { btn, inputCls, selectCls } from "./ui";
  * official's roster) on someone's behalf. It goes through the SAME intake
  * as the public form (admin_create_registration → private.intake_registration):
  * reference, duplicate checks, inbox, history, and Accept for screening.
- * Documents are attached on the registration page afterwards, if available.
+ * Documents are attached on the registration page afterwards, if available
+ * (passport photo recommended; student ID evidence optional).
  */
 
 const blank = (): AdminPersonInput & { key: string } => ({
@@ -265,7 +266,7 @@ export function AdminDocumentUpload({ registrationId, personId, kind, has }: { r
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const label = kind === "photo" ? "photo" : "ID evidence";
+  const label = kind === "photo" ? "photo" : "ID";
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
       <label className={`${btn.small} cursor-pointer ${busy ? "pointer-events-none opacity-60" : ""}`}>

@@ -10,8 +10,9 @@
 --
 -- Changes:
 --   * registrations.source ('PUBLIC' | 'ADMIN') and created_by (the admin).
---   * Documents become optional on admin-created entries (attached later or
---     not at all); the public path still requires both, as before.
+--   * Student ID evidence is OPTIONAL everywhere (public and admin): it can be
+--     attached later, and is never needed to submit, review or accept. The
+--     passport photo stays required on the public form and optional for admins.
 --   * admin_create_registration — any non-archived window, open or closed
 --     (admins may register after public intake closes).
 --   * admin_update_registration_player / admin_update_registration_contact —
@@ -92,9 +93,10 @@ end $$;
 -- ── 3. Shared intake (public and admin) ────────────────────────────────────
 /*
  * Stores one registration. p_admin = false: the public path (window must be
- * OPEN inside its dates and allow this type; both documents required).
+ * OPEN inside its dates and allow this type; passport photo required,
+ * student ID evidence optional).
  * p_admin = true: an ADMIN registering on someone's behalf (any window that
- * is not archived; documents optional, but if given they must be this
+ * is not archived; both documents optional). Any document given must be this
  * entry's own stored objects). Duplicate rules are identical for both.
  */
 create or replace function private.intake_registration(p jsonb, p_admin boolean)
@@ -194,7 +196,8 @@ begin
        or not exists (select 1 from storage.objects o where o.bucket_id = 'registration-documents' and o.name = v_photo))) then
       raise exception 'Player %: upload a passport photograph', i using errcode = 'EK422';
     end if;
-    if (v_doc is null and not p_admin) or (v_doc is not null and (v_doc !~ ('^' || v_id || '/' || v_pid || '/id\.(jpg|png|webp|pdf)$')
+    -- Student ID evidence is optional for everyone (screening staff may still ask for it in person).
+    if (v_doc is not null and (v_doc !~ ('^' || v_id || '/' || v_pid || '/id\.(jpg|png|webp|pdf)$')
        or not exists (select 1 from storage.objects o where o.bucket_id = 'registration-documents' and o.name = v_doc))) then
       raise exception 'Player %: upload a student ID card, course form or admission letter', i using errcode = 'EK422';
     end if;
@@ -413,8 +416,9 @@ begin
           else jsonb_build_object('id', t.id, 'short_name', t.short_name) end,
         'players', (select count(*) from public.registration_players rp where rp.registration_id = r.id),
         'first_player', (select rp.full_name from public.registration_players rp where rp.registration_id = r.id order by rp.sort_order limit 1),
+        -- Only a missing passport photo is flagged; student ID evidence is optional.
         'missing_documents', (select count(*) from public.registration_players rp where rp.registration_id = r.id
-          and (rp.passport_photo_path is null or rp.student_id_document_path is null)),
+          and rp.passport_photo_path is null),
         'flags', (select count(*) from public.registration_players rp where rp.registration_id = r.id
           and jsonb_array_length(private.registration_duplicates(rp.id)) > 0)) as j
       from public.registrations r

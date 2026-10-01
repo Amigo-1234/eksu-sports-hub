@@ -33,7 +33,7 @@ export default async function WindowPage({ params }: PageProps<"/register/[slug]
             <li>Full name, phone number, matric / student number</li>
             <li>Faculty, department and level</li>
             <li>A clear passport photograph</li>
-            <li>Student ID card, course registration form or admission letter (photo or PDF, max 4 MB)</li>
+            <li>Optional: student ID card, course registration form or admission letter (photo or PDF, max 4 MB)</li>
           </ul>
         </section>
         <div className="grid gap-3 sm:grid-cols-2">

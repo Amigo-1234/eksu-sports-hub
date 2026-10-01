@@ -1,6 +1,6 @@
 begin;
 \ir helpers.inc
-select plan(45);
+select plan(52);
 
 create temp table u as select
   tests.make_user('admin9@test.local', array['ADMIN']) as admin,
@@ -10,7 +10,7 @@ grant usage on schema tests to service_role;
 
 -- Synthetic test data only: TEST names, TST matric numbers, 0800000000x phones.
 create temp table ids (k text primary key, id uuid not null default gen_random_uuid());
-insert into ids (k) select unnest(array['win', 'dep', 'pub', 'pubp', 'self', 'team', 'link']);
+insert into ids (k) select unnest(array['win', 'dep', 'pub', 'pubp', 'pub2', 'pub2p', 'self', 'team', 'link']);
 grant select, update on ids to anon, authenticated, service_role;
 create or replace function tests.id(k text) returns uuid language sql stable as $$ select id from ids where ids.k = id.k $$;
 create or replace function tests.t(n int) returns uuid language sql immutable as $$ select ('70000000-0000-4000-8000-00000000000' || n)::uuid $$;
@@ -68,6 +68,20 @@ select lives_ok($$ select public.service_submit_registration(jsonb_build_object(
   'a public submission while the window is open (pre-existing data)');
 reset role;
 select is((tests.r(tests.id('pub'))).source, 'PUBLIC', 'public submissions are marked PUBLIC');
+-- Student ID evidence is optional on the public path too (photo only).
+insert into storage.objects (bucket_id, name) values ('registration-documents', tests.id('pub2') || '/' || tests.id('pub2p') || '/photo.jpg');
+set local role service_role;
+select lives_ok($$ select public.service_submit_registration(jsonb_build_object('id', tests.id('pub2'), 'window_id', tests.id('win'),
+  'type', 'PLAYER_SELF', 'team_id', tests.t(1), 'submitter', jsonb_build_object('name', 'Test Public NoID', 'phone', '08000000908'),
+  'players', jsonb_build_array(tests.person('Test Public NoID', 'TST/26/5008', tests.t(1)) || jsonb_build_object('id', tests.id('pub2p'),
+    'photo_path', tests.id('pub2') || '/' || tests.id('pub2p') || '/photo.jpg'))), null) $$,
+  'a public submission WITHOUT student ID evidence is accepted (photo only)');
+select throws_ok($$ select public.service_submit_registration(jsonb_build_object('id', gen_random_uuid(), 'window_id', tests.id('win'),
+  'type', 'PLAYER_SELF', 'team_id', tests.t(1), 'submitter', jsonb_build_object('name', 'Test Public NoPhoto', 'phone', '08000000907'),
+  'players', jsonb_build_array(tests.person('Test Public NoPhoto', 'TST/26/5007', tests.t(1)) || jsonb_build_object('id', gen_random_uuid()))), null) $$,
+  'EK422', 'Player 1: upload a passport photograph', 'the public form still requires a passport photo');
+reset role;
+select ok((tests.rp_of(tests.id('pub2'), 1)).student_id_document_path is null, 'stored with no student ID document');
 select tests.login((select admin from u));
 select lives_ok($$ select public.admin_set_registration_window_status(tests.id('win'), 'CLOSED') $$, 'admin closes public intake (window kept, audited)');
 reset role;
@@ -154,11 +168,20 @@ select throws_ok($$ select public.admin_attach_registration_document((tests.rp_o
 select lives_ok($$ select public.admin_attach_registration_document((tests.rp_of(tests.id('self'), 1)).id, 'photo',
   tests.id('self') || '/' || (tests.rp_of(tests.id('self'), 1)).id || '/photo.jpg') $$, 'admin attaches a passport photo');
 select is(tests.events(tests.id('self'), 'DOCUMENT_ATTACHED'), 1, 'attachment recorded in history');
+reset role;
+insert into storage.objects (bucket_id, name) values
+  ('registration-documents', tests.id('team') || '/' || (tests.rp_of(tests.id('team'), 1)).id || '/id.pdf');
+select tests.login((select admin from u));
+select lives_ok($$ select public.admin_attach_registration_document((tests.rp_of(tests.id('team'), 1)).id, 'id',
+  tests.id('team') || '/' || (tests.rp_of(tests.id('team'), 1)).id || '/id.pdf') $$, 'student ID evidence can be attached later');
+select ok(tests.audits('REGISTRATION_DOCUMENT_ATTACHED') >= 2, 'later ID attachment is audited');
 
 -- ── Accept for screening: PENDING only ─────────────────────────────────────
-select is((public.admin_accept_registration(tests.id('self'))) ->> 'created', '1', 'admin-created registration can be accepted for screening');
+select ok((tests.rp_of(tests.id('self'), 1)).student_id_document_path is null, 'no student ID document attached before acceptance');
+select is((public.admin_accept_registration(tests.id('self'))) ->> 'created', '1', 'admin-created registration can be accepted for screening without student ID evidence');
 select is(tests.screening_of(tests.id('self')), 'PENDING',
   'acceptance opens a PENDING screening');
+select lives_ok($$ select public.admin_review_registration(tests.id('team'), 'UNDER_REVIEW') $$, 'a roster with no ID documents can be marked Under review');
 select lives_ok($$ select public.admin_reject_registration_player((tests.rp_of(tests.id('team'), 3)).id, 'TEST: not eligible') $$, 'leave one roster entry out');
 select is((public.admin_accept_registration(tests.id('team'))) ->> 'created', '2', 'the rest of the roster is accepted');
 select is(tests.cleared(), (select cleared from before), 'nobody is CLEARED automatically');

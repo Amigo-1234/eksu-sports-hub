@@ -643,7 +643,7 @@ function Review({
             ["Personal", [["Name", p.full_name], ["Phone", p.phone], ["Email", draft.submitter.email]]],
             ["Academic", [["Matric no.", p.matric_number], ["Faculty", org(p)], ["Level", LEVEL_LABEL[p.level as keyof typeof LEVEL_LABEL] ?? ""]]],
             ["Football", [["Position", POSITION_LABEL[p.position as keyof typeof POSITION_LABEL] ?? ""]]],
-            ["Documents", [["Photo", p.photo ? "Uploaded" : "Missing"], ["ID evidence", p.idDoc ? "Uploaded" : "Missing"]]],
+            ["Documents", [["Photo", p.photo ? "Uploaded" : "Missing"], ["Student ID", p.idDoc ? "Uploaded" : "Not provided (optional)"]]],
           ] as [string, [string, string][]][]
         ).map(([title, rows]) => (
           <div key={title} className="rounded-lg border border-line px-3 py-2">
@@ -697,7 +697,8 @@ function Review({
               </span>
               <span className="block text-xs text-ink-muted">
                 {p.matric_number} · {org(p)} · {LEVEL_LABEL[p.level as keyof typeof LEVEL_LABEL] ?? p.level} · {p.position}
-                {p.photo && p.idDoc ? " · documents uploaded" : " · documents missing"}
+                {p.photo ? " · photo uploaded" : " · photo missing"}
+                {p.idDoc ? " · student ID uploaded" : " · student ID not provided"}
               </span>
               {duplicateKeys.has(normaliseMatric(p.matric_number)) && <span className="text-xs font-bold text-loss">Duplicate matric number</span>}
             </li>

@@ -283,7 +283,8 @@ No online payments of any kind.
   as the public path: same validation, duplicate checks, references, inbox,
   history and Accept for screening. Admin entries are `source = 'ADMIN'`
   (with `created_by`), may use a closed (not archived) window, and documents
-  are optional — attach them later on the registration page
+  are optional for admins (the public form requires a passport photo); student
+  ID evidence is optional everywhere — attach either later on the registration page
   (`POST /admin/api/registration-document`, ADMIN session, same file checks,
   recorded by `admin_attach_registration_document`).
 - Corrections before screening: `admin_update_registration_player` /

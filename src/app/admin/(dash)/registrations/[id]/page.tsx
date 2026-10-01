@@ -133,7 +133,11 @@ function EditContact({ r }: { r: RegistrationDetail }) {
 
 function DocumentLink({ url, label, isPdf }: { url: string | null | undefined; label: string; isPdf: boolean }) {
   if (!url)
-    return <span className="grid h-28 w-28 shrink-0 place-items-center rounded-lg border border-dashed border-line-strong px-2 text-center text-xs font-semibold text-ink-muted">No {label.toLowerCase()} yet</span>;
+    return (
+      <span className="grid h-28 w-28 shrink-0 place-items-center rounded-lg border border-dashed border-line-strong px-2 text-center text-xs font-semibold text-ink-muted">
+        No {label.toLowerCase()} yet
+      </span>
+    );
   return (
     <a href={url} target="_blank" rel="noopener noreferrer" className="group block w-28 shrink-0" title={`${label} (link expires in 10 minutes)`}>
       {isPdf ? (
@@ -144,6 +148,17 @@ function DocumentLink({ url, label, isPdf }: { url: string | null | undefined; l
       )}
       <span className="mt-1 block text-xs font-semibold text-brand-700 group-hover:underline">{label} ↗</span>
     </a>
+  );
+}
+
+/** Student ID evidence is optional: "Not provided" is a normal state, not an error. */
+function StudentIdTile({ url, isPdf }: { url: string | null | undefined; isPdf: boolean }) {
+  if (url) return <DocumentLink url={url} label="Student ID" isPdf={isPdf} />;
+  return (
+    <span className="grid h-28 w-28 shrink-0 place-content-center gap-0.5 rounded-lg border border-line bg-subtle px-2 text-center text-xs">
+      <span className="font-bold">Student ID:</span>
+      <span className="text-ink-muted">Not provided</span>
+    </span>
   );
 }
 
@@ -170,7 +185,7 @@ function Person({
       <div className="flex flex-wrap items-start gap-4">
         <div className="flex gap-2">
           <DocumentLink url={p.photo_url} label="Photo" isPdf={false} />
-          <DocumentLink url={p.id_url} label="ID evidence" isPdf={Boolean(p.id_path?.endsWith(".pdf"))} />
+          <StudentIdTile url={p.id_url} isPdf={Boolean(p.id_path?.endsWith(".pdf"))} />
         </div>
         <div className="min-w-0 flex-[1_1_14rem] space-y-1 text-sm">
           <p className="flex flex-wrap items-center gap-2">
@@ -250,7 +265,8 @@ export default async function RegistrationPage({ params, searchParams }: PagePro
   const [r, options] = await Promise.all([getRegistration(id), getIntakeOptions()]);
   if (!r) notFound();
   const teams = r.type === "TEAM_ROSTER" ? [] : (options.windows.find((w) => w.id === r.window.id)?.teams ?? []);
-  const missingDocs = r.players.filter((p) => p.status === "SUBMITTED" && (!p.photo_path || !p.id_path)).length;
+  // Only a missing passport photo is worth a warning; student ID evidence is optional.
+  const missingPhotos = r.players.filter((p) => p.status === "SUBMITTED" && !p.photo_path).length;
   const open = ["SUBMITTED", "UNDER_REVIEW", "NEEDS_CORRECTION"].includes(r.status);
   const waiting = r.players.filter((p) => p.status === "SUBMITTED").length;
   return (
@@ -269,10 +285,10 @@ export default async function RegistrationPage({ params, searchParams }: PagePro
         {r.status_reason && <span className="text-sm">— {r.status_reason}</span>}
         {r.source === "ADMIN" && <Badge tone="neutral">Entered by {r.created_by ?? "an administrator"}</Badge>}
       </div>
-      {missingDocs > 0 && (
-        <p className="mb-4 rounded-lg border border-warn/40 bg-warn-soft px-3 py-2 text-sm font-semibold text-warn">
-          {missingDocs} entr{missingDocs === 1 ? "y has" : "ies have"} no passport photo or ID evidence yet. Attach them below if available, or verify identity at
-          the physical screening.
+      {missingPhotos > 0 && (
+        <p className="mb-4 rounded-lg border border-line bg-subtle px-3 py-2 text-sm">
+          {missingPhotos} entr{missingPhotos === 1 ? "y has" : "ies have"} no passport photo yet — attach one below if available. Student ID evidence is optional;
+          screening staff can check the physical ID in person.
         </p>
       )}
       {r.status === "ACCEPTED_FOR_SCREENING" && (
@@ -290,7 +306,7 @@ export default async function RegistrationPage({ params, searchParams }: PagePro
         </Card>
       )}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <Card title={`${r.type === "TEAM_ROSTER" ? "Roster" : "Player"} · ${r.players.length}`} description="Documents open as private links that expire after 10 minutes.">
+        <Card title={`${r.type === "TEAM_ROSTER" ? "Roster" : "Player"} · ${r.players.length}`} description="Documents open as private links that expire after 10 minutes. Student ID evidence is optional.">
           <ol className="divide-y divide-line">
             {r.players.map((p, i) => (
               <Person

@@ -53,7 +53,6 @@ export function personErrors(p: Person, faculties: RegFaculty[], sections: Secti
   if (sections.includes("football") && !(POSITIONS as readonly string[]).includes(p.position)) e.position = "Choose a preferred position.";
   if (sections.includes("documents")) {
     if (!p.photo) e.photo = "Upload a passport photograph.";
-    if (!p.idDoc) e.idDoc = "Upload the student ID card, course form or admission letter.";
   }
   return e;
 }
@@ -261,8 +260,9 @@ export function PersonSection({
       />
       <DocumentInput
         kind="id"
-        label="Student ID evidence"
-        hint="Student ID card, course registration form or admission letter. Photo or PDF, max 4 MB."
+        label="Student ID evidence (optional)"
+        optional
+        hint="Student ID card, course registration form or admission letter, if you have it. Photo or PDF, max 4 MB. You can also bring it to screening."
         personId={person.id}
         value={person.idDoc}
         onChange={(d) => set({ idDoc: d })}
