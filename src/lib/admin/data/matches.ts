@@ -1,4 +1,5 @@
 import "server-only";
+import type { AudienceSummary } from "@/lib/audience/types";
 import { dateKey } from "@/lib/format";
 import { watDayRange } from "../time";
 import type { LiveMatch, MatchFilters, MatchRow, MatchStatus } from "../types";
@@ -115,4 +116,15 @@ export async function listEventTypes(): Promise<{ code: string; name: string; re
 /** Today's campus-day key, computed on the server. */
 export function todayKey(): string {
   return dateKey(Date.now());
+}
+
+/** Private audience numbers (ADMIN). Null when unavailable: analytics never breaks an admin page. */
+export async function getMatchAudience(id: string): Promise<AudienceSummary | null> {
+  try {
+    const { db } = await adminDb();
+    const { data, error } = await db.rpc("admin_match_audience", { p_match_id: id });
+    return error ? null : (data as AudienceSummary);
+  } catch {
+    return null;
+  }
 }

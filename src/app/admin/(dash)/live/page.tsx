@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AutoRefresh } from "@/components/admin/AutoRefresh";
 import { LiveMatchCard } from "@/components/admin/LiveMatchCard";
 import { Card, Empty, PageTitle } from "@/components/admin/ui";
-import { listLiveMatches } from "@/lib/admin/data/matches";
+import { getMatchAudience, listLiveMatches } from "@/lib/admin/data/matches";
 import { serverNow } from "@/lib/admin/time";
 
 export const metadata: Metadata = { title: "Live Matches" };
@@ -10,6 +10,7 @@ export const metadata: Metadata = { title: "Live Matches" };
 /** Monitoring only — actions happen on the match page, never as a second operator console. */
 export default async function LivePage() {
   const live = await listLiveMatches();
+  const audience = await Promise.all(live.map((m) => getMatchAudience(m.match.id)));
   const now = serverNow();
   return (
     <>
@@ -24,8 +25,8 @@ export default async function LivePage() {
         </Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {live.map((m) => (
-            <LiveMatchCard key={m.match.id} m={m} now={now} />
+          {live.map((m, i) => (
+            <LiveMatchCard key={m.match.id} m={m} now={now} audience={audience[i]} />
           ))}
         </div>
       )}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { LiveMatch } from "@/lib/admin/types";
+import type { AudienceSummary } from "@/lib/audience/types";
 import { formatWatDateTime } from "@/lib/admin/time";
 import { formatTime } from "@/lib/format";
 import { clockLabel } from "@/lib/admin/clock";
@@ -26,7 +27,7 @@ function ago(iso: string | null, now: number): string {
   return formatWatDateTime(iso);
 }
 
-export function LiveMatchCard({ m, now }: { m: LiveMatch; now: number }) {
+export function LiveMatchCard({ m, now, audience }: { m: LiveMatch; now: number; audience?: AudienceSummary | null }) {
   const s = m.match;
   const stale = m.last_activity_at ? now - Date.parse(m.last_activity_at) > 10 * 60_000 : true;
   return (
@@ -68,6 +69,23 @@ export function LiveMatchCard({ m, now }: { m: LiveMatch; now: number }) {
         <dt className="text-ink-muted">Kick-off</dt>
         <dd className="text-right font-semibold">{formatTime(m.scheduled_at)} WAT</dd>
       </dl>
+      {audience && (
+        <dl className="mt-3 grid grid-cols-4 gap-1 border-t border-line pt-3 text-center" data-testid="live-audience" aria-label="Audience (private)">
+          {(
+            [
+              ["Live now", audience.watching_now],
+              ["Peak", audience.peak_viewers],
+              ["Unique", audience.unique_viewers],
+              ["Visits", audience.total_visits],
+            ] as const
+          ).map(([label, value]) => (
+            <div key={label} className="min-w-0">
+              <dt className="truncate text-[10px] font-bold tracking-wide text-ink-faint uppercase">{label}</dt>
+              <dd className="font-display text-lg leading-tight font-extrabold tabular-nums">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
     </Link>
   );
 }

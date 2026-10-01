@@ -15,7 +15,8 @@ import { clearAssignments, rescheduleMatch, setMatchOutcome, updateFixture, void
 import { setLineupOverride } from "@/lib/admin/actions/lineups";
 import { recomputeStandings } from "@/lib/admin/actions/competitions";
 import { listCompetitionOptions } from "@/lib/admin/data/competitions";
-import { getMatchRow, inspectMatch, listEventTypes, type TeamLineupSummary } from "@/lib/admin/data/matches";
+import { getMatchAudience, getMatchRow, inspectMatch, listEventTypes, type TeamLineupSummary } from "@/lib/admin/data/matches";
+import { AudiencePanel } from "@/components/admin/AudiencePanel";
 import { listVenues } from "@/lib/admin/data/reference";
 import { listAssignableOperators } from "@/lib/admin/data/staff";
 import { listTeamRefs, squadsForMatch } from "@/lib/admin/data/teams";
@@ -31,7 +32,7 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/ad
   const created = (await searchParams).created === "1";
   const row = await getMatchRow(id);
   if (!row) notFound();
-  const [detail, operators, eventTypes, squads, competitions, teams, venues] = await Promise.all([
+  const [detail, operators, eventTypes, squads, competitions, teams, venues, audience] = await Promise.all([
     inspectMatch(id),
     listAssignableOperators(),
     listEventTypes(),
@@ -39,6 +40,7 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/ad
     listCompetitionOptions(),
     listTeamRefs(),
     listVenues(),
+    getMatchAudience(id),
   ]);
   const now = serverNow();
   const m = detail.state.match;
@@ -297,6 +299,9 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/ad
         </div>
 
         <div className="min-w-0 space-y-6">
+          <Card title="Audience" id="audience" description="Private engagement figures for this match page.">
+            <AudiencePanel matchId={id} initial={audience} live={LIVE.has(status)} />
+          </Card>
           <Card title="Operators" id="operators">
             <dl className="mb-3 space-y-1 text-sm">
               <div className="flex justify-between gap-2">

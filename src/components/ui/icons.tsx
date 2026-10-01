@@ -179,3 +179,10 @@ export const PlusSquareIcon = (p: IconProps) => (
     <path d="M12 8v8M8 12h8" />
   </svg>
 );
+
+export const EyeIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+    <circle cx="12" cy="12" r="2.8" />
+  </svg>
+);

@@ -32,6 +32,7 @@ Development accounts (password = `DEV_USER_PASSWORD`):
 | `npm run test:db` | pgTAP (105): RLS/privileges per role, state machine, scoring, idempotency, voids, discipline/squad rules, clock, takeover, audit immutability, standings |
 | `npm run test:backend` | API over HTTP with real sign-ins: parallel duplicate retries, 20 concurrent events from two sessions, direct REST writes rejected, persistence from a fresh session |
 | `npm run test:operator` | Frontend engine + canonical reconciliation |
+| `npm run test:audience` | Audience request validation (clients can only say start / still here / gone) |
 | `npm run test:notifications` | Alert preferences, iOS/iPadOS/unsupported detection, push-result classification, feature flag, service worker (push / click / subscription rotation in a sandbox) |
 
 ## Architecture
@@ -353,6 +354,44 @@ Anonymous, per-device notifications for followed matches and teams.
   `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (and server-only `VAPID_PRIVATE_KEY`,
   `VAPID_SUBJECT`, `NOTIFICATIONS_DISPATCH_SECRET`). Off (default): no alert
   UI, no service worker, actions refuse, dispatcher skips.
+
+### Private audience analytics (migration `20261008001700`)
+Per-match audience figures for staff only. **Never public**: no public UI,
+no public payload (`public_match_feed`, page HTML/RSC) and no anon-readable
+table or function carries them.
+
+- **Identity.** The Notifications V1 anonymous device (httpOnly `eksu_alerts`
+  cookie, server-issued token, SHA-256 stored). A viewer without one gets one
+  from `service_audience_register` (per-network budget 2000/10 min). No IPs
+  (only a server-side hash for rate limiting), fingerprints or personal data.
+- **Flow.** The public match page (`AudienceTracker`) posts to
+  `POST /api/audience`: `start` (visible page → new visit, returns an opaque
+  session id), `beat` every 20 s while visible, `end` via `sendBeacon` on
+  close. The route calls `service_audience_*` (service_role) with the cookie
+  token; Postgres derives every number. Hidden tabs stop beating (out of
+  "watching now" within 50 s); returning within 10 min resumes the visit.
+  Responses never contain figures; all failures are swallowed.
+- **Definitions.** *Watching now*: distinct devices with an open session and a
+  heartbeat in the last 50 s. *Peak viewers*: the highest watching-now ever
+  observed for the match, across its whole page life (pre-match, live, after
+  FT) — it only rises. *Unique viewers*: distinct devices that started a visit.
+  *Total visits*: sessions started (each tab/page view; a resumed tab is not
+  a new visit).
+- **Storage.** `match_view_sessions` (raw, deleted 2 days after the last
+  heartbeat), `match_audience_viewers` (match × device, deleted after 180
+  days), `match_audience` (counters, kept for good — basis for future
+  most-viewed / competition / team audience reports; DEMO/TEST matches are
+  separate rows and can be excluded via `matches.is_demo`). Analytics-only
+  devices idle for 400 days are removed. Housekeeping runs on 2% of visit
+  starts and can be scheduled: `select private.audience_housekeeping()`.
+- **Abuse limits.** Validated match ids (public matches only), tokens must be
+  app-issued, ≤ 60 visits/10 min and ≤ 10 open tabs per device per match,
+  beats closer than 10 s write nothing, same-origin POSTs only.
+- **Readers.** `op_match_audience` — active staff with an active assignment
+  (same rule as `operator_match_state`); shown as a small "Viewers · N live ·
+  Peak M" line under the /op live scoreboard (polls 15 s).
+  `admin_match_audience` — ADMIN; on /admin/live cards (15 s auto-refresh) and
+  the admin match page (live-polling panel; figures kept after FT).
 
 ## Authentication
 Email + password through Supabase Auth (works without external services).

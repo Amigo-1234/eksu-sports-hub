@@ -9,6 +9,7 @@ import { availableCommands, PHASE_LABEL } from "@/lib/operator/machine";
 import { consoleSquads } from "@/lib/operator/lineup";
 import { operatorStore } from "@/lib/operator/store";
 import type { AssignmentSeed, OpEvent, Side } from "@/lib/operator/types";
+import { OpAudience } from "@/components/audience/OpAudience";
 import { ActionPad, type SheetKind } from "./ActionPad";
 import { DemoControls } from "./DemoControls";
 import { useFeedback } from "./Feedback";
@@ -91,6 +92,7 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
         Live console: {homeTeam.name} versus {awayTeam.name}
       </h1>
       <Scoreboard seed={seed} state={state} now={now} />
+      <OpAudience matchId={matchId} />
       <QueueBanner />
       {!completed && !inControl && <TakeOverBanner matchId={matchId} />}
 

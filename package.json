@@ -14,7 +14,8 @@
     "test:db": "supabase test db",
     "test:admin": "node --experimental-strip-types --no-warnings --test tests/admin-helpers.test.ts",
     "test:registration": "node --experimental-strip-types --no-warnings --test tests/registration.test.ts",
-    "test:notifications": "node --experimental-strip-types --no-warnings --test tests/notifications.test.ts"
+    "test:notifications": "node --experimental-strip-types --no-warnings --test tests/notifications.test.ts",
+    "test:audience": "node --experimental-strip-types --no-warnings --test tests/audience.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

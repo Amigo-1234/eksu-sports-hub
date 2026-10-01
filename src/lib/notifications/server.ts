@@ -24,7 +24,7 @@ export async function deviceToken(): Promise<string | null> {
   return v && /^[A-Za-z0-9_-]{40,64}$/.test(v) ? v : null;
 }
 
-async function setDeviceCookie(token: string | null) {
+export async function setDeviceCookie(token: string | null) {
   const store = await cookies();
   if (token === null) store.delete(DEVICE_COOKIE);
   else

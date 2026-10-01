@@ -4,6 +4,7 @@ import { HeadToHeadPanel, type PreMatchTeam } from "@/components/match/MatchPane
 import { LiveLineupsPanel, LiveMatchHero, LiveMatchProvider, LiveStatsPanel, LiveSummaryPanel } from "@/components/realtime/LiveMatch";
 import { MatchTabs } from "@/components/match/MatchTabs";
 import { MatchAlertsButton } from "@/components/notifications/MatchAlertsButton";
+import { AudienceTracker } from "@/components/audience/AudienceTracker";
 import { BackLink } from "@/components/ui/BackLink";
 import { DemoNotice } from "@/components/ui/DemoNotice";
 import { DATA_SOURCE_KIND, getHeadToHead, getMatch, getMatches, getNow, getStandings } from "@/lib/data";
@@ -76,6 +77,7 @@ export default async function MatchPage({ params }: PageProps<"/matches/[id]">) 
         />
       </div>
       <DemoNotice />
+      {DATA_SOURCE_KIND === "live" && <AudienceTracker matchId={match.id} />}
     </div>
     </LiveMatchProvider>
   );
