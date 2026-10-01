@@ -53,6 +53,9 @@ function keyFormat(raw: string | undefined) {
     padding: /=/.test(t),
     standardAlphabet: /[+/]/.test(t),
     otherChars: /[^A-Za-z0-9_\-+/="'\s]/.test(t),
+    // Code points of characters that can never be part of a key (e.g. a
+    // smart-punctuation dash), so they reveal nothing about the key itself.
+    foreignChars: [...new Set(t.match(/[^A-Za-z0-9_\-+/="'\s]/gu) ?? [])].map((c) => "U+" + c.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")),
   };
 }
 
