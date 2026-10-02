@@ -143,11 +143,19 @@ alter table public.matches
   add column away_pens smallint check (away_pens >= 0),
   add column winner_team_id uuid references public.teams (id) on delete restrict,
   add column decided_by text check (decided_by in ('REGULATION', 'EXTRA_TIME', 'PENALTIES'));
-update public.matches set original_scheduled_at = scheduled_at where original_scheduled_at is null;
-update public.matches set home_score_90 = home_score, away_score_90 = away_score where status <> 'SCHEDULED';
-update public.matches set winner_team_id = case when home_score > away_score then home_team_id when away_score > home_score then away_team_id end,
-  decided_by = case when home_score <> away_score then 'REGULATION' end
-where status = 'FT';
+-- Backfill of the new derived columns only: existing columns of existing
+-- rows (scores, status, times, updated_at) are left exactly as they are, so
+-- the touch trigger is paused for this one statement (same transaction).
+alter table public.matches disable trigger matches_touch;
+update public.matches set
+  original_scheduled_at = scheduled_at,
+  home_score_90 = case when status <> 'SCHEDULED' then home_score end,
+  away_score_90 = case when status <> 'SCHEDULED' then away_score end,
+  winner_team_id = case when status = 'FT' and home_score > away_score then home_team_id
+                        when status = 'FT' and away_score > home_score then away_team_id end,
+  decided_by = case when status = 'FT' and home_score <> away_score then 'REGULATION' end
+where original_scheduled_at is null;
+alter table public.matches enable trigger matches_touch;
 create index matches_stage_idx on public.matches (stage_id);
 create index matches_tie_idx on public.matches (tie_id) where tie_id is not null;
 
@@ -593,8 +601,10 @@ begin
     select sum(private.fair_play_weight(e.type)) from public.match_events e
     join private.stage_matches(st.id) m on m.id = e.match_id and m.status = 'FT'
     where e.team_id = s.team_id and e.voided_at is null and e.type in ('YELLOW_CARD', 'SECOND_YELLOW', 'RED_CARD')
-  ), 0);
-  update pg_temp._eksu_st set gd = gf - ga, points = wins * c.points_win + draws * c.points_draw + losses * c.points_loss;
+  ), 0) where true;
+  -- `where true` on whole-table updates: PostgREST sessions load
+  -- pg_safeupdate, which rejects UPDATE/DELETE without a WHERE clause.
+  update pg_temp._eksu_st set gd = gf - ga, points = wins * c.points_win + draws * c.points_draw + losses * c.points_loss where true;
 
   -- Ordered tie-breakers refine "blocks" of teams that are still level.
   -- Head-to-head criteria use only the matches between the teams of the block.
@@ -619,11 +629,11 @@ begin
           select m.away_score, m.home_score from private.stage_matches(st.id) m
           where m.status = 'FT' and m.away_team_id = s.team_id
             and m.home_team_id in (select o.team_id from pg_temp._eksu_st o where o.gkey = s.gkey and o.block = s.block and o.team_id <> s.team_id)
-        ) r), 0);
+        ) r), 0) where true;
     else
       update pg_temp._eksu_st set v = case t
         when 'points' then points when 'goal_difference' then gd when 'goals_for' then gf
-        when 'wins' then wins when 'fair_play' then -fair_play end;
+        when 'wins' then wins when 'fair_play' then -fair_play end where true;
     end if;
     update pg_temp._eksu_st s set block = x.nb from (
       select team_id, dense_rank() over (partition by gkey order by block, v desc) nb from pg_temp._eksu_st

@@ -40,7 +40,7 @@ select throws_ok($$ select * from public.operator_assignments $$, '42501', null,
 select throws_ok($$ select * from public.profiles $$, '42501', null, 'anon cannot read profiles');
 select throws_ok($$ select * from public.user_roles $$, '42501', null, 'anon cannot read user roles');
 select throws_ok($$ select * from public.players $$, '42501', null, 'anon cannot read players');
-select throws_ok($$ update public.matches set status = 'FT' $$, '42501', null, 'anon cannot update matches');
+select throws_ok($$ update public.matches set status = 'FT' where true $$, '42501', null, 'anon cannot update matches');
 select throws_ok($$ select public.start_match(tests.m1(), gen_random_uuid()) $$, '42501', null, 'anon cannot execute match RPCs');
 reset role;
 
@@ -54,7 +54,7 @@ select throws_ok($$ insert into public.standings (competition_id, team_id, rank)
   '42501', null, 'authenticated cannot write standings');
 select throws_ok($$ insert into public.audit_log (action, entity_type, entity_id) values ('X', 'match', tests.m1()) $$,
   '42501', null, 'authenticated cannot write audit log');
-select throws_ok($$ delete from public.match_events $$, '42501', null, 'authenticated cannot delete events');
+select throws_ok($$ delete from public.match_events where true $$, '42501', null, 'authenticated cannot delete events');
 select throws_ok($$ select public.start_match(tests.m1(), gen_random_uuid()) $$, 'EK403', null, 'user without a role cannot start a match');
 select is((select count(*) from public.players)::int, 0, 'user without a staff role sees no players');
 reset role;
@@ -76,8 +76,8 @@ reset role;
 
 -- ── audit log is append-only for everyone, including the owner ────────────
 insert into public.audit_log (action, entity_type, entity_id) values ('TEST', 'match', tests.m1());
-select throws_ok($$ update public.audit_log set action = 'TAMPERED' $$, '42501', 'audit_log is append-only', 'owner cannot update audit rows');
-select throws_ok($$ delete from public.audit_log $$, '42501', 'audit_log is append-only', 'owner cannot delete audit rows');
+select throws_ok($$ update public.audit_log set action = 'TAMPERED' where true $$, '42501', 'audit_log is append-only', 'owner cannot update audit rows');
+select throws_ok($$ delete from public.audit_log where true $$, '42501', 'audit_log is append-only', 'owner cannot delete audit rows');
 
 select * from finish();
 rollback;

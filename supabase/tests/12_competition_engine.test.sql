@@ -598,7 +598,7 @@ select tests.login(tests.c('admin'));
 create temp table ms as select public.admin_add_suspension(tests.c('DS'), tests.player(tests.away(), 4), tests.away(), 2, 'Misconduct after the match') id;
 select is((select status || ':' || matches_total from public.player_suspensions where id = (select id from ms)), 'ACTIVE:2', 'manual suspension');
 select lives_ok($$ select public.admin_cancel_suspension((select id from ms), 'Appeal upheld') $$, 'manual suspension cancelled with a reason');
-select throws_ok($$ delete from public.player_suspensions $$, '42501', null, 'suspension history cannot be deleted');
+select throws_ok($$ delete from public.player_suspensions where true $$, '42501', null, 'suspension history cannot be deleted');
 reset role;
 
 -- ═══ G. PLAYER STATS ══════════════════════════════════════════════════════

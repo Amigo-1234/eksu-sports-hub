@@ -12,6 +12,7 @@
     "dev:users": "node --env-file-if-exists=.env.local scripts/dev-users.mjs",
     "test:backend": "node --env-file-if-exists=.env.local --test tests/backend/api.test.mjs",
     "test:db": "supabase test db",
+    "test:db:safeupdate": "bash scripts/test-db-safeupdate.sh",
     "test:admin": "node --experimental-strip-types --no-warnings --test tests/admin-helpers.test.ts",
     "test:registration": "node --experimental-strip-types --no-warnings --test tests/registration.test.ts",
     "test:notifications": "node --experimental-strip-types --no-warnings --test tests/notifications.test.ts",

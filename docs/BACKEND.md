@@ -30,6 +30,7 @@ Development accounts (password = `DEV_USER_PASSWORD`):
 | Command | What |
 | --- | --- |
 | `npm run test:db` | pgTAP (105): RLS/privileges per role, state machine, scoring, idempotency, voids, discipline/squad rules, clock, takeover, audit immutability, standings |
+| `npm run test:db:safeupdate` | The same pgTAP files with `pg_safeupdate` loaded, as in PostgREST sessions (UPDATE/DELETE without a WHERE clause fail there but not in plain psql). Local only |
 | `npm run test:backend` | API over HTTP with real sign-ins: parallel duplicate retries, 20 concurrent events from two sessions, direct REST writes rejected, persistence from a fresh session |
 | `npm run test:operator` | Frontend engine + canonical reconciliation |
 | `npm run test:audience` | Audience request validation (clients can only say start / still here / gone) |
