@@ -3563,3 +3563,126 @@ grant execute on function
   public.admin_competition_overview(uuid), public.admin_fixture_history(uuid)
 to authenticated;
 grant execute on function public.public_competition(uuid) to anon, authenticated;
+
+-- ── 12. Notifications in extra time ────────────────────────────────────────
+-- Same pipeline, same idempotency keys ('EVT:'/'VOID:' + event id): goals and
+-- cards recorded in ET1/ET2 alert exactly like regulation ones; voiding one
+-- uses the existing cancel / SCORE_CORRECTION path. The full-time alert of a
+-- knockout match states how it was decided. Push delivery, VAPID and Vault
+-- are untouched.
+create or replace function private.notification_content(p_match_id uuid, p_type text, p_event_id uuid, p_tag text)
+returns jsonb language plpgsql stable security definer set search_path = '' as $$
+declare m public.matches; e public.match_events; home text; away text; comp text; venue text; prefix text := '';
+  score text; who text; team text; title text; body text; mins int; sc integer[]; v_outcome text;
+begin
+  select * into m from public.matches where id = p_match_id;
+  select name into home from public.teams where id = m.home_team_id;
+  select name into away from public.teams where id = m.away_team_id;
+  select short_name into comp from public.competitions where id = m.competition_id;
+  select name into venue from public.venues where id = m.venue_id;
+  if m.is_demo then
+    prefix := case when coalesce(m.round_label, '') ~* 'test' then 'TEST · ' else 'DEMO · ' end;
+  end if;
+  if p_event_id is not null then
+    select * into e from public.match_events where id = p_event_id;
+  end if;
+  -- A goal: the score at that goal. Anything else (incl. a correction): the score now.
+  sc := private.notification_score(m.id, case when p_type = 'GOAL' then e.seq end);
+  score := format('%s %s–%s %s', home, sc[1], sc[2], away);
+  if p_event_id is not null then
+    select name into team from public.teams where id = e.team_id;
+    who := nullif(btrim(coalesce((select display_name from public.players where id = e.player_id),
+      (select display_name from public.demo_lineup_players where id = e.demo_player_id), '')), '');
+  end if;
+
+  case p_type
+    when 'GOAL' then
+      title := case e.type when 'OWN_GOAL' then 'OWN GOAL ⚽' when 'PENALTY_GOAL' then 'PENALTY GOAL ⚽' else 'GOAL ⚽' end;
+      body := score || E'\n' || private.notification_minute(e) || coalesce(' · ' || who || case when e.type = 'OWN_GOAL' then ' (own goal)' else '' end, '');
+    when 'YELLOW_CARD' then
+      title := 'YELLOW CARD 🟨';
+      body := team || E'\n' || coalesce(who || ' · ', '') || private.notification_minute(e);
+    when 'RED_CARD' then
+      title := case e.type when 'SECOND_YELLOW' then 'SECOND YELLOW 🟥' else 'RED CARD 🟥' end;
+      body := team || E'\n' || coalesce(who || ' sent off · ', 'Player sent off · ') || private.notification_minute(e);
+    when 'KICKOFF' then
+      title := 'KICK-OFF';
+      body := format('%s vs %s is under way', home, away);
+    when 'HALF_TIME' then
+      title := 'HALF-TIME';
+      body := score;
+    when 'SECOND_HALF' then
+      title := 'SECOND HALF';
+      body := score || E'\nThe second half is under way';
+    when 'FULL_TIME' then
+      title := 'FULL-TIME';
+      -- Knockout outcome on its own line: the shoot-out never changes the score.
+      v_outcome := case
+        when m.home_pens is not null and m.away_pens is not null and m.home_pens <> m.away_pens then
+          format('%s win %s–%s on penalties', case when m.home_pens > m.away_pens then home else away end,
+            greatest(m.home_pens, m.away_pens), least(m.home_pens, m.away_pens))
+        when m.decided_by = 'EXTRA_TIME' then 'After extra time' end;
+      body := score || coalesce(E'\n' || v_outcome, '') || coalesce(E'\nFull-time at ' || venue, '');
+    when 'POSTPONED' then
+      title := 'POSTPONED';
+      body := format('%s vs %s has been postponed', home, away);
+    when 'CANCELLED' then
+      title := 'CANCELLED';
+      body := format('%s vs %s has been cancelled', home, away);
+    when 'ABANDONED' then
+      title := 'ABANDONED';
+      body := score || E'\nThe match has been abandoned';
+    when 'MATCH_REMINDER' then
+      mins := greatest(1, round(extract(epoch from (m.scheduled_at - now())) / 60)::int);
+      title := upper(comp);
+      body := format('%s vs %s starts in %s minute%s · %s', home, away, mins, case when mins = 1 then '' else 's' end,
+        to_char(m.scheduled_at at time zone 'Africa/Lagos', 'HH24:MI'));
+    when 'SCORE_CORRECTION' then
+      title := 'SCORE CORRECTION';
+      body := score || E'\nThe previous goal has been removed';
+  end case;
+  return jsonb_build_object('title', prefix || title, 'body', body, 'url', '/matches/' || m.id, 'tag', p_tag,
+    'match_id', m.id, 'type', p_type);
+end $$;
+
+create or replace function private.notify_on_event()
+returns trigger language plpgsql security definer set search_path = '' as $$
+declare e public.match_events; m public.matches; v_type text; v_goal public.notification_outbox;
+begin
+  begin
+    select * into e from public.match_events where id = new.id;
+    select * into m from public.matches where id = new.match_id;
+    if e.id is null or m.id is null then
+      return null;
+    end if;
+    v_type := case when e.type in ('GOAL', 'PENALTY_GOAL', 'OWN_GOAL') then 'GOAL'
+      when e.type = 'YELLOW_CARD' then 'YELLOW_CARD'
+      when e.type in ('RED_CARD', 'SECOND_YELLOW') then 'RED_CARD' end;   -- substitutions / missed penalties: no push
+    if v_type is null then
+      return null;
+    end if;
+
+    if tg_op = 'INSERT' then
+      -- Live events only (regulation and extra time): retroactive admin
+      -- corrections after full-time do not alert anyone. Shoot-out kicks are
+      -- match_shootout_attempts rows, never match_events: no goal alert.
+      if e.voided_at is null and m.status in ('1H', 'HT', '2H', 'ET1', 'ET_BREAK', 'ET2') then
+        perform private.notification_enqueue('EVT:' || e.id, m.id, v_type, e.id);
+      end if;
+    elsif old.voided_at is null and new.voided_at is not null then
+      select * into v_goal from public.notification_outbox where event_key = 'EVT:' || e.id;
+      if v_goal.id is not null then
+        -- Not delivered yet: simply never send it.
+        update public.notification_outbox set status = 'CANCELLED', processed_at = now() where id = v_goal.id and status = 'PENDING';
+        update public.notification_deliveries set status = 'CANCELLED' where outbox_id = v_goal.id and status in ('PENDING', 'SENDING');
+        -- A goal some devices already saw: tell exactly those devices the score changed back.
+        if v_type = 'GOAL' and exists (select 1 from public.notification_deliveries where outbox_id = v_goal.id and status = 'SENT') then
+          perform private.notification_enqueue('VOID:' || e.id, m.id, 'SCORE_CORRECTION', e.id, v_goal.id);
+        end if;
+      end if;
+    end if;
+  exception when others then
+    raise warning 'notify_on_event failed for %: %', new.id, sqlerrm;
+  end;
+  return null;
+end $$;

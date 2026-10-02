@@ -437,6 +437,10 @@ table or function carries them.
   (`*_score`), shoot-out (`*_pens`) from `match_shootout_attempts` (never
   goals). Best of five, then sudden death; teams alternate. `winner_team_id` +
   `decided_by` (`REGULATION`/`EXTRA_TIME`/`PENALTIES`; ties also `ADMIN`).
+  Goals and cards in ET1/ET2 notify through the normal pipeline (same
+  `EVT:`/`VOID:` idempotency keys, minutes like 105+1' or 118'); shoot-out kicks
+  never alert as goals; the full-time alert of a knockout states "X win 4–2 on
+  penalties" or "After extra time".
 - **Discipline.** `competition_discipline_rules` (straight red, second yellow,
   every-N-yellows); `player_suspensions` derived from cards and served by the
   team's next completed official fixtures; manual add/cancel keep history.
