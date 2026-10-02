@@ -2,14 +2,39 @@
 
 export type MatchStatus = "SCHEDULED" | "1H" | "HT" | "2H" | "ET1" | "ET_BREAK" | "ET2" | "PENS" | "FT" | "POSTPONED" | "CANCELLED" | "ABANDONED";
 export const LIVE_STATUSES: MatchStatus[] = ["1H", "HT", "2H", "ET1", "ET_BREAK", "ET2", "PENS"];
-export type CompetitionStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
-export type CompetitionFormat = "LEAGUE" | "KNOCKOUT" | "GROUPS_KNOCKOUT";
+export type CompetitionStatus = "DRAFT" | "REGISTRATION" | "SCHEDULED" | "ACTIVE" | "COMPLETED" | "ARCHIVED";
+export type CompetitionFormat = "LEAGUE" | "KNOCKOUT" | "GROUPS" | "GROUPS_KNOCKOUT";
+export type CompetitionKind = "OFFICIAL" | "FRIENDLY" | "TEST" | "DEMO";
+export const STAGE_TYPES = ["LEAGUE", "GROUP", "ROUND_OF_32", "ROUND_OF_16", "QUARTER_FINAL", "SEMI_FINAL", "THIRD_PLACE", "FINAL", "KNOCKOUT"] as const;
+export type StageType = (typeof STAGE_TYPES)[number];
+export const STAGE_TYPE_LABEL: Record<StageType, string> = {
+  LEAGUE: "League",
+  GROUP: "Group stage",
+  ROUND_OF_32: "Round of 32",
+  ROUND_OF_16: "Round of 16",
+  QUARTER_FINAL: "Quarter-finals",
+  SEMI_FINAL: "Semi-finals",
+  THIRD_PLACE: "Third-place match",
+  FINAL: "Final",
+  KNOCKOUT: "Knockout round (custom name)",
+};
+export const isKnockoutStage = (t: StageType) => t !== "LEAGUE" && t !== "GROUP";
 export type Category = "MEN" | "WOMEN" | "MIXED";
 export type TeamKind = "FACULTY" | "DEPARTMENT" | "OTHER";
 export type StaffRole = "ADMIN" | "MANAGER" | "OPERATOR";
 export const STAFF_ROLES: StaffRole[] = ["ADMIN", "MANAGER", "OPERATOR"];
 export type Position = "GK" | "DF" | "MF" | "FW";
-export const TIEBREAKERS = ["points", "goal_difference", "goals_for", "wins"] as const;
+export const TIEBREAKERS = [
+  "points",
+  "goal_difference",
+  "goals_for",
+  "wins",
+  "h2h_points",
+  "h2h_goal_difference",
+  "h2h_goals_for",
+  "fair_play",
+  "alphabetical",
+] as const;
 export type Tiebreaker = (typeof TIEBREAKERS)[number];
 
 export interface Season {
@@ -71,6 +96,13 @@ export interface Stage {
   stage_order: number;
   has_table: boolean;
   groups: { id: string; name: string }[];
+  stage_type: StageType;
+  legs: number;
+  extra_time_allowed: boolean | null;
+  penalties_allowed: boolean | null;
+  qualification: { per_group?: number; top?: number; best_ranked?: { rank: number; count: number } };
+  status: "PENDING" | "ACTIVE" | "COMPLETED";
+  locked_at: string | null;
 }
 
 export interface Entry {
@@ -97,6 +129,7 @@ export interface CompetitionDetail {
   extra_time_enabled: boolean;
   penalties_enabled: boolean;
   allow_multi_team_players: boolean;
+  kind: CompetitionKind;
   stages: Stage[];
   entries: Entry[];
   match_count: number;

@@ -1,247 +1,313 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ActionForm, Submit } from "@/components/admin/ActionForm";
-import { CompetitionFields, FORMAT_LABEL } from "@/components/admin/CompetitionFields";
+import { CompetitionHeader } from "@/components/admin/CompetitionHeader";
 import { ConfirmAction } from "@/components/admin/ConfirmAction";
-import { Disclosure } from "@/components/admin/Disclosure";
-import { Badge, btn, Card, Check, Empty, Field, inputCls, PageTitle, selectCls } from "@/components/admin/ui";
-import {
-  addEntries,
-  addGroup,
-  deleteGroup,
-  deleteStage,
-  removeEntry,
-  saveStage,
-  setCompetitionStatus,
-  updateCompetition,
-  updateEntry,
-} from "@/lib/admin/actions/competitions";
-import { getCompetition } from "@/lib/admin/data/competitions";
-import { listSeasons, listSports } from "@/lib/admin/data/reference";
-import { listTeamRefs } from "@/lib/admin/data/teams";
-import type { CompetitionDetail } from "@/lib/admin/types";
+import { Badge, btn, Card, Empty, StatusBadge } from "@/components/admin/ui";
+import { completeCompetitionAction, completeStageAction, recomputeAction, reopenCompetitionAction } from "@/lib/admin/actions/engine";
+import { getCompetitionOverview, teamNames, type StageOps, type StageView } from "@/lib/admin/data/engine";
+import { formatWatDateTime } from "@/lib/admin/time";
+import { STAGE_TYPE_LABEL, type MatchStatus } from "@/lib/admin/types";
 
-export const metadata: Metadata = { title: "Competition" };
+export const metadata: Metadata = { title: "Competition control centre" };
 
-function PlacementSelect({ c, value, name = "placement" }: { c: CompetitionDetail; value?: string; name?: string }) {
+const ACTION_LABEL: Record<string, string> = {
+  COMPETITION_FORMAT_CHANGED: "Format changed",
+  COMPETITION_RULES_CHANGED: "Rules changed",
+  GROUP_CREATED: "Group created",
+  TEAM_ASSIGNED_TO_GROUP: "Team drawn into a group",
+  FIXTURES_GENERATED: "Fixtures generated",
+  FIXTURES_CLEARED: "Generated fixtures cleared",
+  FIXTURE_RESCHEDULED: "Fixture rescheduled",
+  STAGE_LOCKED: "Stage locked (first kick-off)",
+  STAGE_COMPLETED: "Stage completed",
+  KNOCKOUT_GENERATED: "Knockout bracket generated",
+  TEAM_ADVANCED: "Team advanced",
+  KNOCKOUT_RECONCILIATION_REQUIRED: "Bracket needs reconciliation",
+  KNOCKOUT_RECONCILED: "Bracket reconciled",
+  DISCIPLINARY_RULE_CHANGED: "Discipline rules changed",
+  PLAYER_SUSPENDED: "Player suspended",
+  SUSPENSION_SERVED: "Suspension served",
+  SUSPENSION_CANCELLED: "Suspension cancelled",
+  COMPETITION_COMPLETED: "Competition completed",
+  COMPETITION_REOPENED: "Competition reopened",
+  QUALIFICATION_DECIDED: "Qualification decision",
+  LOCK_OVERRIDE: "Lock override",
+  COMPETITION_ENGINE_ERROR: "Engine error (run Recompute)",
+};
+
+function StageRow({ s, ops, competitionId }: { s: StageView; ops: StageOps | undefined; competitionId: string }) {
+  const m = ops?.matches;
+  const pct = m && m.total > 0 ? Math.round(((m.finished + m.cancelled) / m.total) * 100) : 0;
+  const tieCount = s.ties?.length ?? 0;
+  const next = (() => {
+    if (s.status === "COMPLETED") return null;
+    if (s.stage_type === "GROUP" && (s.groups?.length ?? 0) <= 1 && !s.groups?.[0]?.id) return { href: "groups", label: "Create groups & draw" };
+    if (!s.is_knockout && (m?.total ?? 0) === 0) return { href: "fixtures", label: "Generate fixtures" };
+    if (s.is_knockout && tieCount === 0) return { href: "knockout", label: "Generate bracket" };
+    if (s.is_knockout && (ops?.ties_unscheduled ?? 0) > 0) return { href: "knockout", label: `Schedule ${ops?.ties_unscheduled} tie(s)` };
+    return null;
+  })();
   return (
-    <select name={name} defaultValue={value ?? ""} className={selectCls} aria-label="Stage and group">
-      <option value="">No stage</option>
-      {c.stages.map((s) => [
-        <option key={s.id} value={`${s.id}:`}>
-          {s.name}
-        </option>,
-        ...s.groups.map((g) => (
-          <option key={g.id} value={`${s.id}:${g.id}`}>
-            {s.name} — {g.name}
-          </option>
-        )),
-      ])}
-    </select>
+    <li className="rounded-lg border border-line p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="min-w-0 font-bold break-words">
+          {s.order}. {s.name} <span className="text-xs font-semibold text-ink-muted">{STAGE_TYPE_LABEL[s.stage_type]}</span>
+        </p>
+        <span className="flex flex-wrap gap-1">
+          <Badge tone={s.status === "COMPLETED" ? "ok" : s.status === "ACTIVE" ? "live" : "neutral"}>{s.status.toLowerCase()}</Badge>
+          {s.locked && s.status !== "COMPLETED" && <Badge tone="warn">locked</Badge>}
+        </span>
+      </div>
+      {m && m.total > 0 && (
+        <div className="mt-2">
+          <div className="h-2 overflow-hidden rounded-full bg-subtle" role="img" aria-label={`${pct}% of matches resolved`}>
+            <div className="h-full bg-brand-700" style={{ width: `${pct}%` }} />
+          </div>
+          <p className="mt-1 text-xs text-ink-muted">
+            {m.finished}/{m.total} played{m.live ? ` · ${m.live} live` : ""}{m.postponed ? ` · ${m.postponed} postponed` : ""}
+            {m.cancelled ? ` · ${m.cancelled} cancelled` : ""}{m.abandoned ? ` · ${m.abandoned} abandoned` : ""}
+          </p>
+        </div>
+      )}
+      {s.is_knockout && tieCount > 0 && <p className="mt-1 text-xs text-ink-muted">{tieCount} tie(s) in the bracket</p>}
+      <div className="mt-2 flex flex-wrap gap-2">
+        {next && (
+          <Link href={`/admin/competitions/${competitionId}/${next.href}`} className={btn.small}>
+            {next.label} →
+          </Link>
+        )}
+        {s.status !== "COMPLETED" && m && m.total > 0 && m.finished + m.cancelled === m.total && (
+          <ConfirmAction
+            action={completeStageAction}
+            hidden={{ stage_id: s.id }}
+            trigger="Complete stage"
+            triggerClass={btn.small}
+            tone="primary"
+            title={`Complete ${s.name}?`}
+            body="Requires every match finished or cancelled, every tie decided and no pending qualification."
+            confirmLabel="Complete stage"
+          />
+        )}
+      </div>
+    </li>
   );
 }
 
-export default async function CompetitionPage({ params, searchParams }: PageProps<"/admin/competitions/[id]">) {
+export default async function CompetitionControlCentre({ params }: PageProps<"/admin/competitions/[id]">) {
   const { id } = await params;
-  const created = (await searchParams).created === "1";
-  const [c, seasons, sports, teams] = await Promise.all([getCompetition(id), listSeasons(), listSports(), listTeamRefs()]);
-  if (!c) notFound();
-  const entered = new Set(c.entries.map((e) => e.team.id));
-  const available = teams.filter((t) => t.active && !entered.has(t.id));
-  const nextOrder = Math.max(0, ...c.stages.map((s) => s.stage_order)) + 1;
-  const statusTone = { DRAFT: "warn", ACTIVE: "ok", ARCHIVED: "muted" } as const;
+  const o = await getCompetitionOverview(id);
+  if (!o) notFound();
+  const c = o.competition;
+  const names = teamNames(o);
+  const team = (tid: string | null) => (tid ? (names.get(tid)?.short_name ?? "—") : "TBC");
+  const ops = new Map(o.stage_ops.map((x) => [x.stage_id, x]));
+  const toReconcile = o.stage_ops.reduce((n, s) => n + s.ties_to_reconcile, 0);
+  const toDecide = o.stage_ops.reduce((n, s) => n + s.ties_to_decide, 0);
+  const pendingQ = o.stage_ops.reduce((n, s) => n + s.pending_qualification, 0);
+  const engineErrors = o.recent_activity.filter((a) => a.action === "COMPETITION_ENGINE_ERROR").length;
+  const suspended = o.discipline_alerts.filter((a) => a.kind === "SUSPENDED").length;
+  const atRisk = o.discipline_alerts.filter((a) => a.kind === "ONE_YELLOW_AWAY").length;
+  const pendingScreening = o.screening.PENDING ?? 0;
+  const tables = o.stages.filter((s) => s.groups && s.groups.some((g) => g.rows.length > 0));
+
+  const alerts: { tone: "bad" | "warn"; text: string; href: string }[] = [
+    ...(toReconcile ? [{ tone: "bad" as const, text: `${toReconcile} knockout tie(s) need reconciliation after a corrected result`, href: "knockout" }] : []),
+    ...(engineErrors ? [{ tone: "bad" as const, text: "The competition engine reported an error — run Recompute", href: "" }] : []),
+    ...(toDecide ? [{ tone: "warn" as const, text: `${toDecide} tie(s) finished without a winner — decide them`, href: "knockout" }] : []),
+    ...(pendingQ ? [{ tone: "warn" as const, text: `${pendingQ} team(s) have a pending qualification place`, href: "knockout" }] : []),
+    ...(suspended ? [{ tone: "warn" as const, text: `${suspended} player(s) currently suspended`, href: "discipline" }] : []),
+    ...(atRisk ? [{ tone: "warn" as const, text: `${atRisk} player(s) one yellow card from a suspension`, href: "discipline" }] : []),
+    ...(pendingScreening ? [{ tone: "warn" as const, text: `${pendingScreening} player screening(s) pending for entered teams`, href: "../../screening" }] : []),
+  ];
 
   return (
     <>
-      <PageTitle
-        title={c.name}
-        back={{ href: "/admin/competitions", label: "Competitions" }}
-        description={
-          <span className="flex flex-wrap items-center gap-2">
-            <Badge tone={statusTone[c.status]}>{c.status.toLowerCase()}</Badge>
-            {FORMAT_LABEL[c.format]} · {c.entries.length} teams · {c.match_count} fixtures
-          </span>
-        }
-        actions={
-          <>
-            <Link href={`/admin/matches?competition=${c.id}`} className={btn.secondary}>
-              Fixtures
-            </Link>
-            <Link href={`/admin/matches/new?competition=${c.id}`} className={btn.secondary}>
-              New fixture
-            </Link>
-            <Link href={`/admin/standings?competition=${c.id}`} className={btn.secondary}>
-              Standings
-            </Link>
-          </>
-        }
-      />
-      {created && <p className="mb-4 rounded-lg border border-win/40 bg-win/10 px-3 py-2 text-sm font-semibold text-win">Competition created as a draft. Enter teams, then activate it.</p>}
+      <CompetitionHeader o={o} />
+
+      {c.status === "COMPLETED" && (
+        <section className="mb-5 rounded-card border-2 border-accent-400 bg-accent-100 p-4" aria-label="Honours">
+          <p className="text-xs font-extrabold tracking-widest text-ink-muted uppercase">Champion</p>
+          <p className="font-display text-3xl font-extrabold">{c.champion_team_id ? names.get(c.champion_team_id)?.name : "—"}</p>
+          <p className="mt-1 text-sm">
+            Runner-up: <strong>{team(c.runner_up_team_id)}</strong>
+            {c.third_place_team_id && (
+              <>
+                {" "}
+                · Third: <strong>{team(c.third_place_team_id)}</strong>
+              </>
+            )}
+          </p>
+        </section>
+      )}
+
+      <dl className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
+        {[
+          ["Teams", o.summary.teams],
+          ["Played", `${o.summary.matches_played}/${o.summary.matches_total}`],
+          ["Goals", o.summary.goals],
+          ["Live now", o.summary.live],
+          ["Suspended", suspended],
+        ].map(([k, v]) => (
+          <div key={k} className="rounded-card border border-line bg-surface p-3">
+            <dt className="text-xs font-bold tracking-wide text-ink-muted uppercase">{k}</dt>
+            <dd className="font-display text-2xl font-extrabold tabular-nums">{v}</dd>
+          </div>
+        ))}
+      </dl>
+
+      {alerts.length > 0 && (
+        <ul className="mb-5 space-y-2" aria-label="Needs attention">
+          {alerts.map((a) => (
+            <li key={a.text} className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm font-semibold ${a.tone === "bad" ? "border-live/40 bg-live/10" : "border-warn/40 bg-warn/10"}`}>
+              <span>{a.text}</span>
+              {a.href && (
+                <Link href={`/admin/competitions/${c.id}/${a.href}`} className="font-bold underline">
+                  Open
+                </Link>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
 
       <div className="grid gap-6 xl:grid-cols-2">
         <div className="min-w-0 space-y-6">
-          <Card title="Status" description="Only active competitions appear in match-day warnings. Archived competitions accept no new fixtures.">
-            <div className="flex flex-wrap gap-2">
-              {c.status !== "ACTIVE" && (
-                <ConfirmAction
-                  action={setCompetitionStatus}
-                  hidden={{ id: c.id, status: "ACTIVE" }}
-                  trigger="Activate"
-                  triggerClass={btn.primary}
-                  tone="primary"
-                  title={`Activate ${c.short_name}?`}
-                  body={c.entries.length < 2 ? "Warning: fewer than two teams are entered." : "The competition becomes active for fixtures and operations."}
-                  confirmLabel="Activate"
-                />
-              )}
-              {c.status === "ACTIVE" && (
-                <ConfirmAction action={setCompetitionStatus} hidden={{ id: c.id, status: "DRAFT" }} trigger="Deactivate (back to draft)" title="Move back to draft?" confirmLabel="Deactivate" tone="primary" />
-              )}
-              {c.status !== "ARCHIVED" && (
-                <ConfirmAction
-                  action={setCompetitionStatus}
-                  hidden={{ id: c.id, status: "ARCHIVED" }}
-                  trigger="Archive"
-                  title={`Archive ${c.short_name}?`}
-                  body="Results and tables are kept. No new fixtures can be created in it."
-                  confirmLabel="Archive"
-                  typeToConfirm="ARCHIVE"
-                />
-              )}
-            </div>
+          <Card title="Stages" description="Progress through the competition. Each stage locks when its first match kicks off.">
+            {o.stages.length === 0 ? (
+              <Empty title="No stages yet">
+                <Link href={`/admin/competitions/${c.id}/setup`} className="underline">Add stages in Setup</Link>
+              </Empty>
+            ) : (
+              <ul className="space-y-3">
+                {o.stages.map((s) => (
+                  <StageRow key={s.id} s={s} ops={ops.get(s.id)} competitionId={c.id} />
+                ))}
+              </ul>
+            )}
           </Card>
 
-          <Card title="Teams entered" id="entries">
-            {c.entries.length === 0 ? (
-              <Empty title="No teams entered" />
+          <Card title="Next fixtures">
+            {o.next_fixtures.length === 0 ? (
+              <p className="text-sm text-ink-muted">Nothing scheduled.</p>
             ) : (
               <ul className="divide-y divide-line">
-                {c.entries.map((e) => (
-                  <li key={e.id} className="flex flex-wrap items-center gap-2 py-2">
-                    <span className="w-full min-w-0 font-semibold break-words">
-                      {e.team.name} <span className="text-xs text-ink-muted">{e.team.code}</span>
+                {o.next_fixtures.slice(0, 6).map((f) => (
+                  <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
+                    <Link href={`/admin/matches/${f.id}`} className="min-w-0 font-semibold break-words hover:underline">
+                      {team(f.home_team_id)} v {team(f.away_team_id)}
+                    </Link>
+                    <span className="flex items-center gap-2 text-xs text-ink-muted">
+                      {formatWatDateTime(f.scheduled_at)} <StatusBadge status={f.status as MatchStatus} />
                     </span>
-                    <ActionForm action={updateEntry} hideMessage={false} className="flex min-w-0 flex-wrap items-center gap-2">
-                      <input type="hidden" name="id" value={e.id} />
-                      <input type="hidden" name="competition_id" value={c.id} />
-                      <div className="w-52 max-w-full">
-                        <PlacementSelect c={c} value={e.stage_id ? `${e.stage_id}:${e.group_id ?? ""}` : ""} />
-                      </div>
-                      <Submit className={btn.small}>Save</Submit>
-                    </ActionForm>
-                    <ConfirmAction
-                      action={removeEntry}
-                      hidden={{ id: e.id }}
-                      trigger="Withdraw"
-                      triggerClass={btn.small}
-                      title={`Withdraw ${e.team.name}?`}
-                      body="Only possible while the team has no fixtures in this competition."
-                      confirmLabel="Withdraw team"
-                    />
                   </li>
                 ))}
               </ul>
             )}
-            <Disclosure summary="Enter teams" className="mt-3">
-              {available.length === 0 ? (
-                <p className="text-sm text-ink-muted">Every active team is already entered.</p>
-              ) : (
-                <ActionForm action={addEntries} resetOnSuccess>
-                  <input type="hidden" name="competition_id" value={c.id} />
-                  <fieldset>
-                    <legend className="mb-1 text-sm font-bold">Teams</legend>
-                    <div className="grid max-h-64 gap-1 overflow-y-auto sm:grid-cols-2">
-                      {available.map((t) => (
-                        <label key={t.id} className="flex min-h-10 items-center gap-2 rounded px-1 text-sm hover:bg-subtle">
-                          <input type="checkbox" name="team_id" value={t.id} className="size-5 accent-brand-700" />
-                          {t.name}
-                        </label>
-                      ))}
-                    </div>
-                  </fieldset>
-                  <Field label="Stage / group" className="mt-3">
-                    <PlacementSelect c={c} value={c.stages[0] ? `${c.stages[0].id}:` : ""} />
-                  </Field>
-                  <Submit className={`${btn.primary} mt-3`}>Enter selected teams</Submit>
-                </ActionForm>
-              )}
-            </Disclosure>
           </Card>
 
-          <Card title="Stages & groups" id="stages" description="A stage with fixtures, teams or groups cannot be removed.">
-            <ul className="space-y-3">
-              {c.stages.map((s) => (
-                <li key={s.id} className="rounded-lg border border-line p-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-bold">
-                      {s.stage_order}. {s.name} {!s.has_table && <Badge tone="muted">No table</Badge>}
-                    </p>
-                    <ConfirmAction action={deleteStage} hidden={{ id: s.id }} trigger="Remove" triggerClass={btn.small} title={`Remove stage ${s.name}?`} confirmLabel="Remove stage" />
-                  </div>
-                  <Disclosure summary="Edit stage">
-                    <ActionForm action={saveStage} className="grid gap-3 sm:grid-cols-[1fr_6rem]">
-                      <input type="hidden" name="id" value={s.id} />
-                      <Field scope={s.id} label="Name">
-                        <input name="name" required maxLength={60} defaultValue={s.name} className={inputCls} />
-                      </Field>
-                      <Field scope={s.id} label="Order">
-                        <input type="number" name="stage_order" min={1} max={20} required defaultValue={s.stage_order} className={inputCls} />
-                      </Field>
-                      <div className="sm:col-span-2">
-                        <Check name="has_table" label="Has a league table" defaultChecked={s.has_table} />
-                      </div>
-                      <Submit className={`${btn.primary} sm:justify-self-start`}>Save stage</Submit>
-                    </ActionForm>
-                  </Disclosure>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    {s.groups.map((g) => (
-                      <span key={g.id} className="inline-flex items-center gap-1 rounded-md border border-line bg-subtle py-0.5 pr-0.5 pl-2 text-sm">
-                        {g.name}
-                        <ConfirmAction
-                          action={deleteGroup}
-                          hidden={{ id: g.id }}
-                          trigger={<span aria-label={`Remove group ${g.name}`}>×</span>}
-                          triggerClass="grid size-7 place-items-center rounded text-ink-muted hover:bg-line"
-                          title={`Remove ${g.name}?`}
-                          body="Only possible while no teams or fixtures are in the group."
-                          confirmLabel="Remove group"
-                        />
-                      </span>
-                    ))}
-                    <ActionForm action={addGroup} resetOnSuccess className="flex items-center gap-1">
-                      <input type="hidden" name="stage_id" value={s.id} />
-                      <input name="name" required maxLength={40} placeholder="New group" aria-label={`New group in ${s.name}`} className={`${inputCls} h-9 w-32`} />
-                      <Submit className={btn.small}>Add</Submit>
-                    </ActionForm>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <Disclosure summary="Add stage" className="mt-3">
-              <ActionForm action={saveStage} resetOnSuccess className="grid gap-3 sm:grid-cols-[1fr_6rem]">
-                <input type="hidden" name="competition_id" value={c.id} />
-                <Field scope="new-stage" label="Name">
-                  <input name="name" required maxLength={60} placeholder="Semi-finals" className={inputCls} />
-                </Field>
-                <Field label="Order">
-                  <input type="number" name="stage_order" min={1} max={20} required defaultValue={nextOrder} className={inputCls} />
-                </Field>
-                <div className="sm:col-span-2">
-                  <Check name="has_table" label="Has a league table" defaultChecked={c.format !== "KNOCKOUT"} />
-                </div>
-                <Submit className={`${btn.primary} sm:justify-self-start`}>Add stage</Submit>
-              </ActionForm>
-            </Disclosure>
+          <Card title="Competition actions">
+            <div className="flex flex-wrap gap-2">
+              <ConfirmAction
+                action={recomputeAction}
+                hidden={{ competition_id: c.id }}
+                trigger="Recompute"
+                triggerClass={btn.secondary}
+                tone="primary"
+                title="Recompute everything from results?"
+                body="Standings, qualification, knockout advancement and suspensions are re-derived from match events. Safe to repeat."
+                confirmLabel="Recompute"
+              />
+              {c.status !== "COMPLETED" ? (
+                <ConfirmAction
+                  action={completeCompetitionAction}
+                  hidden={{ competition_id: c.id }}
+                  trigger="Complete competition"
+                  triggerClass={btn.primary}
+                  tone="primary"
+                  title={`Complete ${c.short_name}?`}
+                  body="Needs every fixture played, cancelled or decided and — where the format has one — a champion determined by the results. Champion, runner-up and third place are derived, never typed."
+                  confirmLabel="Complete competition"
+                  typeToConfirm="COMPLETE"
+                />
+              ) : (
+                <ConfirmAction
+                  action={reopenCompetitionAction}
+                  hidden={{ competition_id: c.id }}
+                  trigger="Reopen"
+                  title="Reopen this competition?"
+                  body="Honours are cleared until it is completed again. This is an audited override."
+                  confirmLabel="Reopen"
+                  reason={{ label: "Reason", required: true }}
+                />
+              )}
+            </div>
           </Card>
         </div>
 
-        <Card title="Settings" id="settings">
-          <ActionForm action={updateCompetition}>
-            <CompetitionFields c={c} seasons={seasons} sports={sports} />
-            <Submit className={`${btn.primary} mt-4`}>Save settings</Submit>
-          </ActionForm>
-        </Card>
+        <div className="min-w-0 space-y-6">
+          <Card title="Current leaders">
+            {tables.length === 0 ? (
+              <p className="text-sm text-ink-muted">No table yet.</p>
+            ) : (
+              <ul className="space-y-3">
+                {tables.flatMap((s) =>
+                  (s.groups ?? []).map((g) => (
+                    <li key={`${s.id}-${g.id ?? "league"}`}>
+                      <p className="text-xs font-extrabold tracking-wide text-ink-muted uppercase">{g.name ?? s.name}</p>
+                      <ol className="mt-1 space-y-0.5 text-sm">
+                        {g.rows.slice(0, 3).map((r) => (
+                          <li key={r.team_id} className="flex justify-between gap-2">
+                            <span className="min-w-0 break-words">
+                              {r.rank}. {team(r.team_id)} {r.tied && <Badge tone="warn">level</Badge>}{" "}
+                              {r.qualification === "QUALIFIED" && <Badge tone="ok">Q</Badge>}
+                            </span>
+                            <span className="font-bold tabular-nums">{r.points} pts</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </li>
+                  )),
+                )}
+              </ul>
+            )}
+          </Card>
+
+          <Card title="Top scorers" description="From match events only (own goals and shoot-out kicks excluded).">
+            {o.scorers.length === 0 ? (
+              <p className="text-sm text-ink-muted">No goals recorded yet.</p>
+            ) : (
+              <ol className="space-y-1 text-sm">
+                {o.scorers.slice(0, 5).map((p) => (
+                  <li key={`${p.player_id}-${p.team_id}`} className="flex justify-between gap-2">
+                    <span className="min-w-0 break-words">
+                      {p.name} <span className="text-xs text-ink-muted">{team(p.team_id)}</span>
+                    </span>
+                    <span className="font-bold tabular-nums">{p.goals}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Card>
+
+          <Card title="Recent competition activity">
+            {o.recent_activity.length === 0 ? (
+              <p className="text-sm text-ink-muted">No activity yet.</p>
+            ) : (
+              <ul className="divide-y divide-line text-sm">
+                {o.recent_activity.map((a, i) => (
+                  <li key={i} className="flex flex-wrap justify-between gap-2 py-1.5">
+                    <span className="min-w-0 break-words">
+                      {ACTION_LABEL[a.action] ?? a.action}
+                      {typeof a.detail === "string" && <span className="text-ink-muted"> · {a.detail}</span>}
+                    </span>
+                    <span className="text-xs text-ink-muted">{formatWatDateTime(a.at)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        </div>
       </div>
     </>
   );

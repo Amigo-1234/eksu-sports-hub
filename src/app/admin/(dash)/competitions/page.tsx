@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FORMAT_LABEL } from "@/components/admin/CompetitionFields";
+import { COMPETITION_STATUS_TONE, FORMAT_LABEL } from "@/components/admin/CompetitionFields";
 import { Badge, btn, Card, Empty, PageTitle, TableWrap, td, th } from "@/components/admin/ui";
 import { listCompetitions } from "@/lib/admin/data/competitions";
 
 export const metadata: Metadata = { title: "Competitions" };
 
-const STATUS_TONE = { DRAFT: "warn", ACTIVE: "ok", ARCHIVED: "muted" } as const;
+const STATUS_TONE = COMPETITION_STATUS_TONE;
 
 export default async function CompetitionsPage() {
   const list = await listCompetitions();

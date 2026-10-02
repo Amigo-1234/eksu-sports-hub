@@ -7,6 +7,11 @@ const TB_LABEL: Record<string, string> = {
   goal_difference: "Goal difference",
   goals_for: "Goals scored",
   wins: "Wins",
+  h2h_points: "Head-to-head points",
+  h2h_goal_difference: "Head-to-head goal difference",
+  h2h_goals_for: "Head-to-head goals scored",
+  fair_play: "Fair play (fewest card points)",
+  alphabetical: "Alphabetical (explicit fallback)",
 };
 
 export function CompetitionFields({ c, seasons, sports }: { c?: CompetitionDetail; seasons: Season[]; sports: Sport[] }) {
@@ -45,8 +50,17 @@ export function CompetitionFields({ c, seasons, sports }: { c?: CompetitionDetai
       <Field label="Format" hint="Groups and knockout rounds are modelled as stages.">
         <select name="format" defaultValue={c?.format ?? "LEAGUE"} className={selectCls}>
           <option value="LEAGUE">League</option>
+          <option value="GROUPS">Groups</option>
           <option value="KNOCKOUT">Knockout</option>
-          <option value="GROUPS_KNOCKOUT">Groups + knockout</option>
+          <option value="GROUPS_KNOCKOUT">Groups → knockout</option>
+        </select>
+      </Field>
+      <Field label="Kind" hint="Friendly, test and demo competitions never mix with official tables, honours or statistics.">
+        <select name="kind" defaultValue={c?.kind ?? "OFFICIAL"} className={selectCls}>
+          <option value="OFFICIAL">Official</option>
+          <option value="FRIENDLY">Friendly</option>
+          <option value="TEST">Test</option>
+          <option value="DEMO">Demo</option>
         </select>
       </Field>
       <Field label="Category">
@@ -75,9 +89,10 @@ export function CompetitionFields({ c, seasons, sports }: { c?: CompetitionDetai
       </fieldset>
       <fieldset className="sm:col-span-2">
         <legend className="mb-1 text-sm font-bold">Table order (tie-breakers)</legend>
-        <div className="grid gap-3 sm:grid-cols-4">
-          {[0, 1, 2, 3].map((i) => (
-            <Field key={i} label={`${i + 1}${["st", "nd", "rd", "th"][i]}`}>
+        <p className="mb-2 text-xs text-ink-muted">Applied in order. Teams still level after every tie-breaker share the position (no random order).</p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <Field key={i} label={`${i + 1}${["st", "nd", "rd", "th", "th", "th"][i]}`}>
               <select name="tiebreakers" defaultValue={tb[i] ?? ""} className={selectCls}>
                 <option value="">—</option>
                 {TIEBREAKERS.map((t) => (
@@ -91,8 +106,8 @@ export function CompetitionFields({ c, seasons, sports }: { c?: CompetitionDetai
         </div>
       </fieldset>
       <div className="sm:col-span-2">
-        <Check name="extra_time_enabled" label="Extra time" defaultChecked={c?.extra_time_enabled} hint="Competition rule. The operator console currently records regulation time (two halves) only." />
-        <Check name="penalties_enabled" label="Penalty shoot-outs" defaultChecked={c?.penalties_enabled} hint="Competition rule. Shoot-outs are not yet recorded by the operator console." />
+        <Check name="extra_time_enabled" label="Extra time" defaultChecked={c?.extra_time_enabled} hint="Default for knockout rounds (a stage can override it). League and group matches never go to extra time." />
+        <Check name="penalties_enabled" label="Penalty shoot-outs" defaultChecked={c?.penalties_enabled} hint="Default for knockout rounds (a stage can override it). Shoot-out kicks never count as goals." />
         <Check
           name="allow_multi_team_players"
           label="Players may represent more than one entered team"
@@ -104,4 +119,12 @@ export function CompetitionFields({ c, seasons, sports }: { c?: CompetitionDetai
   );
 }
 
-export const FORMAT_LABEL = { LEAGUE: "League", KNOCKOUT: "Knockout", GROUPS_KNOCKOUT: "Groups + knockout" } as const;
+export const FORMAT_LABEL = { LEAGUE: "League", GROUPS: "Groups", KNOCKOUT: "Knockout", GROUPS_KNOCKOUT: "Groups → knockout" } as const;
+export const COMPETITION_STATUS_TONE = {
+  DRAFT: "warn",
+  REGISTRATION: "neutral",
+  SCHEDULED: "neutral",
+  ACTIVE: "ok",
+  COMPLETED: "ok",
+  ARCHIVED: "muted",
+} as const;

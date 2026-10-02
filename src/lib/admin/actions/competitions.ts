@@ -12,9 +12,11 @@ const done = (msg: string) => {
   return ok(msg);
 };
 
-const FORMATS = ["LEAGUE", "KNOCKOUT", "GROUPS_KNOCKOUT"] as const;
+const FORMATS = ["LEAGUE", "GROUPS", "KNOCKOUT", "GROUPS_KNOCKOUT"] as const;
+const KINDS = ["OFFICIAL", "FRIENDLY", "TEST", "DEMO"] as const;
 const CATEGORIES = ["MEN", "WOMEN", "MIXED"] as const;
-const STATUSES = ["DRAFT", "ACTIVE", "ARCHIVED"] as const;
+// COMPLETED is reached only through "Complete competition" (honours are derived).
+const STATUSES = ["DRAFT", "REGISTRATION", "SCHEDULED", "ACTIVE", "ARCHIVED"] as const;
 
 function tiebreakers(fd: FormData): Tiebreaker[] {
   const list = fd
@@ -39,6 +41,7 @@ function competitionFields(fd: FormData) {
     sport_id: id(fd, "sport_id", "Sport"),
     format: oneOf(fd, "format", FORMATS, "format"),
     category: oneOf(fd, "category", CATEGORIES, "category"),
+    kind: oneOf(fd, "kind", KINDS, "kind"),
     points_win,
     points_draw,
     points_loss,
@@ -56,10 +59,17 @@ export async function createCompetition(_: ActionState, fd: FormData): Promise<A
     const row = check(await db.from("competitions").insert(fields).select("id").single()) as { id: string };
     newId = row.id;
     // Every competition needs at least one stage for fixtures and tables.
-    check(await db.from("competition_stages").insert({ competition_id: row.id, name: fields.format === "KNOCKOUT" ? "Knockout" : "League phase", stage_order: 1, has_table: fields.format !== "KNOCKOUT" }));
+    // Starting stage from the format; more stages (knockout rounds) are added in the control centre.
+    const first =
+      fields.format === "KNOCKOUT"
+        ? { name: "Final", stage_type: "FINAL", has_table: false }
+        : fields.format === "LEAGUE"
+          ? { name: "League phase", stage_type: "LEAGUE", has_table: true }
+          : { name: "Group stage", stage_type: "GROUP", has_table: true };
+    check(await db.from("competition_stages").insert({ competition_id: row.id, stage_order: 1, ...first }));
     return done("Competition created as a draft.");
   });
-  if (res?.ok && newId) redirect(`/admin/competitions/${newId}?created=1`);
+  if (res?.ok && newId) redirect(`/admin/competitions/${newId}/setup?created=1`);
   return res;
 }
 
@@ -74,7 +84,8 @@ export async function setCompetitionStatus(_: ActionState, fd: FormData): Promis
   return adminAction(async ({ db }) => {
     const status = oneOf(fd, "status", STATUSES, "status");
     check(await db.from("competitions").update({ status }).eq("id", id(fd, "id", "Competition")));
-    return done(status === "ACTIVE" ? "Competition activated." : status === "ARCHIVED" ? "Competition archived." : "Competition moved back to draft.");
+    const msg = { ACTIVE: "Competition activated.", ARCHIVED: "Competition archived.", DRAFT: "Competition moved back to draft.", REGISTRATION: "Competition open for entries.", SCHEDULED: "Competition scheduled." }[status];
+    return done(msg);
   });
 }
 
