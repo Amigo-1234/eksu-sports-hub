@@ -275,7 +275,7 @@ export default async function CompetitionControlCentre({ params }: PageProps<"/a
 
           <Card title="Top scorers" description="From match events only (own goals and shoot-out kicks excluded).">
             {o.scorers.length === 0 ? (
-              <p className="text-sm text-ink-muted">No goals recorded yet.</p>
+              <p className="text-sm text-ink-muted">No goals with a recorded scorer yet.</p>
             ) : (
               <ol className="space-y-1 text-sm">
                 {o.scorers.slice(0, 5).map((p) => (

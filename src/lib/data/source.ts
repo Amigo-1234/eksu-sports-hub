@@ -1,5 +1,6 @@
 import type {
   Competition,
+  CompetitionDetailView,
   ID,
   MatchDetail,
   MatchSummary,
@@ -41,6 +42,12 @@ export interface SportsDataSource {
   getMatch(id: ID): Promise<MatchDetail | null>;
   /** Empty for knockout competitions. */
   getStandings(competitionId: ID): Promise<StandingRow[]>;
+  /**
+   * Competition engine view: stages, group tables with qualification, the
+   * knockout bracket, statistics and honours. Null when unavailable (e.g. the
+   * demo data source), in which case pages fall back to fixtures/results.
+   */
+  getCompetitionDetail(competitionId: ID): Promise<CompetitionDetailView | null>;
   /** Completed meetings between two teams, most recent first. */
   getHeadToHead(
     teamA: ID,

@@ -73,15 +73,23 @@ export function StandingsTable({
         <tbody className="divide-y divide-line">
           {rows.map((r) => {
             const highlighted = highlightTeamIds.includes(r.teamId);
-            const promoted = r.position <= promotionSpots;
+            const promoted = r.qualification ? r.qualification === "QUALIFIED" : r.position <= promotionSpots;
+            const pending = r.qualification === "PENDING";
             return (
               <tr key={r.teamId} className={highlighted ? "bg-accent-100/60" : "hover:bg-subtle/60"}>
                 <td className="relative py-2.5 text-center font-semibold tabular-nums text-ink-muted">
                   {promoted && (
                     <span className="absolute inset-y-1 left-0 w-[3px] rounded-r bg-brand-600" aria-hidden="true" />
                   )}
+                  {pending && <span className="absolute inset-y-1 left-0 w-[3px] rounded-r bg-accent-400" aria-hidden="true" />}
+                  {r.tied && <span aria-hidden="true">=</span>}
                   {r.position}
-                  {promoted && promotionLabel && <span className="sr-only">, {promotionLabel}</span>}
+                  {r.tied && <span className="sr-only">, level on every tie-breaker</span>}
+                  {r.qualification ? (
+                    <span className="sr-only">, {r.qualification.toLowerCase()}</span>
+                  ) : (
+                    promoted && promotionLabel && <span className="sr-only">, {promotionLabel}</span>
+                  )}
                 </td>
                 <th scope="row" className="py-1.5 pl-1 text-left font-normal">
                   <Link
@@ -120,7 +128,22 @@ export function StandingsTable({
           })}
         </tbody>
       </table>
-      {promotionSpots > 0 && promotionLabel && !compact && (
+      {rows.some((r) => r.qualification) && !compact && (
+        <p className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line px-3 py-2 text-xs text-ink-muted">
+          <span className="flex items-center gap-2">
+            <span className="h-3 w-[3px] rounded bg-brand-600" aria-hidden="true" />
+            Qualified
+          </span>
+          {rows.some((r) => r.qualification === "PENDING") && (
+            <span className="flex items-center gap-2">
+              <span className="h-3 w-[3px] rounded bg-accent-400" aria-hidden="true" />
+              Still to be decided
+            </span>
+          )}
+          {rows.some((r) => r.tied) && <span>= level after every tie-breaker</span>}
+        </p>
+      )}
+      {promotionSpots > 0 && promotionLabel && !compact && !rows.some((r) => r.qualification) && (
         <p className="flex items-center gap-2 border-t border-line px-3 py-2 text-xs text-ink-muted">
           <span className="h-3 w-[3px] rounded bg-brand-600" aria-hidden="true" />
           {promotionLabel}

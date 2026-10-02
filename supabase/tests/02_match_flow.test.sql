@@ -147,11 +147,11 @@ select ok((select bool_and(actor_id is not null and before_state is not null or 
            from public.audit_log where match_id = tests.m1()), 'audit rows carry actor and before-state');
 select results_eq(
   $$ select played::int, wins::int, draws::int, losses::int, goals_for::int, goals_against::int, points::int, rank::int
-     from public.standings where team_id = tests.home() $$,
+     from public.standings where team_id = tests.home() and competition_id = (select competition_id from public.matches where id = tests.m1()) $$,
   $$ values (1, 1, 0, 0, 2, 1, 3, 1) $$,
   'standings recomputed at FT using competition points (home)');
 select results_eq(
-  $$ select played::int, losses::int, points::int, goal_difference::int from public.standings where team_id = tests.away() $$,
+  $$ select played::int, losses::int, points::int, goal_difference::int from public.standings where team_id = tests.away() and competition_id = (select competition_id from public.matches where id = tests.m1()) $$,
   $$ values (1, 1, 0, -1) $$,
   'standings recomputed at FT (away)');
 

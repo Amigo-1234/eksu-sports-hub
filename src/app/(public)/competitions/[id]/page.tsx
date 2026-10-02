@@ -5,7 +5,9 @@ import { MatchCardList, MatchesByDate } from "@/components/match/MatchList";
 import { StandingsTable } from "@/components/standings/StandingsTable";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { getCompetition, getMatches, getNow, getStandings } from "@/lib/data";
+import { getCompetition, getCompetitionDetail, getMatches, getNow, getStandings } from "@/lib/data";
+import { ChampionBanner } from "@/components/competition/ChampionBanner";
+import { TieCard } from "@/components/competition/KnockoutBracket";
 import { promotionFor } from "@/lib/competition";
 
 export async function generateMetadata({ params }: PageProps<"/competitions/[id]">): Promise<Metadata> {
@@ -19,15 +21,19 @@ export default async function CompetitionOverview({ params }: PageProps<"/compet
   if (!competition) notFound();
 
   const now = await getNow();
-  const [live, upcoming, results, all, standings] = await Promise.all([
+  const [live, upcoming, results, all, standings, detail] = await Promise.all([
     getMatches({ scope: "live", competitionId: id }),
     getMatches({ scope: "upcoming", competitionId: id, limit: 4 }),
     getMatches({ scope: "results", competitionId: id }),
     getMatches({ competitionId: id }),
     getStandings(id),
+    getCompetitionDetail(id),
   ]);
 
   const completed = results.filter((m) => m.status === "FULL_TIME");
+  // Latest knockout round with ties (engine data), for the overview.
+  const koStage = detail?.stages.filter((s) => s.isKnockout && s.type !== "THIRD_PLACE" && s.ties.length > 0).find((s) => s.ties.some((t) => !t.winnerTeamId))
+    ?? detail?.stages.filter((s) => s.isKnockout && s.type !== "THIRD_PLACE" && s.ties.length > 0).at(-1);
   const goals = completed.reduce((n, m) => n + (m.score ? m.score.home + m.score.away : 0), 0);
   const base = `/competitions/${id}`;
 
@@ -37,6 +43,7 @@ export default async function CompetitionOverview({ params }: PageProps<"/compet
   return (
     <div className="grid gap-x-6 gap-y-7 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="min-w-0 space-y-7">
+        {detail && <ChampionBanner detail={detail} />}
         <section aria-label="About" className="rounded-card border border-line bg-surface p-4">
           <p className="text-sm text-ink-muted">{competition.description}</p>
           <dl className="mt-4 grid grid-cols-3 divide-x divide-line text-center">
@@ -66,7 +73,20 @@ export default async function CompetitionOverview({ params }: PageProps<"/compet
           </section>
         )}
 
-        {competition.format === "knockout" ? (
+        {koStage && (
+          <section aria-labelledby="c-ko">
+            <SectionHeader id="c-ko" title={koStage.name} href={`${base}/knockout`} linkLabel="Full bracket" />
+            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {koStage.ties.map((t) => (
+                <li key={t.id}>
+                  <TieCard tie={t} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {competition.format === "knockout" && !detail ? (
           rounds.map((round) => (
             <section key={round} aria-labelledby={`r-${round}`}>
               <SectionHeader id={`r-${round}`} title={round} />

@@ -18,7 +18,7 @@ import { dateKey } from "../../format";
 import { supabaseEnv } from "../../supabase/env";
 import { clockFromCanonical, type CanonicalMatch } from "../../operator/canonical";
 import { elapsedSeconds } from "../../operator/clock";
-import type { Competition, FormResult, ID, MatchDetail, MatchSummary, Sport, StandingRow, Team, Venue } from "../../types";
+import type { Competition, CompetitionDetailView, FormResult, ID, MatchDetail, MatchSummary, PublicPlayerStat, PublicStage, PublicTie, Sport, StandingRow, Team, Venue } from "../../types";
 import { PUBLIC_DATA_TAG } from "../cacheTags";
 import type { MatchQuery, SportsDataSource } from "../source";
 import { sortEvents, toEvent, toLineups, toOutcome, toPublicClock, toPublicStatus, toShootout, toStats } from "./map";
@@ -69,6 +69,7 @@ function toCompetition(c: any): Competition {
     season: c.season?.name ?? "",
     // Group stages have tables too; only pure knockouts have none.
     format: c.format === "KNOCKOUT" ? "knockout" : "league",
+    engineFormat: c.format,
     category: (c.category ?? "MEN").toLowerCase(),
     description: c.description ?? "",
     teamIds: (c.competition_entries ?? []).map((e: any) => e.team_id),
@@ -197,6 +198,113 @@ async function formFor(competitionId: ID): Promise<Map<ID, FormResult[]>> {
   return form;
 }
 
+function toDetail(p: any, refs: Refs, form: Map<ID, FormResult[]>): CompetitionDetailView | null {
+  const competition = refs.competitions.get(p.competition.id);
+  if (!competition) return null;
+  const team = (id: string | null): Team | null => (id ? (refs.teams.get(id) ?? null) : null);
+  const stat = (x: any): PublicPlayerStat | null => {
+    const t = team(x.team_id);
+    if (!t) return null;
+    return {
+      playerId: x.player_id,
+      team: t,
+      name: x.name,
+      shirtNumber: x.shirt_number ?? null,
+      goals: x.goals,
+      penalties: x.penalties,
+      appearances: x.appearances,
+      yellows: x.yellows,
+      secondYellows: x.second_yellows,
+      reds: x.reds,
+      cleanSheets: x.clean_sheets,
+    };
+  };
+  const stages: PublicStage[] = (p.stages ?? []).map((s: any) => ({
+    id: s.id,
+    name: s.name,
+    type: s.stage_type,
+    isKnockout: Boolean(s.is_knockout),
+    hasTable: Boolean(s.has_table),
+    status: s.status,
+    qualifyingPlaces: s.qualification?.per_group ?? s.qualification?.top ?? null,
+    groups: (s.groups ?? []).map((g: any) => ({
+      id: g.id,
+      name: g.name,
+      complete: Boolean(g.complete),
+      rows: (g.rows ?? [])
+        .map((r: any): StandingRow | null => {
+          const t = team(r.team_id);
+          if (!t) return null;
+          return {
+            competitionId: competition.id,
+            teamId: r.team_id,
+            position: r.rank,
+            played: r.played,
+            won: r.wins,
+            drawn: r.draws,
+            lost: r.losses,
+            goalsFor: r.goals_for,
+            goalsAgainst: r.goals_against,
+            goalDifference: r.goal_difference,
+            points: r.points,
+            form: form.get(r.team_id) ?? [],
+            team: t,
+            qualification: r.qualification ?? null,
+            tied: Boolean(r.tied),
+          };
+        })
+        .filter((r: StandingRow | null): r is StandingRow => r !== null),
+    })),
+    ties: (s.ties ?? []).map(
+      (t: any): PublicTie => ({
+        id: t.id,
+        code: t.code,
+        position: t.position,
+        home: { team: team(t.home_team_id), label: t.home_label },
+        away: { team: team(t.away_team_id), label: t.away_label },
+        matchId: t.match_id ?? null,
+        kickoffAt: t.scheduled_at ?? null,
+        status: t.status ? toPublicStatus(t.status) : null,
+        score: t.status && !["SCHEDULED", "POSTPONED", "CANCELLED"].includes(t.status) ? { home: t.home_score, away: t.away_score } : null,
+        shootout: t.home_pens != null && t.away_pens != null ? { home: t.home_pens, away: t.away_pens } : null,
+        decidedBy: t.decided_by ?? null,
+        winnerTeamId: t.winner_team_id ?? null,
+        winnerTo: t.winner_to?.code ?? null,
+        underReview: Boolean(t.needs_reconciliation),
+      }),
+    ),
+  }));
+  const c = p.competition;
+  return {
+    competitionId: competition.id,
+    format: c.format,
+    status: c.status,
+    kind: c.kind,
+    champion: team(c.champion_team_id),
+    runnerUp: team(c.runner_up_team_id),
+    thirdPlace: team(c.third_place_team_id),
+    stages,
+    scorers: (p.scorers ?? []).map(stat).filter(Boolean) as PublicPlayerStat[],
+    cleanSheets: (p.clean_sheets ?? []).map(stat).filter(Boolean) as PublicPlayerStat[],
+    discipline: {
+      players: (p.discipline?.players ?? []).map(stat).filter(Boolean) as PublicPlayerStat[],
+      suspensions: (p.discipline?.suspensions ?? [])
+        .map((x: any) => {
+          const t = team(x.team_id);
+          return t ? { id: x.id, team: t, name: x.name, reason: x.reason, matchesTotal: x.matches_total, matchesServed: x.matches_served, status: x.status } : null;
+        })
+        .filter(Boolean),
+      rulesEnabled: Boolean(p.discipline?.rules?.enabled),
+    },
+    summary: {
+      teams: p.summary?.teams ?? 0,
+      matchesTotal: p.summary?.matches_total ?? 0,
+      matchesPlayed: p.summary?.matches_played ?? 0,
+      goals: p.summary?.goals ?? 0,
+    },
+  };
+}
+
 export const supabaseDataSource: SportsDataSource = {
   now: () => Date.now(),
 
@@ -283,6 +391,17 @@ export const supabaseDataSource: SportsDataSource = {
         };
       })
       .filter((s): s is StandingRow => s !== null);
+  },
+
+  async getCompetitionDetail(competitionId) {
+    if (!UUID.test(competitionId)) return null;
+    const [res, refs, form] = await Promise.all([
+      client(LIST_TTL).rpc("public_competition", { p_competition_id: competitionId }),
+      loadRefs(),
+      formFor(competitionId),
+    ]);
+    const p = must(res, "competition") as any;
+    return p ? toDetail(p, refs, form) : null;
   },
 
   async getHeadToHead(teamA, teamB, options = {}) {

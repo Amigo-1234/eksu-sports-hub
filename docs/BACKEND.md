@@ -406,6 +406,46 @@ table or function carries them.
   `admin_match_audience` — ADMIN; on /admin/live cards (15 s auto-refresh) and
   the admin match page (live-polling panel; figures kept after FT).
 
+### Competition engine V2 (migrations `20261010001900`, `20261010002000`)
+- **Formats.** `LEAGUE`, `GROUPS`, `KNOCKOUT`, `GROUPS_KNOCKOUT`. Competition
+  lifecycle `DRAFT → REGISTRATION → SCHEDULED → ACTIVE → COMPLETED → ARCHIVED`;
+  `kind` (`OFFICIAL`/`FRIENDLY`/`TEST`/`DEMO`) — only official, non-demo matches feed
+  standings, stats, discipline and honours.
+- **Stages** (`stage_type` GROUP/LEAGUE/ROUND_OF_16/QUARTER_FINAL/SEMI_FINAL/
+  THIRD_PLACE/FINAL…, `legs` = 1, ET/pens flags, `qualification` jsonb). A stage
+  locks at its first kick-off (`locked_at`); structural edits after that need an
+  audited override (`private.begin_override(reason)` → `LOCK_OVERRIDE`).
+- **Fixtures.** Circle-method round robin (single/double), balanced home/away
+  (≤ 2 consecutive), deterministic for the same input. `admin_preview_fixtures`
+  returns a hash; `admin_confirm_fixtures` re-derives and refuses a stale hash,
+  is idempotent, and only replaces a generation whose matches never started.
+  Kick-off changes append to `fixture_schedule_history` (original kept on
+  `matches.original_scheduled_at`).
+- **Standings.** Per stage/group; points and an ordered tie-breaker list
+  (points, GD, GF, head-to-head, fair play, wins…). Teams still level are
+  flagged `tied` and kept alphabetical — never random. Qualification
+  (`QUALIFIED`/`ELIMINATED`/`PENDING`) is derived once a group is complete; level
+  teams across the cut stay `PENDING` until `admin_set_qualification_decision`.
+- **Knockout.** `knockout_ties` with sources TEAM / GROUP_RANK / LEAGUE_RANK /
+  BEST_RANKED / WINNER / LOSER and placeholder labels; cross-group or seeded
+  pairing with same-group avoidance; preview → confirm. A tie's match is created
+  once both teams are known and a kick-off is set. Winners advance
+  automatically (idempotent); a corrected result flags `needs_reconciliation`
+  and `admin_reconcile_tie` repairs unstarted downstream ties.
+- **Extra time / penalties.** Match statuses `ET1`, `ET_BREAK`, `ET2`, `PENS`.
+  Scores kept separately: regulation (`*_score_90`), final incl. ET
+  (`*_score`), shoot-out (`*_pens`) from `match_shootout_attempts` (never
+  goals). Best of five, then sudden death; teams alternate. `winner_team_id` +
+  `decided_by` (`REGULATION`/`EXTRA_TIME`/`PENALTIES`; ties also `ADMIN`).
+- **Discipline.** `competition_discipline_rules` (straight red, second yellow,
+  every-N-yellows); `player_suspensions` derived from cards and served by the
+  team's next completed official fixtures; manual add/cancel keep history.
+  `match_eligibility` reports `SUSPENDED`; players stay in squads.
+- **Read models.** `public_competition` (anon: stages, groups, ties, scorers,
+  clean sheets, cards, suspensions, honours), `admin_competition_overview`,
+  `admin_fixture_history`. Engine refresh runs in a deferred constraint
+  trigger at commit (`competition_refresh`).
+
 ## Authentication
 Email + password through Supabase Auth (works without external services).
 Public sign-up is disabled (`[auth] enable_signup = false`); accounts are

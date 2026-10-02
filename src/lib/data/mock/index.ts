@@ -135,6 +135,11 @@ export const mockDataSource: SportsDataSource = {
     return { ...join(m), events: events.get(id) ?? [] };
   },
 
+  // The demo data has no competition-engine view (stages / bracket / stats).
+  async getCompetitionDetail() {
+    return null;
+  },
+
   async getStandings(competitionId) {
     const competition = competitionMap.get(competitionId);
     if (!competition || competition.format !== "league") return [];

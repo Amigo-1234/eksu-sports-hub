@@ -1,20 +1,17 @@
 import { notFound } from "next/navigation";
 import { CompetitionBadge, competitionMeta } from "@/components/competition/CompetitionLinkList";
 import { LinkTabs } from "@/components/ui/LinkTabs";
-import { getCompetition } from "@/lib/data";
+import { getCompetition, getCompetitionDetail } from "@/lib/data";
+import { competitionSections } from "@/lib/competitionSections";
 
 export default async function CompetitionLayout({ children, params }: LayoutProps<"/competitions/[id]">) {
   const { id } = await params;
-  const competition = await getCompetition(id);
+  const [competition, detail] = await Promise.all([getCompetition(id), getCompetitionDetail(id)]);
   if (!competition) notFound();
 
   const base = `/competitions/${competition.id}`;
-  const tabs = [
-    { href: base, label: "Overview" },
-    { href: `${base}/fixtures`, label: "Fixtures" },
-    { href: `${base}/results`, label: "Results" },
-    ...(competition.format === "league" ? [{ href: `${base}/table`, label: "Table" }] : []),
-  ];
+  // Only the sections that make sense for this competition's format.
+  const tabs = competitionSections(competition, detail).map((s) => ({ href: `${base}${s.path}`, label: s.label }));
 
   return (
     <>

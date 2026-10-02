@@ -57,6 +57,11 @@ export async function getTeam(id: string) {
   return source.getTeam(id);
 }
 
+export async function getCompetitionDetail(id: string) {
+  await connection();
+  return source.getCompetitionDetail(id);
+}
+
 export async function getMatches(query?: Parameters<SportsDataSource["getMatches"]>[0]) {
   await connection();
   return source.getMatches(query);

@@ -3,7 +3,8 @@ import { ChevronRightIcon, TrophyIcon } from "@/components/ui/icons";
 import type { Competition } from "@/lib/types";
 
 export function competitionMeta(c: Competition): string {
-  const format = c.format === "league" ? "League" : "Knockout";
+  const format =
+    c.engineFormat === "GROUPS" ? "Groups" : c.engineFormat === "GROUPS_KNOCKOUT" ? "Groups + knockout" : c.format === "league" ? "League" : "Knockout";
   const category = c.category === "women" ? "Women" : c.category === "men" ? "Men" : "Mixed";
   return `${format} · ${category} · ${c.season}`;
 }

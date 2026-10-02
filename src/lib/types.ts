@@ -32,6 +32,8 @@ export interface Competition {
   shortName: string;
   season: string;
   format: CompetitionFormat;
+  /** The engine's precise format, when known (database source only). */
+  engineFormat?: CompetitionEngineFormat;
   category: CompetitionCategory;
   description: string;
   /** Team IDs participating in the competition. */
@@ -287,4 +289,91 @@ export interface PublicLineupPlayer {
 
 export interface StandingRow extends Standing {
   team: Team;
+  /** Derived qualification state (competitions with qualification rules). */
+  qualification?: "QUALIFIED" | "ELIMINATED" | "PENDING" | null;
+  /** Still level with another team after every configured tie-breaker. */
+  tied?: boolean;
+}
+
+/* ------------------------------------------------------------------------ */
+/* Competition engine (real data only).                                      */
+/* ------------------------------------------------------------------------ */
+
+export type CompetitionEngineFormat = "LEAGUE" | "GROUPS" | "KNOCKOUT" | "GROUPS_KNOCKOUT";
+
+export interface TieSide {
+  team: Team | null;
+  /** Placeholder until resolved, e.g. "Winner QF1" / "Runner-up Group A". */
+  label: string;
+}
+
+export interface PublicTie {
+  id: ID;
+  code: string;
+  position: number;
+  home: TieSide;
+  away: TieSide;
+  matchId: ID | null;
+  kickoffAt: ISODateTime | null;
+  status: MatchStatus | null;
+  score: Score | null;
+  shootout: Score | null;
+  decidedBy: "REGULATION" | "EXTRA_TIME" | "PENALTIES" | "ADMIN" | null;
+  winnerTeamId: ID | null;
+  /** Code of the tie the winner goes to (null for the final). */
+  winnerTo: string | null;
+  underReview: boolean;
+}
+
+export interface PublicStage {
+  id: ID;
+  name: string;
+  type: "LEAGUE" | "GROUP" | "ROUND_OF_32" | "ROUND_OF_16" | "QUARTER_FINAL" | "SEMI_FINAL" | "THIRD_PLACE" | "FINAL" | "KNOCKOUT";
+  isKnockout: boolean;
+  hasTable: boolean;
+  status: "PENDING" | "ACTIVE" | "COMPLETED";
+  /** Places that qualify per group (or from the league), when configured. */
+  qualifyingPlaces: number | null;
+  groups: { id: ID | null; name: string | null; complete: boolean; rows: StandingRow[] }[];
+  ties: PublicTie[];
+}
+
+export interface PublicPlayerStat {
+  playerId: ID;
+  team: Team;
+  name: string;
+  shirtNumber: number | null;
+  goals?: number;
+  penalties?: number;
+  appearances?: number;
+  yellows?: number;
+  secondYellows?: number;
+  reds?: number;
+  cleanSheets?: number;
+}
+
+export interface PublicSuspension {
+  id: ID;
+  team: Team;
+  name: string;
+  reason: "RED_CARD" | "SECOND_YELLOW" | "YELLOW_ACCUMULATION" | "ADMIN";
+  matchesTotal: number;
+  matchesServed: number;
+  status: "ACTIVE" | "SERVED";
+}
+
+/** Everything the public competition page needs beyond fixtures/results. */
+export interface CompetitionDetailView {
+  competitionId: ID;
+  format: CompetitionEngineFormat;
+  status: "REGISTRATION" | "SCHEDULED" | "ACTIVE" | "COMPLETED" | "ARCHIVED" | "DRAFT";
+  kind: "OFFICIAL" | "FRIENDLY" | "TEST" | "DEMO";
+  champion: Team | null;
+  runnerUp: Team | null;
+  thirdPlace: Team | null;
+  stages: PublicStage[];
+  scorers: PublicPlayerStat[];
+  cleanSheets: PublicPlayerStat[];
+  discipline: { players: PublicPlayerStat[]; suspensions: PublicSuspension[]; rulesEnabled: boolean };
+  summary: { teams: number; matchesTotal: number; matchesPlayed: number; goals: number };
 }
