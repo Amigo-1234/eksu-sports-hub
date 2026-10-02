@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { TeamCrest } from "@/components/team/TeamCrest";
 import { formatShortDate } from "@/lib/format";
-import { matchAccessibleLabel, matchHref, matchWinner } from "@/lib/match";
+import { matchAccessibleLabel, matchHref, matchWinner, outcomeNote } from "@/lib/match";
 import { isDisrupted, isLive, showsScore } from "@/lib/status";
 import type { MatchSummary, Team } from "@/lib/types";
 import { MatchStatusLabel } from "./MatchStatusLabel";
@@ -56,6 +56,11 @@ export function MatchRow({
         )}
         <TeamLine team={match.homeTeam} dim={winner === "away"} strong={winner === "home"} />
         <TeamLine team={match.awayTeam} dim={winner === "home"} strong={winner === "away"} className="mt-1.5" />
+        {outcomeNote(match) && (
+          <p className="mt-1 text-[11px] font-semibold text-ink-muted" aria-hidden="true">
+            {outcomeNote(match)}
+          </p>
+        )}
         {isDisrupted(match.status) && match.status !== "ABANDONED" && (
           <p className="sr-only">{match.statusNote}</p>
         )}

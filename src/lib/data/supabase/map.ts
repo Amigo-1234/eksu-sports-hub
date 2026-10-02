@@ -2,7 +2,7 @@
  * Supabase row / RPC payload → public UI types. Pure and shared by the server
  * data source and the browser realtime layer.
  */
-import type { ID, MatchEvent, MatchEventType, MatchStats, MatchStatus, PublicClock, PublicLineup, TeamMatchStats } from "../../types";
+import type { ID, MatchEvent, MatchEventType, MatchOutcome, MatchStats, MatchStatus, PublicClock, PublicLineup, PublicShootout, TeamMatchStats } from "../../types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- RPC payloads are mapped explicitly below. */
 
@@ -11,6 +11,10 @@ const STATUS: Record<string, MatchStatus> = {
   "1H": "LIVE_FIRST_HALF",
   HT: "HALF_TIME",
   "2H": "LIVE_SECOND_HALF",
+  ET1: "LIVE_EXTRA_TIME",
+  ET_BREAK: "EXTRA_TIME_BREAK",
+  ET2: "LIVE_EXTRA_TIME",
+  PENS: "PENALTIES",
   FT: "FULL_TIME",
   POSTPONED: "POSTPONED",
   CANCELLED: "CANCELLED",
@@ -119,5 +123,36 @@ export function toStats(raw: any): MatchStats | null {
     note: String(raw.note ?? ""),
     home: side(raw.home, raw.cards?.home),
     away: side(raw.away, raw.cards?.away),
+  };
+}
+
+/** Knockout outcome fields of a match row / feed match (null for an ordinary result). */
+export function toOutcome(m: any): MatchOutcome | null {
+  const hasPens = m.home_pens != null && m.away_pens != null;
+  const s90 = m.home_score_90 != null && m.away_score_90 != null ? { home: m.home_score_90, away: m.away_score_90 } : null;
+  const wentToEt = Number(m.current_period ?? 0) >= 3;
+  if (!hasPens && !wentToEt && !m.decided_by) return null;
+  return {
+    scoreAfter90: s90,
+    shootout: hasPens ? { home: m.home_pens, away: m.away_pens } : null,
+    decidedBy: m.decided_by ?? null,
+    winnerTeamId: m.winner_team_id ?? null,
+  };
+}
+
+/** Feed shoot-out (public_match_feed.shootout) → UI shoot-out. */
+export function toShootout(s: any): PublicShootout | null {
+  if (!s) return null;
+  return {
+    homeScored: s.home_scored ?? 0,
+    awayScored: s.away_scored ?? 0,
+    decided: Boolean(s.decided),
+    winnerTeamId: s.winner_team_id ?? null,
+    kicks: (s.kicks ?? []).map((k: any) => ({
+      id: k.id,
+      teamId: k.team_id,
+      outcome: k.outcome,
+      player: { shirtNumber: k.shirt_number ?? null, name: k.player_name ?? undefined },
+    })),
   };
 }

@@ -6,6 +6,7 @@
  * buttons from `availableCommands()` and never checks phases on its own.
  */
 import type { MatchStatus } from "../types.ts";
+import { isLevel, shootoutTally } from "./score.ts";
 import type { OpMatchState, OpPhase } from "./types.ts";
 
 export type OpCommand =
@@ -18,6 +19,9 @@ export type OpCommand =
   | "PAUSE"
   | "RESUME"
   | "FINALISE_MATCH"
+  /** Penalty shoot-out kick (never a match event). */
+  | "RECORD_KICK"
+  | "VOID_KICK"
   | "POSTPONE"
   | "CANCEL"
   | "ABANDON";
@@ -42,15 +46,51 @@ interface CommandSpec {
   to?: OpPhase;
 }
 
-const IN_PLAY = ["FIRST_HALF", "SECOND_HALF"] as const;
-const STARTED = ["FIRST_HALF", "HALF_TIME", "SECOND_HALF"] as const;
+const IN_PLAY = ["FIRST_HALF", "SECOND_HALF", "EXTRA_TIME_FIRST", "EXTRA_TIME_SECOND"] as const;
+const STARTED = ["FIRST_HALF", "HALF_TIME", "SECOND_HALF", "ET_BREAK", "EXTRA_TIME_FIRST", "EXTRA_TIME_SECOND", "PENALTIES"] as const;
+
+/** Knockout match level after the current period, with more football to come. */
+function continues(s: OpMatchState, after: "REGULATION" | "EXTRA_TIME"): boolean {
+  const r = s.rules;
+  if (!r?.needsWinner || !isLevel(s)) return false;
+  return after === "REGULATION" ? r.extraTime || r.penalties : r.penalties;
+}
+
+/** Where END_PERIOD leads from the current phase (null: not a period end). */
+export function endPeriodTarget(s: OpMatchState): OpPhase | null {
+  switch (s.phase) {
+    case "FIRST_HALF":
+      return "HALF_TIME";
+    case "SECOND_HALF":
+      return continues(s, "REGULATION") ? (s.rules?.extraTime ? "ET_BREAK" : "PENALTIES") : null;
+    case "EXTRA_TIME_FIRST":
+      return "ET_BREAK";
+    case "EXTRA_TIME_SECOND":
+      return continues(s, "EXTRA_TIME") ? "PENALTIES" : null;
+    default:
+      return null;
+  }
+}
+
+/** Where START_PERIOD leads from a break. */
+export function startPeriodTarget(s: OpMatchState): OpPhase | null {
+  if (s.phase === "HALF_TIME") return "SECOND_HALF";
+  if (s.phase === "ET_BREAK") return s.clock.period === 3 ? "EXTRA_TIME_SECOND" : "EXTRA_TIME_FIRST";
+  return null;
+}
 
 export const COMMANDS: Record<OpCommand, CommandSpec> = {
   START_MATCH: { rpc: "start_match", role: "operator", consequence: "critical", allowedIn: ["SCHEDULED"], to: "FIRST_HALF" },
   RECORD_EVENT: { rpc: "record_event", role: "operator", consequence: "routine", allowedIn: IN_PLAY },
   VOID_EVENT: { rpc: "void_event", role: "operator", consequence: "routine", allowedIn: STARTED },
-  END_PERIOD: { rpc: "end_period", role: "operator", consequence: "critical", allowedIn: ["FIRST_HALF"], to: "HALF_TIME" },
-  START_PERIOD: { rpc: "start_period", role: "operator", consequence: "critical", allowedIn: ["HALF_TIME"], to: "SECOND_HALF" },
+  END_PERIOD: {
+    rpc: "end_period",
+    role: "operator",
+    consequence: "critical",
+    allowedIn: ["FIRST_HALF", "SECOND_HALF", "EXTRA_TIME_FIRST", "EXTRA_TIME_SECOND"],
+    guard: (s) => (endPeriodTarget(s) ? null : "End the match instead"),
+  },
+  START_PERIOD: { rpc: "start_period", role: "operator", consequence: "critical", allowedIn: ["HALF_TIME", "ET_BREAK"] },
   SET_STOPPAGE: { rpc: "set_stoppage", role: "operator", consequence: "routine", allowedIn: IN_PLAY },
   PAUSE: {
     rpc: "pause_match",
@@ -66,7 +106,33 @@ export const COMMANDS: Record<OpCommand, CommandSpec> = {
     allowedIn: IN_PLAY,
     guard: (s) => (s.clock.pausedAt === null ? "Clock is not paused" : null),
   },
-  FINALISE_MATCH: { rpc: "finalise_match", role: "operator", consequence: "critical", allowedIn: ["SECOND_HALF"], to: "FULL_TIME" },
+  FINALISE_MATCH: {
+    rpc: "finalise_match",
+    role: "operator",
+    consequence: "critical",
+    allowedIn: ["SECOND_HALF", "EXTRA_TIME_SECOND", "PENALTIES"],
+    to: "FULL_TIME",
+    guard: (s) => {
+      if (s.phase === "SECOND_HALF" && continues(s, "REGULATION")) return "The tie is level — continue to extra time or penalties";
+      if (s.phase === "EXTRA_TIME_SECOND" && continues(s, "EXTRA_TIME")) return "Still level — go to penalties";
+      if (s.phase === "PENALTIES" && !shootoutTally(s.kicks).decided) return "The shoot-out is not decided yet";
+      return null;
+    },
+  },
+  RECORD_KICK: {
+    rpc: "record_shootout_attempt",
+    role: "operator",
+    consequence: "routine",
+    allowedIn: ["PENALTIES"],
+    guard: (s) => (shootoutTally(s.kicks).decided ? "The shoot-out is decided" : null),
+  },
+  VOID_KICK: {
+    rpc: "void_shootout_attempt",
+    role: "operator",
+    consequence: "routine",
+    allowedIn: ["PENALTIES"],
+    guard: (s) => ((s.kicks ?? []).some((k) => !k.voided) ? null : "No kick to undo"),
+  },
   // Administrative outcomes: represented now, not offered to operators.
   POSTPONE: { rpc: "postpone_match", role: "admin", consequence: "critical", allowedIn: ["SCHEDULED"], to: "POSTPONED" },
   CANCEL: { rpc: "cancel_match", role: "admin", consequence: "critical", allowedIn: ["SCHEDULED", "POSTPONED"], to: "CANCELLED" },
@@ -104,6 +170,10 @@ export const PHASE_LABEL: Record<OpPhase, string> = {
   FIRST_HALF: "1st half",
   HALF_TIME: "Half-time",
   SECOND_HALF: "2nd half",
+  ET_BREAK: "Extra-time break",
+  EXTRA_TIME_FIRST: "Extra time · 1st half",
+  EXTRA_TIME_SECOND: "Extra time · 2nd half",
+  PENALTIES: "Penalty shoot-out",
   FULL_TIME: "Full-time",
   POSTPONED: "Postponed",
   CANCELLED: "Cancelled",
@@ -111,7 +181,7 @@ export const PHASE_LABEL: Record<OpPhase, string> = {
 };
 
 export function isLivePhase(p: OpPhase): boolean {
-  return p === "FIRST_HALF" || p === "HALF_TIME" || p === "SECOND_HALF";
+  return (STARTED as readonly OpPhase[]).includes(p);
 }
 
 export function isTerminalPhase(p: OpPhase): boolean {
@@ -129,6 +199,13 @@ export function toPublicStatus(p: OpPhase): MatchStatus {
       return "HALF_TIME";
     case "SECOND_HALF":
       return "LIVE_SECOND_HALF";
+    case "EXTRA_TIME_FIRST":
+    case "EXTRA_TIME_SECOND":
+      return "LIVE_EXTRA_TIME";
+    case "ET_BREAK":
+      return "EXTRA_TIME_BREAK";
+    case "PENALTIES":
+      return "PENALTIES";
     case "FULL_TIME":
       return "FULL_TIME";
     default:
@@ -142,6 +219,10 @@ export function fromPublicStatus(s: MatchStatus): OpPhase {
       return "FIRST_HALF";
     case "LIVE_SECOND_HALF":
       return "SECOND_HALF";
+    case "LIVE_EXTRA_TIME":
+      return "EXTRA_TIME_FIRST";
+    case "EXTRA_TIME_BREAK":
+      return "ET_BREAK";
     default:
       return s;
   }

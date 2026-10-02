@@ -13,7 +13,7 @@
  * the canonical score must equal the score derived from non-voided scoring
  * events — otherwise the caller does a full resync.
  */
-import { sortEvents, toEvent, toLineups, toPublicClock, toPublicStatus, toStats } from "../data/supabase/map.ts";
+import { sortEvents, toEvent, toLineups, toOutcome, toPublicClock, toPublicStatus, toShootout, toStats } from "../data/supabase/map.ts";
 import type { MatchDetail, MatchEvent, Score } from "../types.ts";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- RPC payload is mapped explicitly below. */
@@ -56,7 +56,7 @@ export function applyFeed(current: MatchDetail, feed: any): FeedResult {
 
   const status = toPublicStatus(m.status);
   const started = status !== "SCHEDULED" && status !== "POSTPONED" && status !== "CANCELLED";
-  const live = status === "LIVE_FIRST_HALF" || status === "LIVE_SECOND_HALF";
+  const live = status === "LIVE_FIRST_HALF" || status === "LIVE_SECOND_HALF" || status === "LIVE_EXTRA_TIME";
   const next: MatchDetail = {
     ...current,
     status,
@@ -65,6 +65,8 @@ export function applyFeed(current: MatchDetail, feed: any): FeedResult {
     statusNote: m.status_note ?? undefined,
     seq,
     clock: toPublicClock(m),
+    outcome: toOutcome(m),
+    ...("shootout" in feed ? { shootout: toShootout(feed.shootout) } : {}),
     events: sortEvents([...byId.values()]),
     // Line-ups are always sent complete: replace (a reopened line-up disappears).
     ...(Array.isArray(feed.lineups) ? { lineups: toLineups(feed.lineups) } : {}),

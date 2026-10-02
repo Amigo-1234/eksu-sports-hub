@@ -3,7 +3,7 @@ import { TeamCrest } from "@/components/team/TeamCrest";
 import { BallIcon, CalendarIcon, MapPinIcon } from "@/components/ui/icons";
 import { scorersFor } from "@/lib/events";
 import { dateKey, formatDayLabel, formatLongDate, formatTime } from "@/lib/format";
-import { matchWinner, type Side } from "@/lib/match";
+import { matchWinner, outcomeNote, type Side } from "@/lib/match";
 import { isClockRunning, isDisrupted, isLive, showsScore, statusLongLabel } from "@/lib/status";
 import type { MatchDetail, Team } from "@/lib/types";
 import { LiveMinute } from "./LiveMinute";
@@ -42,7 +42,7 @@ function StatusPill({ match, serverNow }: { match: MatchDetail; serverNow: numbe
             <LiveMinute status={status} periodStartedAt={match.periodStartedAt} clock={match.clock} serverNow={serverNow} />
           </>
         ) : (
-          "Half-time"
+          statusLongLabel(status)
         )}
       </span>
     );
@@ -80,6 +80,37 @@ function Scorers({ match, side }: { match: MatchDetail; side: Side }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Penalty shoot-out kicks (● scored, ○ missed/saved) — never part of the score. */
+function ShootoutStrip({ match }: { match: MatchDetail }) {
+  const s = match.shootout!;
+  const row = (team: Team) => {
+    const kicks = s.kicks.filter((k) => k.teamId === team.id);
+    return (
+      <div className="flex items-center gap-2">
+        <span className="w-10 shrink-0 text-right text-[11px] font-bold text-white/70">{team.code}</span>
+        <ol className="flex flex-wrap gap-1" aria-label={`${team.shortName} penalties`}>
+          {kicks.map((k, i) => (
+            <li
+              key={k.id}
+              className={`size-3 rounded-full border ${k.outcome === "SCORED" ? "border-accent-300 bg-accent-300" : "border-white/60"}`}
+              aria-label={`Kick ${i + 1}: ${k.outcome.toLowerCase()}${k.player.shirtNumber ? `, No. ${k.player.shirtNumber}` : ""}`}
+            />
+          ))}
+        </ol>
+      </div>
+    );
+  };
+  return (
+    <section aria-label="Penalty shoot-out" className="mx-auto mb-4 w-fit space-y-1 rounded-lg bg-black/15 px-3 py-2">
+      <p className="text-center text-[11px] font-bold tracking-wide text-white/70 uppercase">
+        Penalties {s.homeScored}–{s.awayScored}
+      </p>
+      {row(match.homeTeam)}
+      {row(match.awayTeam)}
+    </section>
   );
 }
 
@@ -156,10 +187,15 @@ export function MatchHero({ match, serverNow }: { match: MatchDetail; serverNow:
           <div className="mt-3">
             <StatusPill match={match} serverNow={serverNow} />
           </div>
+          {outcomeNote(match) && (
+            <p className="mt-2 max-w-[11rem] text-center text-xs font-bold text-accent-300">{outcomeNote(match)}</p>
+          )}
         </div>
 
         <HeroTeam team={match.awayTeam} dim={winner === "home"} />
       </div>
+
+      {match.shootout && match.shootout.kicks.length > 0 && <ShootoutStrip match={match} />}
 
       {hasGoals && (
         <div className="grid grid-cols-[minmax(0,1fr)_1.5rem_minmax(0,1fr)] items-start gap-2 px-4 pb-4 sm:px-8">

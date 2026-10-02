@@ -21,7 +21,7 @@ import { elapsedSeconds } from "../../operator/clock";
 import type { Competition, FormResult, ID, MatchDetail, MatchSummary, Sport, StandingRow, Team, Venue } from "../../types";
 import { PUBLIC_DATA_TAG } from "../cacheTags";
 import type { MatchQuery, SportsDataSource } from "../source";
-import { sortEvents, toEvent, toLineups, toPublicClock, toPublicStatus, toStats } from "./map";
+import { sortEvents, toEvent, toLineups, toOutcome, toPublicClock, toPublicStatus, toShootout, toStats } from "./map";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- PostgREST rows are mapped explicitly below. */
 
@@ -86,7 +86,8 @@ function abandonedMinute(m: any): number | undefined {
 /** Row fields a public match needs (canonical score + clock, never operator ids). */
 export const MATCH_COLS = `id, competition_id, home_team_id, away_team_id, venue_id, scheduled_at, status, status_note,
   home_score, away_score, round_label, seq, current_period, period_started_at, period_ended_at,
-  period_offset_seconds, clock_running, paused_at, accumulated_pause_seconds, stoppage_seconds, finished_at`;
+  period_offset_seconds, clock_running, paused_at, accumulated_pause_seconds, stoppage_seconds, finished_at,
+  home_score_90, away_score_90, home_pens, away_pens, winner_team_id, decided_by, matchday, tie_id, stage_id, group_id`;
 
 interface Refs {
   teams: Map<ID, Team>;
@@ -101,7 +102,7 @@ function toSummary(m: any, refs: Refs): MatchSummary | null {
   if (!homeTeam || !awayTeam || !competition) return null; // not public (e.g. draft)
   const status = toPublicStatus(m.status);
   const started = status !== "SCHEDULED" && status !== "POSTPONED" && status !== "CANCELLED";
-  const live = status === "LIVE_FIRST_HALF" || status === "LIVE_SECOND_HALF";
+  const live = status === "LIVE_FIRST_HALF" || status === "LIVE_SECOND_HALF" || status === "LIVE_EXTRA_TIME";
   return {
     id: m.id,
     competitionId: m.competition_id,
@@ -117,6 +118,7 @@ function toSummary(m: any, refs: Refs): MatchSummary | null {
     abandonedMinute: abandonedMinute(m),
     seq: Number(m.seq ?? 0),
     clock: toPublicClock(m),
+    outcome: toOutcome(m),
     homeTeam,
     awayTeam,
     competition,
@@ -147,7 +149,7 @@ const WAT_MS = 3_600_000;
 const dayStartIso = (key: string) => new Date(Date.parse(`${key}T00:00:00Z`) - WAT_MS).toISOString();
 const dayEndIso = (key: string) => new Date(Date.parse(`${key}T00:00:00Z`) - WAT_MS + 86_400_000).toISOString();
 
-const LIVE = ["1H", "HT", "2H"];
+const LIVE = ["1H", "HT", "2H", "ET1", "ET_BREAK", "ET2", "PENS"];
 const DISRUPTED = "(POSTPONED,CANCELLED,ABANDONED)";
 const DEFAULT_LIMIT = 200;
 
@@ -241,6 +243,7 @@ export const supabaseDataSource: SportsDataSource = {
       lineups: toLineups(f.lineups),
       isDemo: Boolean(f.match?.is_demo),
       stats: toStats(f.stats),
+      shootout: toShootout(f.shootout),
     };
     return detail;
   },

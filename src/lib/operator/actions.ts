@@ -6,7 +6,7 @@
  * canonical response is reconciled into the store. The UI never sees RPCs.
  */
 import type { Score } from "../types.ts";
-import { applyCommand, type CommandInput, type NewEvent } from "./engine.ts";
+import { applyCommand, type CommandInput, type NewEvent, type NewKick } from "./engine.ts";
 import { COMMANDS } from "./machine.ts";
 import type { Intent } from "./queue.ts";
 import { operatorStore } from "./store.ts";
@@ -27,6 +27,8 @@ export interface OperatorActions {
   pauseMatch(matchId: string, reason: PauseReason): ActionResult;
   resumeMatch(matchId: string): ActionResult;
   finaliseMatch(matchId: string, confirmedScore: Score): ActionResult;
+  recordKick(matchId: string, kick: NewKick): ActionResult;
+  voidKick(matchId: string, kickId: string, reason: string): ActionResult;
 }
 
 function newId(): string {
@@ -43,10 +45,15 @@ function dispatch(matchId: string, input: CommandInput): ActionResult {
   }
 
   const t = now();
-  // For events the client-generated event id IS the intent id (idempotency key).
-  const intentId = input.command === "RECORD_EVENT" ? (input.event.id ?? newId()) : newId();
+  // For events and shoot-out kicks the client-generated id IS the intent id (idempotency key).
+  const intentId =
+    input.command === "RECORD_EVENT" ? (input.event.id ?? newId()) : input.command === "RECORD_KICK" ? (input.kick.id ?? newId()) : newId();
   const withId: CommandInput =
-    input.command === "RECORD_EVENT" ? { ...input, event: { ...input.event, id: intentId } } : input;
+    input.command === "RECORD_EVENT"
+      ? { ...input, event: { ...input.event, id: intentId } }
+      : input.command === "RECORD_KICK"
+        ? { ...input, kick: { ...input.kick, id: intentId } }
+        : input;
   const result = applyCommand(state, withId, { now: t, newId, intentId });
   if (!result.ok) return result;
 
@@ -84,6 +91,8 @@ const queuedOperatorActions: OperatorActions = {
   pauseMatch: (id, reason) => dispatch(id, { command: "PAUSE", reason }),
   resumeMatch: (id) => dispatch(id, { command: "RESUME" }),
   finaliseMatch: (id, confirmedScore) => dispatch(id, { command: "FINALISE_MATCH", confirmedScore }),
+  recordKick: (id, kick) => dispatch(id, { command: "RECORD_KICK", kick }),
+  voidKick: (id, kickId, reason) => dispatch(id, { command: "VOID_KICK", kickId, reason }),
 };
 
 /**

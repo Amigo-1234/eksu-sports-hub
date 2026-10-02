@@ -1,4 +1,4 @@
-import { displayClock } from "./operator/clock";
+import { displayClock, toPeriod } from "./operator/clock";
 import type { MatchStatus, PublicClock } from "./types";
 
 /**
@@ -32,6 +32,9 @@ export const LIVE_STATUSES: readonly MatchStatus[] = [
   "LIVE_FIRST_HALF",
   "HALF_TIME",
   "LIVE_SECOND_HALF",
+  "EXTRA_TIME_BREAK",
+  "LIVE_EXTRA_TIME",
+  "PENALTIES",
 ];
 
 /** Match is underway (including half-time). */
@@ -41,7 +44,7 @@ export function isLive(status: MatchStatus): boolean {
 
 /** Ball is currently in play (clock running). */
 export function isClockRunning(status: MatchStatus): boolean {
-  return status === "LIVE_FIRST_HALF" || status === "LIVE_SECOND_HALF";
+  return status === "LIVE_FIRST_HALF" || status === "LIVE_SECOND_HALF" || status === "LIVE_EXTRA_TIME";
 }
 
 export function isFinished(status: MatchStatus): boolean {
@@ -63,6 +66,10 @@ export function statusShortLabel(status: MatchStatus): string | null {
   switch (status) {
     case "HALF_TIME":
       return "HT";
+    case "EXTRA_TIME_BREAK":
+      return "ET";
+    case "PENALTIES":
+      return "PENS";
     case "FULL_TIME":
       return "FT";
     case "POSTPONED":
@@ -86,6 +93,12 @@ export function statusLongLabel(status: MatchStatus): string {
       return "Half-time";
     case "LIVE_SECOND_HALF":
       return "Second half";
+    case "LIVE_EXTRA_TIME":
+      return "Extra time";
+    case "EXTRA_TIME_BREAK":
+      return "Extra-time break";
+    case "PENALTIES":
+      return "Penalty shoot-out";
     case "FULL_TIME":
       return "Full-time";
     case "POSTPONED":
@@ -145,7 +158,7 @@ export function computePublicClock(
   const ms = (iso: string | null) => (iso ? Date.parse(iso) : null);
   const d = displayClock(
     {
-      period: clock.period === 2 ? 2 : 1,
+      period: toPeriod(clock.period) ?? 1,
       periodOffsetSeconds: clock.periodOffsetSeconds,
       periodStartedAt: ms(clock.periodStartedAt),
       periodEndedAt: ms(clock.periodEndedAt),

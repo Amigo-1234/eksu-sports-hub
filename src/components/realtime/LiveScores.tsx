@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { isClockRunning } from "@/lib/status";
 import { toEvent, toPublicClock, toPublicStatus } from "@/lib/data/supabase/map";
 import { onResume, publicClient, subscribeHints } from "@/lib/realtime/client";
 import { setServerTime } from "@/lib/realtime/serverTime";
@@ -70,7 +71,7 @@ export function LiveScoresProvider({
           status,
           score: { home: Number(m.home_score), away: Number(m.away_score) },
           clock: toPublicClock(m),
-          periodStartedAt: status === "LIVE_FIRST_HALF" || status === "LIVE_SECOND_HALF" ? m.period_started_at : null,
+          periodStartedAt: isClockRunning(status) ? m.period_started_at : null,
           seq,
           lastEvent: m.last_event ? toEvent(m.last_event, m.id) : null,
         });

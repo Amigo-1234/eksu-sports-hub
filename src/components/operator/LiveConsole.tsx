@@ -5,7 +5,7 @@ import { useState } from "react";
 import { operatorActions } from "@/lib/operator/actions";
 import { computeScore, lastUndoable } from "@/lib/operator/engine";
 import { useCanonicalSync, useOperatorSnapshot, useNow, useOpMatch } from "@/lib/operator/hooks";
-import { availableCommands, PHASE_LABEL } from "@/lib/operator/machine";
+import { availableCommands, endPeriodTarget, PHASE_LABEL, startPeriodTarget } from "@/lib/operator/machine";
 import { consoleSquads } from "@/lib/operator/lineup";
 import { operatorStore } from "@/lib/operator/store";
 import type { AssignmentSeed, OpEvent, Side } from "@/lib/operator/types";
@@ -23,6 +23,7 @@ import { SquadContext } from "./pickers";
 import { TakeOverBanner } from "./TakeOverBanner";
 import { QueueBanner } from "./QueueBanner";
 import { Scoreboard } from "./Scoreboard";
+import { ShootoutPanel } from "./ShootoutPanel";
 import { Sheet } from "./Sheet";
 
 const TITLES: Record<SheetKind, string> = {
@@ -109,7 +110,27 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
             Back to my matches
           </Link>
         </section>
-      ) : !inControl ? null : (
+      ) : !inControl ? null : state.phase === "PENALTIES" ? (
+        <ShootoutPanel
+          state={state}
+          home={homeTeam}
+          away={awayTeam}
+          canRecord={available.has("RECORD_KICK")}
+          canUndo={available.has("VOID_KICK")}
+          canFinish={available.has("FINALISE_MATCH")}
+          onFinish={() => setSheet("finalise")}
+          onKick={(side, outcome, shirt) => {
+            const r = operatorActions.recordKick(matchId, { side, outcome, shirt });
+            notify(r.ok ? { tone: outcome === "SCORED" ? "success" : "info", message: `${side === "home" ? homeTeam.shortName : awayTeam.shortName}: kick ${outcome.toLowerCase()}` } : { tone: "error", message: r.reason });
+          }}
+          onUndo={() => {
+            const last = [...(state.kicks ?? [])].reverse().find((k) => !k.voided);
+            if (!last) return;
+            const r = operatorActions.voidKick(matchId, last.id, "Undone by operator");
+            notify(r.ok ? { tone: "info", message: "Last kick undone" } : { tone: "error", message: r.reason });
+          }}
+        />
+      ) : (
         <ActionPad
           state={state}
           available={available}
@@ -117,8 +138,14 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
           onOpen={setSheet}
           onUndo={(e) => undo(e)}
           onResume={() => report(operatorActions.resumeMatch(matchId), "Clock resumed")}
-          onEndHalf={() => report(operatorActions.endPeriod(matchId), "Half-time. Clock stopped.")}
-          onStartSecondHalf={() => report(operatorActions.startPeriod(matchId), "2nd half started from 45:00")}
+          onEndHalf={() => {
+            const to = endPeriodTarget(state);
+            report(operatorActions.endPeriod(matchId), to === "PENALTIES" ? "Penalty shoot-out" : to === "ET_BREAK" ? "Break. Clock stopped." : "Half-time. Clock stopped.");
+          }}
+          onStartSecondHalf={() => {
+            const to = startPeriodTarget(state);
+            report(operatorActions.startPeriod(matchId), to === "EXTRA_TIME_FIRST" ? "Extra time started from 90:00" : to === "EXTRA_TIME_SECOND" ? "Extra time 2nd half from 105:00" : "2nd half started from 45:00");
+          }}
         />
       )}
 

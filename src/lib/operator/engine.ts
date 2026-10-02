@@ -13,8 +13,9 @@ import {
   startPeriodClock,
   stopClock,
 } from "./clock.ts";
-import { canRun, type OpCommand } from "./machine.ts";
-import type { OpEvent, OpEventType, OpLogEntry, OpMatchState, PauseReason, Side } from "./types.ts";
+import { canRun, endPeriodTarget, startPeriodTarget, type OpCommand } from "./machine.ts";
+import { activeEvents, computeScore, shootoutTally } from "./score.ts";
+import type { KickOutcome, OpEvent, OpEventType, OpKick, OpLogEntry, OpMatchState, PauseReason, Side } from "./types.ts";
 
 export interface NewEvent {
   type: OpEventType;
@@ -37,7 +38,17 @@ export type CommandInput =
   | { command: "SET_STOPPAGE"; minutes: number }
   | { command: "PAUSE"; reason: PauseReason }
   | { command: "RESUME" }
-  | { command: "FINALISE_MATCH"; confirmedScore: Score };
+  | { command: "FINALISE_MATCH"; confirmedScore: Score }
+  | { command: "RECORD_KICK"; kick: NewKick }
+  | { command: "VOID_KICK"; kickId: string; reason: string };
+
+export interface NewKick {
+  side: Side;
+  shirt: number | null;
+  outcome: KickOutcome;
+  /** Client-generated kick id (idempotency key). Generated if absent. */
+  id?: string;
+}
 
 export interface ApplyContext {
   now: number;
@@ -54,25 +65,7 @@ export type ApplyResult =
 /** Identical events inside this window are treated as an accidental double tap. */
 export const DUPLICATE_WINDOW_MS = 4000;
 
-export const SCORING_TYPES: readonly OpEventType[] = ["GOAL", "PENALTY_GOAL", "OWN_GOAL"];
-
-export const isScoring = (e: Pick<OpEvent, "type">) => SCORING_TYPES.includes(e.type);
-
-export const activeEvents = (s: OpMatchState) => s.events.filter((e) => !e.voided);
-
-const other = (side: Side): Side => (side === "home" ? "away" : "home");
-
-/** Side credited with a scoring event (own goals count for the opponent). */
-export function creditedSide(e: Pick<OpEvent, "type" | "side">): Side {
-  return e.type === "OWN_GOAL" ? other(e.side) : e.side;
-}
-
-/** Score is always recomputed from non-voided scoring events. */
-export function computeScore(s: OpMatchState): Score {
-  const score: Score = { home: 0, away: 0 };
-  for (const e of activeEvents(s)) if (isScoring(e)) score[creditedSide(e)]++;
-  return score;
-}
+export { activeEvents, computeScore, creditedSide, isScoring, SCORING_TYPES } from "./score.ts";
 
 export interface PlayerStatus {
   yellow: boolean;
@@ -166,23 +159,79 @@ export function applyCommand(state: OpMatchState, input: CommandInput, ctx: Appl
     case "START_MATCH":
       return { ok: true, state: next({ phase: "FIRST_HALF", clock: startPeriodClock(1, now), log: log("MATCH_STARTED") }) };
 
-    case "END_PERIOD":
-      return { ok: true, state: next({ phase: "HALF_TIME", clock: stopClock(state.clock, now), log: log("PERIOD_ENDED", "1H") }) };
+    case "END_PERIOD": {
+      const to = endPeriodTarget(state);
+      if (!to) return { ok: false, reason: "End the match instead" };
+      const label = { FIRST_HALF: "1H", SECOND_HALF: "2H", EXTRA_TIME_FIRST: "ET1", EXTRA_TIME_SECOND: "ET2" }[state.phase as "FIRST_HALF"] ?? state.phase;
+      const stopped = stopClock(state.clock, now);
+      if (to === "PENALTIES") {
+        // The shoot-out has no running clock (period 5, frozen).
+        return {
+          ok: true,
+          state: next({
+            phase: "PENALTIES",
+            clock: { ...startPeriodClock(5, now), clockRunning: false, periodEndedAt: now },
+            log: [...log("PERIOD_ENDED", label), { id: ctx.newId(), at: now, kind: "SHOOTOUT_STARTED" }],
+            kicks: state.kicks ?? [],
+          }),
+        };
+      }
+      return { ok: true, state: next({ phase: to, clock: stopped, log: log("PERIOD_ENDED", label) }) };
+    }
 
-    case "START_PERIOD":
-      return { ok: true, state: next({ phase: "SECOND_HALF", clock: startPeriodClock(2, now), log: log("PERIOD_STARTED", "2H") }) };
+    case "START_PERIOD": {
+      const to = startPeriodTarget(state);
+      if (!to) return { ok: false, reason: "No period to start" };
+      const period = to === "SECOND_HALF" ? 2 : to === "EXTRA_TIME_FIRST" ? 3 : 4;
+      const label = to === "SECOND_HALF" ? "2H" : to === "EXTRA_TIME_FIRST" ? "ET1" : "ET2";
+      return { ok: true, state: next({ phase: to, clock: startPeriodClock(period, now), log: log("PERIOD_STARTED", label) }) };
+    }
+
+    case "RECORD_KICK": {
+      const kicks = state.kicks ?? [];
+      if (input.kick.id && kicks.some((k) => k.id === input.kick.id)) return { ok: true, state, eventId: input.kick.id };
+      const tally = shootoutTally(kicks);
+      const mine = input.kick.side === "home" ? tally.homeTaken : tally.awayTaken;
+      const theirs = input.kick.side === "home" ? tally.awayTaken : tally.homeTaken;
+      if (mine > theirs) return { ok: false, reason: "It is the other team's kick" };
+      const kick: OpKick = {
+        id: input.kick.id ?? ctx.newId(),
+        side: input.kick.side,
+        shirt: input.kick.shirt,
+        outcome: input.kick.outcome,
+        voided: null,
+        intentId: ctx.intentId,
+      };
+      return { ok: true, state: next({ kicks: [...kicks, kick], log: log("SHOOTOUT_KICK", `${kick.side}:${kick.outcome}`) }), eventId: kick.id };
+    }
+
+    case "VOID_KICK": {
+      const kicks = state.kicks ?? [];
+      const target = kicks.find((k) => k.id === input.kickId);
+      if (!target) return { ok: false, reason: "Kick not found" };
+      if (target.voided) return { ok: false, reason: "This kick has already been voided" };
+      if (!input.reason.trim()) return { ok: false, reason: "A reason is required" };
+      return {
+        ok: true,
+        state: next({
+          kicks: kicks.map((k) => (k.id === target.id ? { ...k, voided: { at: now, reason: input.reason } } : k)),
+          log: log("SHOOTOUT_KICK_VOIDED", input.reason),
+        }),
+      };
+    }
 
     case "FINALISE_MATCH": {
       const score = computeScore(state);
       if (score.home !== input.confirmedScore.home || score.away !== input.confirmedScore.away) {
         return { ok: false, reason: "The score changed while you were confirming. Check it again." };
       }
+      const pens = state.phase === "PENALTIES" ? shootoutTally(state.kicks) : null;
       return {
         ok: true,
         state: next({
           phase: "FULL_TIME",
-          clock: stopClock(state.clock, now),
-          log: log("MATCH_FINALISED", `${score.home}-${score.away}`),
+          clock: state.phase === "PENALTIES" ? state.clock : stopClock(state.clock, now),
+          log: log("MATCH_FINALISED", `${score.home}-${score.away}${pens ? ` (${pens.homeScored}-${pens.awayScored} pens)` : ""}`),
         }),
       };
     }

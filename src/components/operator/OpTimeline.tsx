@@ -29,9 +29,15 @@ function logText(l: OpLogEntry): string | null {
     case "MATCH_STARTED":
       return "Kick-off · 1st half started";
     case "PERIOD_ENDED":
-      return "Half-time";
+      return { "1H": "Half-time", "2H": "End of 90 minutes", ET1: "Extra time · half-time", ET2: "End of extra time" }[l.detail ?? "1H"] ?? "Period ended";
     case "PERIOD_STARTED":
-      return "2nd half started";
+      return { "2H": "2nd half started", ET1: "Extra time started", ET2: "Extra time · 2nd half started" }[l.detail ?? "2H"] ?? "Period started";
+    case "SHOOTOUT_STARTED":
+      return "Penalty shoot-out";
+    case "SHOOTOUT_KICK": {
+      const [side, outcome] = (l.detail ?? "").split(":");
+      return outcome ? `Penalty ${outcome.toLowerCase()} (${side})` : "Penalty kick";
+    }
     case "MATCH_FINALISED":
       return `Full-time · ${l.detail?.replace("-", "–")}`;
     case "PAUSED":

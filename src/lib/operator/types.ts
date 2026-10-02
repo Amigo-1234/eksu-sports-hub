@@ -15,6 +15,12 @@ export type OpPhase =
   | "FIRST_HALF"
   | "HALF_TIME"
   | "SECOND_HALF"
+  /** Knockout only: break before extra time (clock.period 2) or between ET halves (clock.period 3). */
+  | "ET_BREAK"
+  | "EXTRA_TIME_FIRST"
+  | "EXTRA_TIME_SECOND"
+  /** Penalty shoot-out (no running clock). */
+  | "PENALTIES"
   | "FULL_TIME"
   | "POSTPONED"
   | "CANCELLED"
@@ -71,8 +77,32 @@ export interface OpLogEntry {
     | "RESUMED"
     | "STOPPAGE_SET"
     | "EVENT_VOIDED"
-    | "OPERATOR_TAKEOVER";
+    | "OPERATOR_TAKEOVER"
+    | "SHOOTOUT_STARTED"
+    | "SHOOTOUT_KICK"
+    | "SHOOTOUT_KICK_VOIDED";
   detail?: string;
+}
+
+/** What the match's stage allows when the score is level (server-provided). */
+export interface MatchRules {
+  /** Knockout match: a level score is not a final result. */
+  needsWinner: boolean;
+  extraTime: boolean;
+  penalties: boolean;
+}
+
+export type KickOutcome = "SCORED" | "MISSED" | "SAVED";
+
+/** One penalty shoot-out kick. Never a match event: it cannot change the score. */
+export interface OpKick {
+  id: string;
+  side: Side;
+  shirt: number | null;
+  outcome: KickOutcome;
+  voided: { at: number; reason: string } | null;
+  intentId: string | null;
+  seq?: number;
 }
 
 export interface OpMatchState {
@@ -83,6 +113,10 @@ export interface OpMatchState {
   log: OpLogEntry[];
   /** Bumped on every change; lets the store detect stale writes. */
   version: number;
+  /** Level-score rules for this match (absent: league rules — a draw is final). */
+  rules?: MatchRules;
+  /** Penalty shoot-out kicks (empty/absent until a shoot-out starts). */
+  kicks?: OpKick[];
 }
 
 export type AssignmentRole = "PRIMARY" | "BACKUP";

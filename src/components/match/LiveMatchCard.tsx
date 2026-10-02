@@ -72,7 +72,7 @@ export function LiveMatchCard({ match: initial, serverNow }: { match: MatchSumma
             <span>{score.away}</span>
           </div>
           <p className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold tracking-wide text-live uppercase">
-            {match.status === "HALF_TIME" ? "Half-time" : <><LiveDot className="scale-75" /> Live</>}
+            {match.status === "HALF_TIME" ? "Half-time" : match.status === "EXTRA_TIME_BREAK" ? "ET break" : match.status === "PENALTIES" ? "Penalties" : <><LiveDot className="scale-75" /> Live</>}
           </p>
         </div>
         <CardTeam team={match.awayTeam} />

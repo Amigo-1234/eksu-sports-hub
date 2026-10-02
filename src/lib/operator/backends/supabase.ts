@@ -51,6 +51,19 @@ function toRpc(intent: Intent): { fn: string; args: Record<string, unknown> } {
         fn: "finalise_match",
         args: { ...base, p_confirmed_home: a.confirmedScore.home, p_confirmed_away: a.confirmedScore.away },
       };
+    case "RECORD_KICK":
+      return {
+        fn: "record_shootout_attempt",
+        args: {
+          p_match_id: intent.matchId,
+          p_attempt_id: a.kick.id ?? intent.id,
+          p_team_id: teamId(intent.matchId, a.kick.side),
+          p_player_id: playerId(intent.matchId, a.kick.side, a.kick.shirt),
+          p_outcome: a.kick.outcome,
+        },
+      };
+    case "VOID_KICK":
+      return { fn: "void_shootout_attempt", args: { ...base, p_attempt_id: a.kickId, p_reason: a.reason } };
     case "RECORD_EVENT": {
       const e = a.event;
       return {

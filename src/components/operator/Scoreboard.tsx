@@ -5,6 +5,7 @@ import { TeamCrest } from "@/components/team/TeamCrest";
 import { displayClock } from "@/lib/operator/clock";
 import { computeScore } from "@/lib/operator/engine";
 import { isLivePhase, PHASE_LABEL } from "@/lib/operator/machine";
+import { shootoutTally } from "@/lib/operator/score";
 import type { AssignmentSeed, OpMatchState, PauseReason } from "@/lib/operator/types";
 import { ConnectionPill } from "./ConnectionPill";
 import { PAUSE_LABEL } from "./labels";
@@ -16,7 +17,8 @@ import { PAUSE_LABEL } from "./labels";
 export function Scoreboard({ seed, state, now }: { seed: AssignmentSeed; state: OpMatchState; now: number }) {
   const { homeTeam, awayTeam } = seed.match;
   const score = computeScore(state);
-  const running = state.phase === "FIRST_HALF" || state.phase === "SECOND_HALF";
+  const running = state.phase === "FIRST_HALF" || state.phase === "SECOND_HALF" || state.phase === "EXTRA_TIME_FIRST" || state.phase === "EXTRA_TIME_SECOND";
+  const pens = (state.kicks?.length ?? 0) > 0 || state.phase === "PENALTIES" ? shootoutTally(state.kicks) : null;
   const clock = running && now ? displayClock(state.clock, now) : null;
   const pauseReason = [...state.log].reverse().find((l) => l.kind === "PAUSED")?.detail as PauseReason | undefined;
   const live = isLivePhase(state.phase);
@@ -56,11 +58,16 @@ export function Scoreboard({ seed, state, now }: { seed: AssignmentSeed; state: 
       <div className="mt-2 flex items-center justify-center gap-2" aria-live="off">
         <span
           className={`rounded px-2 py-1 text-sm font-extrabold tracking-wide uppercase ${
-            state.phase === "HALF_TIME" ? "bg-accent-400 text-ink" : live ? "bg-ink text-white" : "border-2 border-ink text-ink"
+            state.phase === "HALF_TIME" || state.phase === "ET_BREAK" ? "bg-accent-400 text-ink" : live ? "bg-ink text-white" : "border-2 border-ink text-ink"
           }`}
         >
           {state.phase === "HALF_TIME" ? "HT · Half-time" : PHASE_LABEL[state.phase]}
         </span>
+        {pens && (
+          <span className="rounded border-2 border-ink px-1.5 text-sm font-extrabold tabular-nums" aria-label={`Penalties ${pens.homeScored} to ${pens.awayScored}`}>
+            Pens {pens.homeScored}–{pens.awayScored}
+          </span>
+        )}
         {running && (
           <>
             <span className="font-display text-3xl leading-none font-extrabold tabular-nums" aria-label={clock ? `Match clock ${clock.label}` : undefined}>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { OpCommand } from "@/lib/operator/machine";
+import { endPeriodTarget, startPeriodTarget, type OpCommand } from "@/lib/operator/machine";
 import type { OpEvent, OpMatchState } from "@/lib/operator/types";
 import { HoldButton } from "./HoldButton";
 import { EVENT_LABEL } from "./labels";
@@ -32,6 +32,18 @@ export function ActionPad({
   onStartSecondHalf: () => void;
 }) {
   const canRecord = available.has("RECORD_EVENT");
+  const endTo = endPeriodTarget(state);
+  const startTo = startPeriodTarget(state);
+  const endLabel =
+    state.phase === "FIRST_HALF"
+      ? "Hold to end 1st half"
+      : state.phase === "EXTRA_TIME_FIRST"
+        ? "Hold to end extra time 1st half"
+        : endTo === "ET_BREAK"
+          ? "Level — hold to end 90 min (extra time)"
+          : "Level — hold to go to penalties";
+  const startLabel =
+    startTo === "SECOND_HALF" ? "Hold to start 2nd half" : startTo === "EXTRA_TIME_FIRST" ? "Hold to start extra time" : "Hold to start extra time 2nd half";
   const [armedUndo, setArmedUndo] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,6 +61,11 @@ export function ActionPad({
       {!canRecord && state.phase === "HALF_TIME" && (
         <p role="status" className="rounded-xl border-2 border-ink bg-accent-100 px-3 py-2.5 text-sm font-bold">
           Half-time. Event recording is locked until the second half starts.
+        </p>
+      )}
+      {!canRecord && state.phase === "ET_BREAK" && (
+        <p role="status" className="rounded-xl border-2 border-ink bg-accent-100 px-3 py-2.5 text-sm font-bold">
+          {state.clock.period === 3 ? "Extra-time half-time." : "Level after 90 minutes — extra time follows."} Event recording is locked until play restarts.
         </p>
       )}
 
@@ -143,8 +160,8 @@ export function ActionPad({
 
       <div className="rounded-2xl border-2 border-dashed border-line-strong p-3">
         <p className="mb-2 text-xs font-extrabold tracking-widest text-ink-muted uppercase">Period control</p>
-        {available.has("END_PERIOD") && <HoldButton label="Hold to end 1st half" onConfirm={onEndHalf} tone="brand" />}
-        {available.has("START_PERIOD") && <HoldButton label="Hold to start 2nd half" onConfirm={onStartSecondHalf} tone="go" />}
+        {available.has("END_PERIOD") && <HoldButton label={endLabel} onConfirm={onEndHalf} tone="brand" />}
+        {available.has("START_PERIOD") && <HoldButton label={startLabel} onConfirm={onStartSecondHalf} tone="go" />}
         {available.has("FINALISE_MATCH") && (
           <button
             type="button"

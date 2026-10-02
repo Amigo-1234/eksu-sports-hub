@@ -62,6 +62,12 @@ export type MatchStatus =
   | "LIVE_FIRST_HALF"
   | "HALF_TIME"
   | "LIVE_SECOND_HALF"
+  /** Knockout extra time (either half; see `clock.period`). */
+  | "LIVE_EXTRA_TIME"
+  /** Break before / between extra-time halves. */
+  | "EXTRA_TIME_BREAK"
+  /** Penalty shoot-out in progress. */
+  | "PENALTIES"
   | "FULL_TIME"
   | "POSTPONED"
   | "CANCELLED"
@@ -107,6 +113,27 @@ export interface Match {
    * derived from these (pauses, offsets) rather than from `periodStartedAt`.
    */
   clock?: PublicClock | null;
+  /** Knockout results: extra time / penalties (real data only). */
+  outcome?: MatchOutcome | null;
+}
+
+/** How a match was decided (knockout football). */
+export interface MatchOutcome {
+  /** Score after 90 minutes (when it went to extra time this differs from `score`). */
+  scoreAfter90: Score | null;
+  /** Shoot-out score; null when there was no shoot-out. */
+  shootout: Score | null;
+  decidedBy: "REGULATION" | "EXTRA_TIME" | "PENALTIES" | null;
+  winnerTeamId: ID | null;
+}
+
+/** Shoot-out kicks as published (valid kicks only). */
+export interface PublicShootout {
+  homeScored: number;
+  awayScored: number;
+  decided: boolean;
+  winnerTeamId: ID | null;
+  kicks: { id: ID; teamId: ID; outcome: "SCORED" | "MISSED" | "SAVED"; player: PlayerRef }[];
 }
 
 /** The server's clock state for the current period (all times ISO). */
@@ -204,6 +231,8 @@ export interface MatchDetail extends MatchSummary {
   isDemo?: boolean;
   /** Match statistics. Only DEMO SHOWCASE matches carry (demonstration) stats. */
   stats?: MatchStats | null;
+  /** Penalty shoot-out (knockout matches; real data only). */
+  shootout?: PublicShootout | null;
 }
 
 export interface TeamMatchStats {

@@ -1,7 +1,7 @@
 /** Admin read models (rows as the admin data layer returns them). */
 
-export type MatchStatus = "SCHEDULED" | "1H" | "HT" | "2H" | "FT" | "POSTPONED" | "CANCELLED" | "ABANDONED";
-export const LIVE_STATUSES: MatchStatus[] = ["1H", "HT", "2H"];
+export type MatchStatus = "SCHEDULED" | "1H" | "HT" | "2H" | "ET1" | "ET_BREAK" | "ET2" | "PENS" | "FT" | "POSTPONED" | "CANCELLED" | "ABANDONED";
+export const LIVE_STATUSES: MatchStatus[] = ["1H", "HT", "2H", "ET1", "ET_BREAK", "ET2", "PENS"];
 export type CompetitionStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
 export type CompetitionFormat = "LEAGUE" | "KNOCKOUT" | "GROUPS_KNOCKOUT";
 export type Category = "MEN" | "WOMEN" | "MIXED";

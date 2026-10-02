@@ -11,11 +11,26 @@
  */
 
 export const HALF_SECONDS = 45 * 60;
+/** Extra-time halves are 15 minutes. */
+export const ET_HALF_SECONDS = 15 * 60;
+
+export type Period = 1 | 2 | 3 | 4 | 5;
+
+/** Football baseline at the start of each period (ET1 from 90:00, ET2 from 105:00; 5 = shoot-out). */
+export const PERIOD_OFFSET: Record<Period, number> = { 1: 0, 2: HALF_SECONDS, 3: 2 * HALF_SECONDS, 4: 2 * HALF_SECONDS + ET_HALF_SECONDS, 5: 2 * HALF_SECONDS + 2 * ET_HALF_SECONDS };
+
+export function periodLengthSeconds(period: Period | null): number {
+  return period === 3 || period === 4 ? ET_HALF_SECONDS : period === 5 ? 0 : HALF_SECONDS;
+}
+
+export function toPeriod(n: number | null | undefined): Period | null {
+  return n === 1 || n === 2 || n === 3 || n === 4 || n === 5 ? n : null;
+}
 
 export interface ClockState {
-  /** 1 or 2 once the match has started. */
-  period: 1 | 2 | null;
-  /** Football baseline for the period: 0 for 1H, 2700 (45:00) for 2H. */
+  /** 1–2 (halves), 3–4 (extra time), 5 (shoot-out) once the match has started. */
+  period: Period | null;
+  /** Football baseline for the period: 0 for 1H, 2700 (45:00) for 2H, 5400 for ET1, 6300 for ET2. */
   periodOffsetSeconds: number;
   /** Wall-clock start of the current period (ms). */
   periodStartedAt: number | null;
@@ -41,10 +56,10 @@ export const initialClock = (): ClockState => ({
   stoppageSeconds: 0,
 });
 
-export function startPeriodClock(period: 1 | 2, now: number): ClockState {
+export function startPeriodClock(period: Period, now: number): ClockState {
   return {
     period,
-    periodOffsetSeconds: period === 1 ? 0 : HALF_SECONDS,
+    periodOffsetSeconds: PERIOD_OFFSET[period],
     periodStartedAt: now,
     periodEndedAt: null,
     clockRunning: true,
@@ -103,7 +118,7 @@ export interface ClockDisplay {
 
 export function displayClock(c: ClockState, now: number): ClockDisplay {
   const elapsed = elapsedSeconds(c, now);
-  const regulationEndMinute = (c.periodOffsetSeconds + HALF_SECONDS) / 60;
+  const regulationEndMinute = (c.periodOffsetSeconds + periodLengthSeconds(c.period)) / 60;
   const rawMinute = Math.floor(elapsed / 60) + 1;
   const over = rawMinute > regulationEndMinute;
   const minute = over ? regulationEndMinute : rawMinute;

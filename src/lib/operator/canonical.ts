@@ -2,13 +2,13 @@
  * Canonical (server) match state → operator state. Pure; shared by the
  * server data layer and the client reconciler.
  */
-import { initialClock, type ClockState } from "./clock.ts";
-import type { OpEvent, OpEventType, OpLogEntry, OpMatchState, OpPhase } from "./types.ts";
+import { initialClock, toPeriod, type ClockState } from "./clock.ts";
+import type { KickOutcome, OpEvent, OpEventType, OpKick, OpLogEntry, OpMatchState, OpPhase } from "./types.ts";
 
 /** Shape returned by the match RPCs (see supabase/migrations/*_match_rpc.sql). */
 export interface CanonicalMatch {
   id: string;
-  status: "SCHEDULED" | "1H" | "HT" | "2H" | "FT" | "POSTPONED" | "CANCELLED" | "ABANDONED";
+  status: "SCHEDULED" | "1H" | "HT" | "2H" | "ET1" | "ET_BREAK" | "ET2" | "PENS" | "FT" | "POSTPONED" | "CANCELLED" | "ABANDONED";
   home_team_id: string;
   away_team_id: string;
   home_score: number;
@@ -23,6 +23,30 @@ export interface CanonicalMatch {
   accumulated_pause_seconds: number | string;
   stoppage_seconds: number;
   active_operator_id?: string | null;
+  home_pens?: number | null;
+  away_pens?: number | null;
+  winner_team_id?: string | null;
+  decided_by?: "REGULATION" | "EXTRA_TIME" | "PENALTIES" | null;
+}
+
+export interface CanonicalShootout {
+  home_taken: number;
+  away_taken: number;
+  home_scored: number;
+  away_scored: number;
+  decided: boolean;
+  winner_team_id: string | null;
+  kicks: {
+    id: string;
+    seq: number;
+    team_id: string;
+    outcome: KickOutcome;
+    player_id: string | null;
+    shirt_number: number | null;
+    recorded_at: string;
+    voided_at: string | null;
+    void_reason: string | null;
+  }[];
 }
 
 export interface CanonicalEvent {
@@ -82,6 +106,8 @@ export interface CanonicalState {
   lineups?: { home: CanonicalLineup | null; away: CanonicalLineup | null };
   lineup_override?: string | null;
   lineup_control?: boolean;
+  shootout?: CanonicalShootout | null;
+  rules?: { needs_winner: boolean; extra_time: boolean; penalties: boolean } | null;
 }
 
 const PHASE: Record<CanonicalMatch["status"], OpPhase> = {
@@ -89,6 +115,10 @@ const PHASE: Record<CanonicalMatch["status"], OpPhase> = {
   "1H": "FIRST_HALF",
   HT: "HALF_TIME",
   "2H": "SECOND_HALF",
+  ET1: "EXTRA_TIME_FIRST",
+  ET_BREAK: "ET_BREAK",
+  ET2: "EXTRA_TIME_SECOND",
+  PENS: "PENALTIES",
   FT: "FULL_TIME",
   POSTPONED: "POSTPONED",
   CANCELLED: "CANCELLED",
@@ -100,12 +130,13 @@ const ms = (iso: string | null) => (iso ? Date.parse(iso) : null);
 const LOG_KINDS = new Set<OpLogEntry["kind"]>([
   "MATCH_STARTED", "PERIOD_ENDED", "PERIOD_STARTED", "MATCH_FINALISED",
   "PAUSED", "RESUMED", "STOPPAGE_SET", "OPERATOR_TAKEOVER",
+  "SHOOTOUT_STARTED", "SHOOTOUT_KICK", "SHOOTOUT_KICK_VOIDED",
 ]);
 
 export function clockFromCanonical(m: CanonicalMatch): ClockState {
   if (m.current_period === null) return initialClock();
   return {
-    period: m.current_period === 2 ? 2 : 1,
+    period: toPeriod(m.current_period) ?? 1,
     periodOffsetSeconds: m.period_offset_seconds,
     periodStartedAt: ms(m.period_started_at),
     periodEndedAt: ms(m.period_ended_at),
@@ -140,5 +171,23 @@ export function fromCanonical(c: CanonicalState): OpMatchState {
       kind: l.action as OpLogEntry["kind"],
       ...(typeof l.detail === "string" ? { detail: l.detail } : {}),
     }));
-  return { matchId: m.id, phase: PHASE[m.status], clock: clockFromCanonical(m), events, log, version: m.seq };
+  const kicks: OpKick[] = (c.shootout?.kicks ?? []).map((k) => ({
+    id: k.id,
+    side: k.team_id === m.home_team_id ? "home" : "away",
+    shirt: k.shirt_number ?? null,
+    outcome: k.outcome,
+    voided: k.voided_at ? { at: Date.parse(k.voided_at), reason: k.void_reason ?? "" } : null,
+    intentId: null,
+    seq: k.seq,
+  }));
+  return {
+    matchId: m.id,
+    phase: PHASE[m.status] ?? "SCHEDULED",
+    clock: clockFromCanonical(m),
+    events,
+    log,
+    version: m.seq,
+    ...(c.rules ? { rules: { needsWinner: c.rules.needs_winner, extraTime: c.rules.extra_time, penalties: c.rules.penalties } } : {}),
+    kicks,
+  };
 }

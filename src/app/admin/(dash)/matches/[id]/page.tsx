@@ -24,7 +24,7 @@ import { formatWatDateTime, serverNow, toWatInput } from "@/lib/admin/time";
 
 export const metadata: Metadata = { title: "Match" };
 
-const LIVE = new Set(["1H", "HT", "2H"]);
+const LIVE = new Set(["1H", "HT", "2H", "ET1", "ET_BREAK", "ET2", "PENS"]);
 
 export default async function MatchPage({ params, searchParams }: PageProps<"/admin/matches/[id]">) {
   const { id } = await params;
@@ -48,7 +48,7 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/ad
   const primary = detail.assignments.find((a) => a.active && a.role === "PRIMARY");
   const backup = detail.assignments.find((a) => a.active && a.role === "BACKUP");
   const canAssign = !["FT", "CANCELLED", "ABANDONED"].includes(status);
-  const canCorrect = ["1H", "HT", "2H", "FT", "ABANDONED"].includes(status);
+  const canCorrect = ["1H", "HT", "2H", "ET1", "ET_BREAK", "ET2", "PENS", "FT", "ABANDONED"].includes(status);
   const teamName = (tid: string) => (tid === m.home_team_id ? row.home.short_name : row.away.short_name);
   const events = [...detail.state.events].sort((a, b) => b.seq - a.seq);
   const startsIn = Date.parse(row.scheduled_at) - now;

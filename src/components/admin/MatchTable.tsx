@@ -1,3 +1,4 @@
+import { LIVE_STATUSES } from "@/lib/admin/types";
 import Link from "next/link";
 import type { MatchRow } from "@/lib/admin/types";
 import { formatWatDateTime } from "@/lib/admin/time";
@@ -7,7 +8,7 @@ export function OperatorCell({ m }: { m: MatchRow }) {
   const primary = m.assignments.find((a) => a.role === "PRIMARY");
   const backup = m.assignments.find((a) => a.role === "BACKUP");
   if (!primary) {
-    const needs = m.status === "SCHEDULED" || m.status === "1H" || m.status === "HT" || m.status === "2H";
+    const needs = m.status === "SCHEDULED" || LIVE_STATUSES.includes(m.status);
     return needs ? <Badge tone="bad">No primary</Badge> : <span className="text-ink-faint">—</span>;
   }
   return (

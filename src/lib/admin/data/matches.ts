@@ -25,7 +25,7 @@ function toRow(m: any): MatchRow {
 }
 
 export const STATUS_FILTERS: Record<string, MatchStatus[]> = {
-  live: ["1H", "HT", "2H"],
+  live: ["1H", "HT", "2H", "ET1", "ET_BREAK", "ET2", "PENS"],
   scheduled: ["SCHEDULED"],
   ht: ["HT"],
   ft: ["FT"],

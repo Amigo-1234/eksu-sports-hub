@@ -11,7 +11,9 @@ export type ClockSnap = Pick<
 export function clockLabel(m: ClockSnap, now: number): string {
   if (m.status === "HT") return "HT";
   if (m.status === "FT") return "FT";
-  if (m.status !== "1H" && m.status !== "2H") return "—";
+  if (m.status === "ET_BREAK") return "ET break";
+  if (m.status === "PENS") return "Pens";
+  if (m.status !== "1H" && m.status !== "2H" && m.status !== "ET1" && m.status !== "ET2") return "—";
   const d = displayClock(clockFromCanonical({ ...m, period_ended_at: m.period_ended_at ?? null } as CanonicalMatch), now);
   return d.paused ? `${d.label} · paused` : d.label;
 }
