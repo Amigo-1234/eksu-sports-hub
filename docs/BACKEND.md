@@ -406,6 +406,19 @@ table or function carries them.
   `admin_match_audience` — ADMIN; on /admin/live cards (15 s auto-refresh) and
   the admin match page (live-polling panel; figures kept after FT).
 
+### Match duration (migration `20261009001850`)
+- `competitions.half_seconds` / `et_half_seconds` (default 2700 / 900 — the
+  normal football clock); set from the admin competition page ("Match length",
+  `admin_set_match_duration`: steps of 30 s, audited, locked once a match has
+  kicked off unless an override reason is given).
+- Kick-off copies the lengths onto `matches.half_seconds` / `et_half_seconds`,
+  so a live or finished match never changes length.
+- The clock stays authoritative in seconds (timestamps + offsets). The second
+  half starts from one half length; accepted event minutes follow the
+  conventional labels (2 × 7:30 → 1st half 0–8, 2nd half 7–15, added time on
+  the last minute). `match_events.clock_seconds` stores the exact clock second.
+- Half-time has no fixed interval: the operator restarts play when ready.
+
 ## Authentication
 Email + password through Supabase Auth (works without external services).
 Public sign-up is disabled (`[auth] enable_signup = false`); accounts are

@@ -131,9 +131,9 @@ select is((select screened_by from public.player_screenings where id = tests.scr
 select throws_ok($$ select public.admin_decide_screening(tests.scr(tests.id('p3'), tests.t(1)), 'CLEARED', null, null, current_date + 3) $$,
   'EK422', null, 'a screening date in the future is refused');
 reset role;
-select throws_ok($$ update public.player_screening_decisions set to_status = 'CLEARED' $$, '42501', null,
+select throws_ok($$ update public.player_screening_decisions set to_status = 'CLEARED' where true $$, '42501', null,
   'screening history is append-only, even for the owner');
-select throws_ok($$ delete from public.player_screening_decisions $$, '42501', null, 'screening history cannot be deleted');
+select throws_ok($$ delete from public.player_screening_decisions where true $$, '42501', null, 'screening history cannot be deleted');
 select tests.login((select admin from u));
 
 select is(public.admin_player_detail(tests.id('p1')) -> 'player' ->> 'student_id', 'EKSU/2020/001', 'admin sees the student number on player detail');
@@ -438,7 +438,7 @@ grant select, update on ko to authenticated;
 create or replace function tests.ko(k text) returns uuid language sql stable as $$ select id from ko where ko.k = $1 $$;
 grant execute on function tests.ko(text) to authenticated;
 select tests.login((select admin from u));
-update ko set id = public.admin_create_match('60000000-0000-4000-8000-000000000001', null, null, 'KO ' || k, tests.t(3), tests.t(4), null, now());
+update ko set id = public.admin_create_match('60000000-0000-4000-8000-000000000001', null, null, 'KO ' || k, tests.t(3), tests.t(4), null, now()) where true;
 select public.admin_assign_operators(tests.ko(k), (select op from u), (select op_backup from u)) from ko;
 select tests.confirm_lineups(tests.ko(k)) from ko;
 

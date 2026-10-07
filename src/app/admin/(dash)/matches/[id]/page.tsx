@@ -263,6 +263,7 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/ad
                     away={{ id: m.away_team_id, name: row.away.short_name }}
                     squads={squads}
                     maxPeriod={m.current_period ?? 1}
+                    halfSeconds={m.half_seconds ?? 45 * 60}
                   />
                 </div>
               </details>

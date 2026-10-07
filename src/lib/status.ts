@@ -1,4 +1,4 @@
-import { displayClock } from "./operator/clock";
+import { displayClock, ET_HALF_SECONDS, HALF_SECONDS } from "./operator/clock.ts";
 import type { MatchStatus, PublicClock } from "./types";
 
 /**
@@ -145,6 +145,8 @@ export function computePublicClock(
   const ms = (iso: string | null) => (iso ? Date.parse(iso) : null);
   const d = displayClock(
     {
+      halfSeconds: clock.halfSeconds ?? HALF_SECONDS,
+      etHalfSeconds: clock.etHalfSeconds ?? ET_HALF_SECONDS,
       period: clock.period === 2 ? 2 : 1,
       periodOffsetSeconds: clock.periodOffsetSeconds,
       periodStartedAt: ms(clock.periodStartedAt),

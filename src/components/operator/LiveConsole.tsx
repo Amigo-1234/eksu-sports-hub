@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { formatDuration, periodOffset } from "@/lib/operator/clock";
 import { useState } from "react";
 import { operatorActions } from "@/lib/operator/actions";
 import { computeScore, lastUndoable } from "@/lib/operator/engine";
@@ -118,7 +119,7 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
           onUndo={(e) => undo(e)}
           onResume={() => report(operatorActions.resumeMatch(matchId), "Clock resumed")}
           onEndHalf={() => report(operatorActions.endPeriod(matchId), "Half-time. Clock stopped.")}
-          onStartSecondHalf={() => report(operatorActions.startPeriod(matchId), "2nd half started from 45:00")}
+          onStartSecondHalf={() => report(operatorActions.startPeriod(matchId), `2nd half started from ${formatDuration(periodOffset(2, state.clock))}`)}
         />
       )}
 

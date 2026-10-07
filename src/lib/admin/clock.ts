@@ -4,7 +4,7 @@ import { displayClock } from "@/lib/operator/clock";
 /** The clock fields of a canonical match snapshot. */
 export type ClockSnap = Pick<
   CanonicalMatch,
-  "status" | "current_period" | "period_started_at" | "period_ended_at" | "period_offset_seconds" | "clock_running" | "paused_at" | "accumulated_pause_seconds" | "stoppage_seconds"
+  "status" | "current_period" | "period_started_at" | "period_ended_at" | "period_offset_seconds" | "clock_running" | "paused_at" | "accumulated_pause_seconds" | "stoppage_seconds" | "half_seconds" | "et_half_seconds"
 >;
 
 /** Match minute label from server timestamps (same maths as the operator console). Pure. */

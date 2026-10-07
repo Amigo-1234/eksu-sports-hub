@@ -32,6 +32,8 @@ export interface Competition {
   shortName: string;
   season: string;
   format: CompetitionFormat;
+  /** Set only for short formats: length of each half in seconds (e.g. 450 = 7:30). */
+  halfSeconds?: number;
   category: CompetitionCategory;
   description: string;
   /** Team IDs participating in the competition. */
@@ -119,6 +121,9 @@ export interface PublicClock {
   pausedAt: ISODateTime | null;
   accumulatedPauseSeconds: number;
   stoppageSeconds: number;
+  /** Half lengths of this match in seconds (45:00 / 15:00 unless the competition sets a short format). */
+  halfSeconds?: number;
+  etHalfSeconds?: number;
 }
 
 export type MatchEventType =
@@ -154,6 +159,8 @@ export interface MatchEvent {
   playerIn?: PlayerRef;
   /** Server order (real data only). */
   seq?: number;
+  /** 1–2 when known (real data): which half the event belongs to. */
+  period?: number;
 }
 
 export interface FormResult {

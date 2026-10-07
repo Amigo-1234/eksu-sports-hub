@@ -10,12 +10,39 @@
  * applied by the caller (see `time.ts`) without touching this module.
  */
 
+/** Normal football: 45:00 halves. Competitions can set their own (e.g. 7:30). */
 export const HALF_SECONDS = 45 * 60;
+/** Extra-time halves (kept for compatibility; not used by league matches). */
+export const ET_HALF_SECONDS = 15 * 60;
 
-export interface ClockState {
+/** Length of the halves for a match (seconds), from the competition's setting. */
+export interface MatchDurations {
+  halfSeconds: number;
+  etHalfSeconds: number;
+}
+export const STANDARD_DURATIONS: MatchDurations = { halfSeconds: HALF_SECONDS, etHalfSeconds: ET_HALF_SECONDS };
+
+/** Match-clock second at which a period starts: 0 / H / 2H / 2H+E / 2H+2E. */
+export function periodOffset(period: number, d: MatchDurations = STANDARD_DURATIONS): number {
+  const h = d.halfSeconds;
+  const e = d.etHalfSeconds;
+  return period === 1 ? 0 : period === 2 ? h : period === 3 ? 2 * h : period === 4 ? 2 * h + e : 2 * h + 2 * e;
+}
+
+export function periodLengthSeconds(period: number | null, d: MatchDurations = STANDARD_DURATIONS): number {
+  return period === 3 || period === 4 ? d.etHalfSeconds : period === 5 ? 0 : d.halfSeconds;
+}
+
+/** "45:00" / "7:30" — a duration in match-clock notation. */
+export function formatDuration(seconds: number): string {
+  const s = Math.max(0, Math.round(seconds));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+export interface ClockState extends MatchDurations {
   /** 1 or 2 once the match has started. */
   period: 1 | 2 | null;
-  /** Football baseline for the period: 0 for 1H, 2700 (45:00) for 2H. */
+  /** Clock second at the start of the period: 0 for 1H, one half length for 2H (45:00 normally). */
   periodOffsetSeconds: number;
   /** Wall-clock start of the current period (ms). */
   periodStartedAt: number | null;
@@ -30,7 +57,9 @@ export interface ClockState {
   stoppageSeconds: number;
 }
 
-export const initialClock = (): ClockState => ({
+export const initialClock = (d: MatchDurations = STANDARD_DURATIONS): ClockState => ({
+  halfSeconds: d.halfSeconds,
+  etHalfSeconds: d.etHalfSeconds,
   period: null,
   periodOffsetSeconds: 0,
   periodStartedAt: null,
@@ -41,10 +70,12 @@ export const initialClock = (): ClockState => ({
   stoppageSeconds: 0,
 });
 
-export function startPeriodClock(period: 1 | 2, now: number): ClockState {
+export function startPeriodClock(period: 1 | 2, now: number, d: MatchDurations = STANDARD_DURATIONS): ClockState {
   return {
+    halfSeconds: d.halfSeconds,
+    etHalfSeconds: d.etHalfSeconds,
     period,
-    periodOffsetSeconds: period === 1 ? 0 : HALF_SECONDS,
+    periodOffsetSeconds: periodOffset(period, d),
     periodStartedAt: now,
     periodEndedAt: null,
     clockRunning: true,
@@ -103,7 +134,8 @@ export interface ClockDisplay {
 
 export function displayClock(c: ClockState, now: number): ClockDisplay {
   const elapsed = elapsedSeconds(c, now);
-  const regulationEndMinute = (c.periodOffsetSeconds + HALF_SECONDS) / 60;
+  // Rounded up: a 7:30 half ends in the 8th minute (added time from 8:00 → 8+1').
+  const regulationEndMinute = Math.ceil((c.periodOffsetSeconds + periodLengthSeconds(c.period, c)) / 60);
   const rawMinute = Math.floor(elapsed / 60) + 1;
   const over = rawMinute > regulationEndMinute;
   const minute = over ? regulationEndMinute : rawMinute;

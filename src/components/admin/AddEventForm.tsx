@@ -18,6 +18,7 @@ export function AddEventForm({
   away,
   squads,
   maxPeriod,
+  halfSeconds = 45 * 60,
 }: {
   matchId: string;
   eventTypes: { code: string; name: string; requires_player: boolean; requires_related_player: boolean }[];
@@ -25,6 +26,8 @@ export function AddEventForm({
   away: { id: string; name: string };
   squads: { home: SquadEntry[]; away: SquadEntry[] };
   maxPeriod: number;
+  /** Half length of this match in seconds (45:00 unless the competition uses a short format). */
+  halfSeconds?: number;
 }) {
   const [eventId, setEventId] = useState(newId);
   const [type, setType] = useState(eventTypes[0]?.code ?? "");
@@ -35,6 +38,9 @@ export function AddEventForm({
   const onDone = useCallback((s: NonNullable<ActionState>) => {
     if (s.ok) setEventId(newId());
   }, []);
+  // Accepted minute labels follow the match's half length (normally 0–45 / 45–90).
+  const lo = period === 1 ? 0 : Math.floor(halfSeconds / 60);
+  const hi = period === 1 ? Math.ceil(halfSeconds / 60) : Math.ceil((2 * halfSeconds) / 60);
   const label = (p: SquadEntry) => `#${p.shirt_number}${p.name ? ` ${p.name}` : ""}`;
 
   return (
@@ -64,10 +70,10 @@ export function AddEventForm({
           </select>
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Minute" hint={period === 1 ? "0–45" : "45–90"}>
-            <input type="number" name="minute" required min={period === 1 ? 0 : 45} max={period === 1 ? 45 : 90} className={inputCls} />
+          <Field label="Minute" hint={`${lo}–${hi}`}>
+            <input type="number" name="minute" required min={lo} max={hi} className={inputCls} />
           </Field>
-          <Field label="Added time" hint={`Only at ${period === 1 ? 45 : 90}'`}>
+          <Field label="Added time" hint={`Only at ${hi}'`}>
             <input type="number" name="minute_extra" min={0} max={60} defaultValue={0} className={inputCls} />
           </Field>
         </div>

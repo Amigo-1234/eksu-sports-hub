@@ -41,6 +41,8 @@ export function toPublicClock(m: any): PublicClock | null {
     pausedAt: m.paused_at,
     accumulatedPauseSeconds: Number(m.accumulated_pause_seconds ?? 0),
     stoppageSeconds: m.stoppage_seconds ?? 0,
+    ...(m.half_seconds ? { halfSeconds: m.half_seconds } : {}),
+    ...(m.et_half_seconds ? { etHalfSeconds: m.et_half_seconds } : {}),
   };
 }
 
@@ -59,6 +61,7 @@ export function toEvent(e: any, matchId: ID): MatchEvent {
       ? { playerIn: { shirtNumber: e.related_shirt_number ?? null, name: e.related_player_name ?? undefined } }
       : {}),
     seq: Number(e.seq),
+    ...(e.period ? { period: Number(e.period) } : {}),
   };
 }
 

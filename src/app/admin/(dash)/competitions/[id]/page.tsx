@@ -17,6 +17,7 @@ import {
   updateCompetition,
   updateEntry,
 } from "@/lib/admin/actions/competitions";
+import { MatchLengthForm } from "@/components/admin/MatchLengthForm";
 import { getCompetition } from "@/lib/admin/data/competitions";
 import { listSeasons, listSports } from "@/lib/admin/data/reference";
 import { listTeamRefs } from "@/lib/admin/data/teams";
@@ -236,12 +237,21 @@ export default async function CompetitionPage({ params, searchParams }: PageProp
           </Card>
         </div>
 
+        <div className="min-w-0 space-y-6">
+        <Card
+          title="Match length"
+          id="match-length"
+          description={c.matches_started ? "Locked: a match has kicked off. Started matches keep their own length." : "Applies to every match of this competition from kick-off."}
+        >
+          <MatchLengthForm competitionId={c.id} halfSeconds={c.half_seconds} etHalfSeconds={c.et_half_seconds} locked={Boolean(c.matches_started)} />
+        </Card>
         <Card title="Settings" id="settings">
           <ActionForm action={updateCompetition}>
             <CompetitionFields c={c} seasons={seasons} sports={sports} />
             <Submit className={`${btn.primary} mt-4`}>Save settings</Submit>
           </ActionForm>
         </Card>
+        </div>
       </div>
     </>
   );

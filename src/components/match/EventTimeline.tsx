@@ -101,11 +101,14 @@ function EventBody({ entry, match }: { entry: TimelineEntry; match: MatchDetail 
  */
 export function EventTimeline({ match }: { match: MatchDetail }) {
   const entries = buildTimeline(match);
-  const first = entries.filter((e) => e.event.minute <= 45);
-  const second = entries.filter((e) => e.event.minute > 45);
+  // Halves: by the event's period when known, else by the match's half length (45' normally).
+  const halfMinute = Math.ceil((match.clock?.halfSeconds ?? 45 * 60) / 60);
+  const inFirstHalf = (e: TimelineEntry) => (e.event.period ? e.event.period === 1 : e.event.minute <= halfMinute);
+  const first = entries.filter(inFirstHalf);
+  const second = entries.filter((e) => !inFirstHalf(e));
   const reachedHalfTime =
     match.status !== "LIVE_FIRST_HALF" &&
-    !(match.status === "ABANDONED" && (match.abandonedMinute ?? 0) <= 45);
+    !(match.status === "ABANDONED" && (match.abandonedMinute ?? 0) <= halfMinute);
 
   const row = (entry: TimelineEntry) => {
     const { event, side } = entry;

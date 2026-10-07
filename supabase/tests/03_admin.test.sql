@@ -44,7 +44,7 @@ select throws_ok($$ select public.admin_create_match('60000000-0000-4000-8000-00
 select throws_ok($$ select public.admin_grant_role((select op from u), 'ADMIN') $$,
   'EK403', null, 'operator cannot grant themselves ADMIN');
 select throws_ok($$ select * from public.admin_list_staff() $$, 'EK403', null, 'operator cannot list staff');
-select throws_ok($$ update public.matches set home_score = 9 $$, '42501', null, 'score columns are never writable by clients');
+select throws_ok($$ update public.matches set home_score = 9 where true $$, '42501', null, 'score columns are never writable by clients');
 
 select tests.login((select nobody from u));
 select throws_ok($$ select public.admin_live_matches() $$, 'EK403', null, 'signed-in non-staff cannot use admin reads');
@@ -207,9 +207,9 @@ select ok(not private.has_role('OPERATOR'), 'deactivated operator loses role acc
 
 -- ── Audit log is immutable ─────────────────────────────────────────────────
 select tests.login((select admin from u));
-select throws_ok($$ delete from public.audit_log $$, '42501', null, 'admin cannot delete audit entries');
+select throws_ok($$ delete from public.audit_log where true $$, '42501', null, 'admin cannot delete audit entries');
 reset role;
-select throws_ok($$ update public.audit_log set action = 'X' $$, '42501', null, 'audit log is append-only even for the owner');
+select throws_ok($$ update public.audit_log set action = 'X' where true $$, '42501', null, 'audit log is append-only even for the owner');
 
 select * from finish();
 rollback;

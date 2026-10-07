@@ -164,13 +164,13 @@ export function applyCommand(state: OpMatchState, input: CommandInput, ctx: Appl
 
   switch (input.command) {
     case "START_MATCH":
-      return { ok: true, state: next({ phase: "FIRST_HALF", clock: startPeriodClock(1, now), log: log("MATCH_STARTED") }) };
+      return { ok: true, state: next({ phase: "FIRST_HALF", clock: startPeriodClock(1, now, state.clock), log: log("MATCH_STARTED") }) };
 
     case "END_PERIOD":
       return { ok: true, state: next({ phase: "HALF_TIME", clock: stopClock(state.clock, now), log: log("PERIOD_ENDED", "1H") }) };
 
     case "START_PERIOD":
-      return { ok: true, state: next({ phase: "SECOND_HALF", clock: startPeriodClock(2, now), log: log("PERIOD_STARTED", "2H") }) };
+      return { ok: true, state: next({ phase: "SECOND_HALF", clock: startPeriodClock(2, now, state.clock), log: log("PERIOD_STARTED", "2H") }) };
 
     case "FINALISE_MATCH": {
       const score = computeScore(state);

@@ -2,7 +2,7 @@
  * Canonical (server) match state → operator state. Pure; shared by the
  * server data layer and the client reconciler.
  */
-import { initialClock, type ClockState } from "./clock.ts";
+import { ET_HALF_SECONDS, HALF_SECONDS, initialClock, type ClockState, type MatchDurations } from "./clock.ts";
 import type { OpEvent, OpEventType, OpLogEntry, OpMatchState, OpPhase } from "./types.ts";
 
 /** Shape returned by the match RPCs (see supabase/migrations/*_match_rpc.sql). */
@@ -18,6 +18,9 @@ export interface CanonicalMatch {
   period_started_at: string | null;
   period_ended_at: string | null;
   period_offset_seconds: number;
+  /** Half lengths in seconds (absent before the duration migration → 45:00 / 15:00). */
+  half_seconds?: number | null;
+  et_half_seconds?: number | null;
   clock_running: boolean;
   paused_at: string | null;
   accumulated_pause_seconds: number | string;
@@ -102,9 +105,15 @@ const LOG_KINDS = new Set<OpLogEntry["kind"]>([
   "PAUSED", "RESUMED", "STOPPAGE_SET", "OPERATOR_TAKEOVER",
 ]);
 
+export function durationsFromCanonical(m: Pick<CanonicalMatch, "half_seconds" | "et_half_seconds">): MatchDurations {
+  return { halfSeconds: m.half_seconds ?? HALF_SECONDS, etHalfSeconds: m.et_half_seconds ?? ET_HALF_SECONDS };
+}
+
 export function clockFromCanonical(m: CanonicalMatch): ClockState {
-  if (m.current_period === null) return initialClock();
+  const d = durationsFromCanonical(m);
+  if (m.current_period === null) return initialClock(d);
   return {
+    ...d,
     period: m.current_period === 2 ? 2 : 1,
     periodOffsetSeconds: m.period_offset_seconds,
     periodStartedAt: ms(m.period_started_at),
