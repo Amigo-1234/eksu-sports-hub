@@ -385,3 +385,28 @@ export async function competitionRulesOverrideAction(_: ActionState, fd: FormDat
     return done("Rules changed with an audited override. Tables were recomputed.");
   });
 }
+
+/** "7:30", "7.5" or "45" (minutes) → seconds, in steps of 30 seconds. */
+function clockLength(fd: FormData, key: string, label: string, maxSeconds: number): number {
+  const raw = String(fd.get(key) ?? "").trim();
+  const m = /^(\d{1,2}):([0-5]\d)$/.exec(raw);
+  const seconds = m ? Number(m[1]) * 60 + Number(m[2]) : /^\d{1,2}(\.\d+)?$/.test(raw) ? Math.round(Number(raw) * 60) : NaN;
+  if (!Number.isFinite(seconds)) throw new Invalid(`${label}: enter minutes like 7:30 or 7.5.`);
+  if (seconds < 60 || seconds > maxSeconds) throw new Invalid(`${label} must be between 1:00 and ${maxSeconds / 60}:00.`);
+  if (seconds % 30 !== 0) throw new Invalid(`${label} must be in steps of 30 seconds (e.g. 7:00, 7:30).`);
+  return seconds;
+}
+
+export async function matchDurationAction(_: ActionState, fd: FormData): Promise<ActionState> {
+  return adminAction(async ({ db }) => {
+    check(
+      await db.rpc("admin_set_match_duration", {
+        p_competition_id: id(fd, "competition_id", "Competition"),
+        p_half_seconds: clockLength(fd, "half", "Half length", 3600),
+        p_et_half_seconds: clockLength(fd, "et_half", "Extra-time half", 1800),
+        p_override_reason: text(fd, "reason", { label: "Reason", max: 300 }) || null,
+      }),
+    );
+    return done("Match length saved.");
+  });
+}

@@ -157,7 +157,7 @@ export function applyCommand(state: OpMatchState, input: CommandInput, ctx: Appl
 
   switch (input.command) {
     case "START_MATCH":
-      return { ok: true, state: next({ phase: "FIRST_HALF", clock: startPeriodClock(1, now), log: log("MATCH_STARTED") }) };
+      return { ok: true, state: next({ phase: "FIRST_HALF", clock: startPeriodClock(1, now, state.clock), log: log("MATCH_STARTED") }) };
 
     case "END_PERIOD": {
       const to = endPeriodTarget(state);
@@ -170,7 +170,7 @@ export function applyCommand(state: OpMatchState, input: CommandInput, ctx: Appl
           ok: true,
           state: next({
             phase: "PENALTIES",
-            clock: { ...startPeriodClock(5, now), clockRunning: false, periodEndedAt: now },
+            clock: { ...startPeriodClock(5, now, state.clock), clockRunning: false, periodEndedAt: now },
             log: [...log("PERIOD_ENDED", label), { id: ctx.newId(), at: now, kind: "SHOOTOUT_STARTED" }],
             kicks: state.kicks ?? [],
           }),
@@ -184,7 +184,7 @@ export function applyCommand(state: OpMatchState, input: CommandInput, ctx: Appl
       if (!to) return { ok: false, reason: "No period to start" };
       const period = to === "SECOND_HALF" ? 2 : to === "EXTRA_TIME_FIRST" ? 3 : 4;
       const label = to === "SECOND_HALF" ? "2H" : to === "EXTRA_TIME_FIRST" ? "ET1" : "ET2";
-      return { ok: true, state: next({ phase: to, clock: startPeriodClock(period, now), log: log("PERIOD_STARTED", label) }) };
+      return { ok: true, state: next({ phase: to, clock: startPeriodClock(period, now, state.clock), log: log("PERIOD_STARTED", label) }) };
     }
 
     case "RECORD_KICK": {

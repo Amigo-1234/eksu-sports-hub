@@ -29,7 +29,7 @@ function logText(l: OpLogEntry): string | null {
     case "MATCH_STARTED":
       return "Kick-off · 1st half started";
     case "PERIOD_ENDED":
-      return { "1H": "Half-time", "2H": "End of 90 minutes", ET1: "Extra time · half-time", ET2: "End of extra time" }[l.detail ?? "1H"] ?? "Period ended";
+      return { "1H": "Half-time", "2H": "End of normal time", ET1: "Extra time · half-time", ET2: "End of extra time" }[l.detail ?? "1H"] ?? "Period ended";
     case "PERIOD_STARTED":
       return { "2H": "2nd half started", ET1: "Extra time started", ET2: "Extra time · 2nd half started" }[l.detail ?? "2H"] ?? "Period started";
     case "SHOOTOUT_STARTED":

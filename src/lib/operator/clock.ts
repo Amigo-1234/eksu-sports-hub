@@ -10,27 +10,45 @@
  * applied by the caller (see `time.ts`) without touching this module.
  */
 
+/** Normal football: 45:00 halves. Competitions can set their own (e.g. 7:30). */
 export const HALF_SECONDS = 45 * 60;
-/** Extra-time halves are 15 minutes. */
+/** Normal extra-time halves are 15:00. */
 export const ET_HALF_SECONDS = 15 * 60;
 
 export type Period = 1 | 2 | 3 | 4 | 5;
 
-/** Football baseline at the start of each period (ET1 from 90:00, ET2 from 105:00; 5 = shoot-out). */
-export const PERIOD_OFFSET: Record<Period, number> = { 1: 0, 2: HALF_SECONDS, 3: 2 * HALF_SECONDS, 4: 2 * HALF_SECONDS + ET_HALF_SECONDS, 5: 2 * HALF_SECONDS + 2 * ET_HALF_SECONDS };
+/** Length of the halves for a match (seconds), from the competition's setting. */
+export interface MatchDurations {
+  halfSeconds: number;
+  etHalfSeconds: number;
+}
+export const STANDARD_DURATIONS: MatchDurations = { halfSeconds: HALF_SECONDS, etHalfSeconds: ET_HALF_SECONDS };
 
-export function periodLengthSeconds(period: Period | null): number {
-  return period === 3 || period === 4 ? ET_HALF_SECONDS : period === 5 ? 0 : HALF_SECONDS;
+/** Match-clock second at which a period starts: 0 / H / 2H / 2H+E / 2H+2E (5 = shoot-out). */
+export function periodOffset(period: Period, d: MatchDurations = STANDARD_DURATIONS): number {
+  const h = d.halfSeconds;
+  const e = d.etHalfSeconds;
+  return { 1: 0, 2: h, 3: 2 * h, 4: 2 * h + e, 5: 2 * h + 2 * e }[period];
+}
+
+export function periodLengthSeconds(period: Period | null, d: MatchDurations = STANDARD_DURATIONS): number {
+  return period === 3 || period === 4 ? d.etHalfSeconds : period === 5 ? 0 : d.halfSeconds;
+}
+
+/** "45:00" / "7:30" — a duration in match-clock notation. */
+export function formatDuration(seconds: number): string {
+  const s = Math.max(0, Math.round(seconds));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
 export function toPeriod(n: number | null | undefined): Period | null {
   return n === 1 || n === 2 || n === 3 || n === 4 || n === 5 ? n : null;
 }
 
-export interface ClockState {
+export interface ClockState extends MatchDurations {
   /** 1–2 (halves), 3–4 (extra time), 5 (shoot-out) once the match has started. */
   period: Period | null;
-  /** Football baseline for the period: 0 for 1H, 2700 (45:00) for 2H, 5400 for ET1, 6300 for ET2. */
+  /** Clock second at the start of the period: 0 for 1H, one half length for 2H (45:00 normally), … */
   periodOffsetSeconds: number;
   /** Wall-clock start of the current period (ms). */
   periodStartedAt: number | null;
@@ -45,7 +63,9 @@ export interface ClockState {
   stoppageSeconds: number;
 }
 
-export const initialClock = (): ClockState => ({
+export const initialClock = (d: MatchDurations = STANDARD_DURATIONS): ClockState => ({
+  halfSeconds: d.halfSeconds,
+  etHalfSeconds: d.etHalfSeconds,
   period: null,
   periodOffsetSeconds: 0,
   periodStartedAt: null,
@@ -56,10 +76,12 @@ export const initialClock = (): ClockState => ({
   stoppageSeconds: 0,
 });
 
-export function startPeriodClock(period: Period, now: number): ClockState {
+export function startPeriodClock(period: Period, now: number, d: MatchDurations = STANDARD_DURATIONS): ClockState {
   return {
+    halfSeconds: d.halfSeconds,
+    etHalfSeconds: d.etHalfSeconds,
     period,
-    periodOffsetSeconds: PERIOD_OFFSET[period],
+    periodOffsetSeconds: periodOffset(period, d),
     periodStartedAt: now,
     periodEndedAt: null,
     clockRunning: true,
@@ -103,7 +125,7 @@ export function elapsedSeconds(c: ClockState, now: number): number {
 }
 
 export interface ClockDisplay {
-  /** Football minute: 1-based, capped at the regulation end of the period. */
+  /** Football minute: 1-based, capped at the regulation end of the period (rounded up: a 7:30 half ends in 8'). */
   minute: number;
   /** Minutes beyond regulation (45+2 → 2). */
   addedTime: number;
@@ -118,7 +140,7 @@ export interface ClockDisplay {
 
 export function displayClock(c: ClockState, now: number): ClockDisplay {
   const elapsed = elapsedSeconds(c, now);
-  const regulationEndMinute = (c.periodOffsetSeconds + periodLengthSeconds(c.period)) / 60;
+  const regulationEndMinute = Math.ceil((c.periodOffsetSeconds + periodLengthSeconds(c.period, c)) / 60);
   const rawMinute = Math.floor(elapsed / 60) + 1;
   const over = rawMinute > regulationEndMinute;
   const minute = over ? regulationEndMinute : rawMinute;

@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { ChevronRightIcon, TrophyIcon } from "@/components/ui/icons";
+import { formatDuration } from "@/lib/operator/clock";
 import type { Competition } from "@/lib/types";
 
 export function competitionMeta(c: Competition): string {
   const format =
     c.engineFormat === "GROUPS" ? "Groups" : c.engineFormat === "GROUPS_KNOCKOUT" ? "Groups + knockout" : c.format === "league" ? "League" : "Knockout";
   const category = c.category === "women" ? "Women" : c.category === "men" ? "Men" : "Mixed";
-  return `${format} · ${category} · ${c.season}`;
+  const length = c.halfSeconds ? ` · 2 × ${formatDuration(c.halfSeconds)}` : "";
+  return `${format} · ${category} · ${c.season}${length}`;
 }
 
 export function CompetitionBadge({ competition, size = 36 }: { competition: Competition; size?: number }) {

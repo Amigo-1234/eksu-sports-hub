@@ -36,11 +36,11 @@ export async function getCompetition(id: string): Promise<CompetitionDetail | nu
     .from("competitions")
     .select(
       `id, name, short_name, description, status, format, category, season_id, sport_id, points_win, points_draw, points_loss,
-       tiebreakers, extra_time_enabled, penalties_enabled, allow_multi_team_players, kind,
+       tiebreakers, extra_time_enabled, penalties_enabled, allow_multi_team_players, kind, half_seconds, et_half_seconds,
        competition_stages(id, name, stage_order, has_table, stage_type, legs, extra_time_allowed, penalties_allowed,
          qualification, status, locked_at, competition_groups(id, name)),
        competition_entries(id, stage_id, group_id, team:teams(${TEAM_REF})),
-       matches(id)`,
+       matches(id, status)`,
     )
     .eq("id", id)
     .maybeSingle();
@@ -69,6 +69,7 @@ export async function getCompetition(id: string): Promise<CompetitionDetail | nu
       .map((e: any) => ({ id: e.id, stage_id: e.stage_id, group_id: e.group_id, team: e.team }))
       .sort((a: any, b: any) => a.team.name.localeCompare(b.team.name)),
     match_count: c.matches?.length ?? 0,
+    matches_started: (c.matches ?? []).some((m: any) => m.status !== "SCHEDULED"),
   };
 }
 

@@ -70,6 +70,7 @@ function toCompetition(c: any): Competition {
     // Group stages have tables too; only pure knockouts have none.
     format: c.format === "KNOCKOUT" ? "knockout" : "league",
     engineFormat: c.format,
+    ...(c.half_seconds && c.half_seconds !== 2700 ? { halfSeconds: c.half_seconds } : {}),
     category: (c.category ?? "MEN").toLowerCase(),
     description: c.description ?? "",
     teamIds: (c.competition_entries ?? []).map((e: any) => e.team_id),
@@ -87,7 +88,7 @@ function abandonedMinute(m: any): number | undefined {
 /** Row fields a public match needs (canonical score + clock, never operator ids). */
 export const MATCH_COLS = `id, competition_id, home_team_id, away_team_id, venue_id, scheduled_at, status, status_note,
   home_score, away_score, round_label, seq, current_period, period_started_at, period_ended_at,
-  period_offset_seconds, clock_running, paused_at, accumulated_pause_seconds, stoppage_seconds, finished_at,
+  period_offset_seconds, half_seconds, et_half_seconds, clock_running, paused_at, accumulated_pause_seconds, stoppage_seconds, finished_at,
   home_score_90, away_score_90, home_pens, away_pens, winner_team_id, decided_by, matchday, tie_id, stage_id, group_id`;
 
 interface Refs {
@@ -134,7 +135,7 @@ async function loadRefs(): Promise<Refs> {
     db.from("teams").select("id, name, short_name, code, kind, category, color_primary, color_secondary").order("name"),
     db
       .from("competitions")
-      .select("id, sport_id, name, short_name, format, category, description, created_at, season:seasons(name), competition_entries(team_id)")
+      .select("id, sport_id, name, short_name, format, category, description, created_at, half_seconds, season:seasons(name), competition_entries(team_id)")
       .order("created_at"),
     db.from("venues").select("id, name, short_name").order("name"),
   ]);

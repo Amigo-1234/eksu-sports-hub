@@ -451,6 +451,18 @@ table or function carries them.
   `admin_fixture_history`. Engine refresh runs in a deferred constraint
   trigger at commit (`competition_refresh`).
 
+### Match duration (migration `20261010002100`)
+- `competitions.half_seconds` / `et_half_seconds` (default 2700 / 900 — the
+  normal football clock); set with `admin_set_match_duration` (steps of 30 s,
+  audited, locked once a match has kicked off unless an override reason is given).
+- Kick-off copies the lengths onto `matches.half_seconds` / `et_half_seconds`,
+  so a live or finished match never changes length.
+- The clock stays authoritative in seconds (timestamps + offsets). Period offsets
+  are 0 / H / 2H / 2H+E / 2H+2E; accepted event minutes follow the conventional
+  labels (2 × 7:30 → 1st half 0–8, 2nd half 7–15, added time on the last minute).
+  `match_events.clock_seconds` stores the exact clock second of live events.
+- Half-time has no fixed interval: the operator restarts play when ready.
+
 ## Authentication
 Email + password through Supabase Auth (works without external services).
 Public sign-up is disabled (`[auth] enable_signup = false`); accounts are

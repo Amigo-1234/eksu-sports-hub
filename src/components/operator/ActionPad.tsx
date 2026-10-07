@@ -40,7 +40,7 @@ export function ActionPad({
       : state.phase === "EXTRA_TIME_FIRST"
         ? "Hold to end extra time 1st half"
         : endTo === "ET_BREAK"
-          ? "Level — hold to end 90 min (extra time)"
+          ? "Level — hold to end normal time (extra time)"
           : "Level — hold to go to penalties";
   const startLabel =
     startTo === "SECOND_HALF" ? "Hold to start 2nd half" : startTo === "EXTRA_TIME_FIRST" ? "Hold to start extra time" : "Hold to start extra time 2nd half";
@@ -65,7 +65,7 @@ export function ActionPad({
       )}
       {!canRecord && state.phase === "ET_BREAK" && (
         <p role="status" className="rounded-xl border-2 border-ink bg-accent-100 px-3 py-2.5 text-sm font-bold">
-          {state.clock.period === 3 ? "Extra-time half-time." : "Level after 90 minutes — extra time follows."} Event recording is locked until play restarts.
+          {state.clock.period === 3 ? "Extra-time half-time." : "Level after normal time — extra time follows."} Event recording is locked until play restarts.
         </p>
       )}
 

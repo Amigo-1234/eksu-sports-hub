@@ -130,9 +130,14 @@ export interface CompetitionDetail {
   penalties_enabled: boolean;
   allow_multi_team_players: boolean;
   kind: CompetitionKind;
+  /** Half lengths in seconds (2700 / 900 = normal football). */
+  half_seconds: number;
+  et_half_seconds: number;
   stages: Stage[];
   entries: Entry[];
   match_count: number;
+  /** Any match has kicked off (match length is then locked). */
+  matches_started?: boolean;
 }
 
 export interface TeamRef {
@@ -266,6 +271,9 @@ export interface LiveMatch {
     period_started_at: string | null;
     period_ended_at: string | null;
     period_offset_seconds: number;
+    /** Half length of the match in seconds (45:00 unless a short format). */
+    half_seconds?: number | null;
+    et_half_seconds?: number | null;
     clock_running: boolean;
     paused_at: string | null;
     accumulated_pause_seconds: number;

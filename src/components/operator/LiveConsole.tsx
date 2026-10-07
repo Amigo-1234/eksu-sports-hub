@@ -6,6 +6,7 @@ import { operatorActions } from "@/lib/operator/actions";
 import { computeScore, lastUndoable } from "@/lib/operator/engine";
 import { useCanonicalSync, useOperatorSnapshot, useNow, useOpMatch } from "@/lib/operator/hooks";
 import { availableCommands, endPeriodTarget, PHASE_LABEL, startPeriodTarget } from "@/lib/operator/machine";
+import { formatDuration, periodOffset } from "@/lib/operator/clock";
 import { consoleSquads } from "@/lib/operator/lineup";
 import { operatorStore } from "@/lib/operator/store";
 import type { AssignmentSeed, OpEvent, Side } from "@/lib/operator/types";
@@ -144,7 +145,8 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
           }}
           onStartSecondHalf={() => {
             const to = startPeriodTarget(state);
-            report(operatorActions.startPeriod(matchId), to === "EXTRA_TIME_FIRST" ? "Extra time started from 90:00" : to === "EXTRA_TIME_SECOND" ? "Extra time 2nd half from 105:00" : "2nd half started from 45:00");
+            const from = formatDuration(periodOffset(to === "EXTRA_TIME_FIRST" ? 3 : to === "EXTRA_TIME_SECOND" ? 4 : 2, state.clock));
+            report(operatorActions.startPeriod(matchId), to === "EXTRA_TIME_FIRST" ? `Extra time started from ${from}` : to === "EXTRA_TIME_SECOND" ? `Extra time 2nd half from ${from}` : `2nd half started from ${from}`);
           }}
         />
       )}

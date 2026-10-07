@@ -128,7 +128,7 @@ export async function addEvent(_: ActionState, fd: FormData): Promise<ActionStat
         p_type: text(fd, "type", { label: "Event type", required: true, max: 40 }),
         p_team_id: id(fd, "team_id", "Team"),
         p_period: int(fd, "period", "Period", 1, 2),
-        p_minute: int(fd, "minute", "Minute", 0, 90),
+        p_minute: int(fd, "minute", "Minute", 0, 200), // the database checks the range for this match's half length
         p_minute_extra: extra ? int(fd, "minute_extra", "Added time", 0, 60) : 0,
         p_player_id: optionalId(fd, "player_id"),
         p_related_player_id: optionalId(fd, "related_player_id"),

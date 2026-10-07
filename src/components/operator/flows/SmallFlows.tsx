@@ -4,6 +4,7 @@ import { useState } from "react";
 import { TeamCrest } from "@/components/team/TeamCrest";
 import { operatorActions } from "@/lib/operator/actions";
 import { computeScore } from "@/lib/operator/engine";
+import { periodLengthSeconds } from "@/lib/operator/clock";
 import type { AssignmentSeed, OpEvent, OpMatchState, PauseReason } from "@/lib/operator/types";
 import { HoldButton } from "../HoldButton";
 import { EVENT_LABEL, PAUSE_REASONS } from "../labels";
@@ -24,7 +25,7 @@ export function StoppageFlow({ state, onDone }: { state: OpMatchState; onDone: (
     <div>
       <ErrorNote message={error} />
       <p className="mb-3 text-sm text-ink-muted">
-        Shown to the public as e.g. <strong>45+2&apos;</strong>. The match clock itself is not changed.
+        Shown to the public as e.g. <strong>{Math.ceil((state.clock.periodOffsetSeconds + periodLengthSeconds(state.clock.period, state.clock)) / 60)}+2&apos;</strong>. The match clock itself is not changed.
         {current > 0 && <> Currently announced: <strong>+{current}</strong>.</>}
       </p>
       <div className="grid grid-cols-5 gap-2">
