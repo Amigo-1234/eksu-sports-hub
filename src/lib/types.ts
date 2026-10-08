@@ -284,6 +284,16 @@ export interface PublicLineupPlayer {
   goals: number;
 }
 
+/** Competition top scorers row. Players with equal goals share a rank. */
+export interface TopScorer {
+  rank: number;
+  playerName: string | null;
+  teamId: ID;
+  teamName: string;
+  teamShortName: string;
+  goals: number;
+}
+
 export interface StandingRow extends Standing {
   team: Team;
 }

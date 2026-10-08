@@ -248,6 +248,19 @@ export const supabaseDataSource: SportsDataSource = {
     return detail;
   },
 
+  async getTopScorers(competitionId) {
+    if (!UUID.test(competitionId)) return [];
+    const rows = must(await client(LIST_TTL).rpc("public_top_scorers", { p_competition_id: competitionId }), "top scorers") as any[];
+    return (rows ?? []).map((r) => ({
+      rank: Number(r.rank),
+      playerName: r.player_name ?? null,
+      teamId: r.team_id,
+      teamName: r.team_name,
+      teamShortName: r.team_short_name,
+      goals: Number(r.goals),
+    }));
+  },
+
   async getStandings(competitionId) {
     if (!UUID.test(competitionId)) return [];
     const refs = await loadRefs();

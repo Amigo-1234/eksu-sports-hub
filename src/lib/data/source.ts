@@ -4,7 +4,7 @@ import type {
   MatchDetail,
   MatchSummary,
   Sport,
-  StandingRow,
+  StandingRow, TopScorer,
   Team,
 } from "../types";
 
@@ -41,6 +41,8 @@ export interface SportsDataSource {
   getMatch(id: ID): Promise<MatchDetail | null>;
   /** Empty for knockout competitions. */
   getStandings(competitionId: ID): Promise<StandingRow[]>;
+  /** Goals + penalties by named players (own goals excluded); ties share a rank. */
+  getTopScorers(competitionId: ID): Promise<TopScorer[]>;
   /** Completed meetings between two teams, most recent first. */
   getHeadToHead(
     teamA: ID,

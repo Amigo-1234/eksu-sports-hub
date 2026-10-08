@@ -135,6 +135,10 @@ export const mockDataSource: SportsDataSource = {
     return { ...join(m), events: events.get(id) ?? [] };
   },
 
+  async getTopScorers() {
+    return []; // demo data has shirt numbers only — no named scorers
+  },
+
   async getStandings(competitionId) {
     const competition = competitionMap.get(competitionId);
     if (!competition || competition.format !== "league") return [];

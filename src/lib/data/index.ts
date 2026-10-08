@@ -67,6 +67,11 @@ export async function getMatch(id: string) {
   return source.getMatch(id);
 }
 
+export async function getTopScorers(competitionId: string) {
+  await connection();
+  return source.getTopScorers(competitionId);
+}
+
 export async function getStandings(competitionId: string) {
   await connection();
   return source.getStandings(competitionId);
