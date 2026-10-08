@@ -40,6 +40,12 @@ export interface LineupRules {
   max_substitutes: number;
 }
 
+/** "Starting XI" for eleven-a-side; "Starting six" etc. for small-sided competitions. */
+export function startingLabel(maxStarters: number): string {
+  const words: Record<number, string> = { 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten" };
+  return maxStarters === 11 ? "Starting XI" : `Starting ${words[maxStarters] ?? maxStarters}`;
+}
+
 export interface EditorSquadMember {
   player_id: string;
   name: string | null;
@@ -207,7 +213,12 @@ export function draftProblems(draft: LineupDraft, state: LineupEditorState): str
   const c = counts(draft);
   const { rules } = state;
   const formation = formationOf(state.formations, draft.formation);
-  if (c.starters < rules.min_starters) out.push(`Starting XI incomplete: ${c.starters} of at least ${rules.min_starters} (normally 11).`);
+  if (c.starters < rules.min_starters)
+    out.push(
+      rules.max_starters === 11
+        ? `Starting XI incomplete: ${c.starters} of at least ${rules.min_starters} (normally 11).`
+        : `${startingLabel(rules.max_starters)} incomplete: ${c.starters} of ${rules.min_starters}.`,
+    );
   if (c.starters > rules.max_starters) out.push(`Too many starters: ${c.starters} (maximum ${rules.max_starters}).`);
   if (c.substitutes > rules.max_substitutes) out.push(`Too many substitutes: ${c.substitutes} (maximum ${rules.max_substitutes}).`);
   if (c.unplaced > 0) out.push(`${c.unplaced} starter${c.unplaced === 1 ? " has" : "s have"} no position on the pitch.`);
@@ -287,7 +298,13 @@ interface SubLike {
  * takes the position of the player they replaced (in event order); sent-off
  * players leave. Derived from the confirmed line-up + non-voided events.
  */
-export function currentPitch(lineup: LineupLike, teamId: string, events: SubLike[]): PitchPlayer[] {
+/**
+ * Who is on the pitch now, replaying substitutions over the starting
+ * positions. `temporaryReds` (special rules): a red card takes the player off
+ * until an approved SUSPENSION_RETURN puts them back in their spot.
+ */
+export function currentPitch(lineup: LineupLike, teamId: string, events: SubLike[], temporaryReds = false): PitchPlayer[] {
+  const vacated = new Map<number, PitchPlayer>();
   const byShirt = new Map(lineup.players.map((p) => [p.shirtNumber, p]));
   const onPitch = new Map<number, PitchPlayer>();
   for (const p of lineup.players) {
@@ -298,6 +315,24 @@ export function currentPitch(lineup: LineupLike, teamId: string, events: SubLike
     });
   }
   for (const e of events) {
+    if (temporaryReds && e.teamId === teamId && e.player.shirtNumber != null) {
+      const n = e.player.shirtNumber;
+      if (e.type === "RED_CARD" && onPitch.has(n)) {
+        vacated.set(n, onPitch.get(n)!);
+        onPitch.delete(n);
+        continue;
+      }
+      if (e.type === "SUSPENSION_RETURN" && vacated.has(n)) {
+        onPitch.set(n, vacated.get(n)!);
+        vacated.delete(n);
+        continue;
+      }
+      if (e.type === "EXCLUSION") {
+        onPitch.delete(n);
+        vacated.delete(n);
+        continue;
+      }
+    }
     if (e.type !== "SUBSTITUTION" || e.teamId !== teamId) continue;
     const off = e.player.shirtNumber;
     const on = e.playerIn?.shirtNumber;

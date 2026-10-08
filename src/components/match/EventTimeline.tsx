@@ -11,7 +11,15 @@ const EVENT_TEXT: Record<MatchEventType, string> = {
   YELLOW_CARD: "Yellow card",
   RED_CARD: "Red card",
   SUBSTITUTION: "Substitution",
+  SUSPENSION_RETURN: "Returned",
+  EXCLUSION: "Excluded from the match",
 };
+
+/** Under special rules a red card is a temporary suspension. */
+function eventText(type: MatchEventType, match: MatchDetail): string {
+  const secs = match.clock?.rules?.redCardSuspensionSeconds;
+  return type === "RED_CARD" && secs ? `Red card (${secs} s)` : EVENT_TEXT[type];
+}
 
 function EventIcon({ type }: { type: MatchEventType }) {
   switch (type) {
@@ -33,6 +41,10 @@ function EventIcon({ type }: { type: MatchEventType }) {
       return <CardIcon size={18} color="red" />;
     case "SUBSTITUTION":
       return <SwapIcon size={17} className="text-ink-muted" />;
+    case "SUSPENSION_RETURN":
+      return <span className="text-base font-black text-win">↩</span>;
+    case "EXCLUSION":
+      return <CardIcon size={18} color="red" />;
   }
 }
 
@@ -81,7 +93,7 @@ function EventBody({ entry, match }: { entry: TimelineEntry; match: MatchDetail 
       <p className={`truncate ${strong ? "font-bold text-ink" : "font-semibold text-ink"}`}>{playerLabel(event.player)}</p>
       <p className={`flex min-w-0 items-center gap-1.5 text-xs text-ink-faint ${alignEnd ? "justify-end" : ""}`}>
         <span className="truncate">
-          {EVENT_TEXT[event.type]}
+          {eventText(event.type, match)}
           {event.type === "OWN_GOAL" && ` · ${team.shortName}`}
         </span>
         {entry.scoreAfter && (
@@ -124,7 +136,7 @@ export function EventTimeline({ match }: { match: MatchDetail }) {
     return (
       <li key={event.id} className="grid grid-cols-[minmax(0,1fr)_3.25rem_minmax(0,1fr)] items-center py-1.5">
         <span className="sr-only">
-          {eventMinute(event)}, {EVENT_TEXT[event.type]}, {team.name}.
+          {eventMinute(event)}, {eventText(event.type, match)}, {team.name}.
         </span>
         <div className="min-w-0">{side === "home" && content}</div>
         <div className="flex justify-center" aria-hidden="true">

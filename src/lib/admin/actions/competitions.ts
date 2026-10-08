@@ -5,6 +5,7 @@ import { PUBLIC_DATA_TAG } from "@/lib/data/cacheTags";
 import { redirect } from "next/navigation";
 import { TIEBREAKERS, type ActionState, type Tiebreaker } from "../types";
 import { adminAction, bool, check, id, int, Invalid, ok, oneOf, optionalId, text } from "./util";
+import { SIX_A_SIDE_NOVELTY_PRESET } from "@/lib/rules/special";
 
 const done = (msg: string) => {
   revalidatePath("/admin", "layout");
@@ -196,5 +197,19 @@ export async function matchDurationAction(_: ActionState, fd: FormData): Promise
       }),
     );
     return done("Match length saved.");
+  });
+}
+
+/** Special competition rules: apply the six-a-side novelty preset, or switch special rules off. Audited. */
+export async function specialRulesAction(_: ActionState, fd: FormData): Promise<ActionState> {
+  return adminAction(async ({ db }) => {
+    const mode = oneOf(fd, "mode", ["six_a_side_novelty", "off"] as const, "Rules");
+    check(
+      await db.rpc("admin_set_special_rules", {
+        p_competition_id: id(fd, "competition_id", "Competition"),
+        p_rules: mode === "off" ? null : SIX_A_SIDE_NOVELTY_PRESET,
+      }),
+    );
+    return done(mode === "off" ? "Special rules switched off. Matches already played keep their rules." : "Six-a-side rules applied.");
   });
 }

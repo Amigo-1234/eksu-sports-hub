@@ -11,6 +11,7 @@ import {
   formationOf,
   sameDraft,
   slotOccupants,
+  startingLabel,
   toPayload,
   type EditorSquadMember,
   type LineupActions,
@@ -173,7 +174,7 @@ export function LineupBuilder({ initial, actions }: { initial: LineupEditorState
         <section aria-labelledby={`${uid}-pitch`} className="min-w-0">
           <div className="mb-2 flex flex-wrap items-end justify-between gap-2">
             <h2 id={`${uid}-pitch`} className="font-display text-lg font-extrabold uppercase">
-              Starting XI
+              {startingLabel(state.rules.max_starters)}
             </h2>
             <label className="flex items-center gap-2 text-sm font-bold">
               Formation
@@ -479,7 +480,7 @@ function SelectedList({
   };
   return (
     <div className="space-y-3">
-      <ul aria-label="Starting XI" className="divide-y divide-line rounded-lg border border-line bg-surface">
+      <ul aria-label={startingLabel(starters.length === 11 ? 11 : starters.length)} className="divide-y divide-line rounded-lg border border-line bg-surface">
         {starters.map(row)}
       </ul>
       <h3 className="text-xs font-extrabold tracking-wide text-ink-muted uppercase">Substitutes</h3>

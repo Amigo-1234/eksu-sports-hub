@@ -28,11 +28,16 @@ export function MatchLengthForm({
   halfSeconds,
   etHalfSeconds,
   locked,
+  noAddedTime = false,
+  halftimeSeconds = null,
 }: {
   competitionId: string;
   halfSeconds: number;
   etHalfSeconds: number;
   locked: boolean;
+  /** Special rules: no added time / a timed half-time break. */
+  noAddedTime?: boolean;
+  halftimeSeconds?: number | null;
 }) {
   const [half, setHalf] = useState(formatDuration(halfSeconds));
   const [etHalf, setEtHalf] = useState(formatDuration(etHalfSeconds));
@@ -78,7 +83,11 @@ export function MatchLengthForm({
             </p>
             <p className="text-xs text-ink-muted">
               The operator clock runs in seconds. The public sees minute labels: 1st half 1&apos;–{lastMinute(h)}&apos;, 2nd half {Math.floor(h / 60) + 1}&apos;–
-              {lastMinute(2 * h)}&apos;, added time as {lastMinute(2 * h)}+1&apos;. Half-time lasts as long as the operator needs.
+              {lastMinute(2 * h)}&apos;
+              {noAddedTime ? ". No added time: each half ends at its regulation time." : `, added time as ${lastMinute(2 * h)}+1'.`}{" "}
+              {halftimeSeconds
+                ? `Half-time break: ${formatDuration(halftimeSeconds)} (the operator restarts play).`
+                : "Half-time lasts as long as the operator needs."}
             </p>
           </>
         ) : (

@@ -6,6 +6,7 @@
  */
 import type { Score } from "../types.ts";
 import {
+  activeSeconds,
   displayClock,
   pauseClock,
   resumeClock,
@@ -15,6 +16,7 @@ import {
 } from "./clock.ts";
 import { canRun, type OpCommand } from "./machine.ts";
 import type { OpEvent, OpEventType, OpLogEntry, OpMatchState, PauseReason, Side } from "./types.ts";
+import { formatCountdown, hasPlayerRules, suspensionSeconds } from "../rules/special.ts";
 
 export interface NewEvent {
   type: OpEventType;
@@ -26,6 +28,8 @@ export interface NewEvent {
   /** Minute captured when the operator recorded it (kept for replays). */
   minute?: number;
   addedTime?: number;
+  /** EXCLUSION: the referee's reason. */
+  reason?: string;
 }
 
 export type CommandInput =
@@ -76,13 +80,100 @@ export function computeScore(s: OpMatchState): Score {
 
 export interface PlayerStatus {
   yellow: boolean;
+  /** Out for the rest of the match (normal red card; special rules: excluded). */
   sentOff: boolean;
+  /** Normal: substituted off. Special rules: off the pitch now after a substitution. */
   subbedOff: boolean;
+  /** Came on at least once. */
   subbedOn: boolean;
+  /** Special rules only: the latest movement decides where the player is. */
+  lastMove?: "ON" | "OFF" | "RED" | "RETURN" | "EXCLUDED";
+  suspended?: boolean;
+  /** Active playing time of the suspension's incident (null: unknown → treated as served). */
+  suspendedAt?: number | null;
+  entries?: number;
+  exits?: number;
+  redCards?: number;
+}
+
+/** Seconds of a temporary suspension still to serve (0 when served or not suspended). */
+export function suspensionRemaining(s: OpMatchState, st: PlayerStatus | undefined, now: number): number {
+  const secs = suspensionSeconds(s.rules);
+  if (!st?.suspended || secs === null || st.suspendedAt == null) return 0;
+  return Math.max(0, st.suspendedAt + secs - activeSeconds(s.clock, now));
+}
+
+/** Special rules: event-sourced status (rolling substitutions, temporary red cards, exclusion). */
+function specialStatuses(s: OpMatchState, side: Side): Map<number, PlayerStatus> {
+  const map = new Map<number, PlayerStatus>();
+  const temporary = suspensionSeconds(s.rules) !== null;
+  const get = (n: number) => {
+    let p = map.get(n);
+    if (!p) {
+      p = { yellow: false, sentOff: false, subbedOff: false, subbedOn: false, suspended: false, suspendedAt: null, entries: 0, exits: 0, redCards: 0 };
+      map.set(n, p);
+    }
+    return p;
+  };
+  for (const e of activeEvents(s)) {
+    if (e.side !== side || e.shirt === null) {
+      if (e.side === side && e.type === "SUBSTITUTION" && e.shirtIn != null) {
+        const pin = get(e.shirtIn);
+        pin.lastMove = "ON";
+        pin.entries! += 1;
+        pin.subbedOn = true;
+      }
+      continue;
+    }
+    const p = get(e.shirt);
+    if (p.lastMove === "EXCLUDED") continue;
+    switch (e.type) {
+      case "YELLOW_CARD":
+        p.yellow = true;
+        break;
+      case "RED_CARD":
+      case "SECOND_YELLOW":
+        p.redCards! += 1;
+        if (temporary) {
+          p.lastMove = "RED";
+          p.suspended = true;
+          p.suspendedAt = e.activeAt ?? null;
+        } else {
+          p.lastMove = "EXCLUDED";
+          p.sentOff = true;
+        }
+        break;
+      case "SUSPENSION_RETURN":
+        p.lastMove = "RETURN";
+        p.suspended = false;
+        break;
+      case "EXCLUSION":
+        p.lastMove = "EXCLUDED";
+        p.sentOff = true;
+        p.suspended = false;
+        break;
+      case "SUBSTITUTION": {
+        p.lastMove = "OFF";
+        p.exits! += 1;
+        if (e.shirtIn != null) {
+          const pin = get(e.shirtIn);
+          if (pin.lastMove !== "EXCLUDED") {
+            pin.lastMove = "ON";
+            pin.entries! += 1;
+            pin.subbedOn = true;
+          }
+        }
+        break;
+      }
+    }
+  }
+  for (const p of map.values()) p.subbedOff = p.lastMove === "OFF";
+  return map;
 }
 
 /** Discipline/substitution status per shirt, from non-voided events. */
 export function playerStatuses(s: OpMatchState, side: Side): Map<number, PlayerStatus> {
+  if (hasPlayerRules(s.rules)) return specialStatuses(s, side);
   const map = new Map<number, PlayerStatus>();
   const get = (n: number) => {
     let p = map.get(n);
@@ -116,21 +207,26 @@ function validateEvent(s: OpMatchState, ev: NewEvent, now: number): string | nul
   const needsShirt = ev.type !== "GOAL" && ev.type !== "PENALTY_GOAL" && ev.type !== "OWN_GOAL";
 
   if (needsShirt && ev.shirt === null) return "Choose a shirt number";
-  if (st(ev.shirt)?.sentOff) return `No. ${ev.shirt} has already been sent off`;
-  if (st(ev.shirt)?.subbedOff) return `No. ${ev.shirt} has already been substituted off`;
+  if (hasPlayerRules(s.rules)) {
+    const problem = specialProblem(s, ev, st, now);
+    if (problem) return problem;
+  } else {
+    if (st(ev.shirt)?.sentOff) return `No. ${ev.shirt} has already been sent off`;
+    if (st(ev.shirt)?.subbedOff) return `No. ${ev.shirt} has already been substituted off`;
 
-  if (ev.type === "SECOND_YELLOW" && !st(ev.shirt)?.yellow) {
-    return `No. ${ev.shirt} has no yellow card yet — record a yellow instead`;
-  }
-  if (ev.type === "YELLOW_CARD" && st(ev.shirt)?.yellow) {
-    return `No. ${ev.shirt} already has a yellow — use Second yellow`;
-  }
-  if (ev.type === "SUBSTITUTION") {
-    if (ev.shirtIn == null) return "Choose the player coming on";
-    if (ev.shirtIn === ev.shirt) return "Player on and player off must be different";
-    const incoming = st(ev.shirtIn);
-    if (incoming?.subbedOff || incoming?.sentOff) return `No. ${ev.shirtIn} can't return to the pitch`;
-    if (incoming?.subbedOn) return `No. ${ev.shirtIn} is already on the pitch`;
+    if (ev.type === "SECOND_YELLOW" && !st(ev.shirt)?.yellow) {
+      return `No. ${ev.shirt} has no yellow card yet — record a yellow instead`;
+    }
+    if (ev.type === "YELLOW_CARD" && st(ev.shirt)?.yellow) {
+      return `No. ${ev.shirt} already has a yellow — use Second yellow`;
+    }
+    if (ev.type === "SUBSTITUTION") {
+      if (ev.shirtIn == null) return "Choose the player coming on";
+      if (ev.shirtIn === ev.shirt) return "Player on and player off must be different";
+      const incoming = st(ev.shirtIn);
+      if (incoming?.subbedOff || incoming?.sentOff) return `No. ${ev.shirtIn} can't return to the pitch`;
+      if (incoming?.subbedOn) return `No. ${ev.shirtIn} is already on the pitch`;
+    }
   }
 
   const dup = activeEvents(s).find(
@@ -142,6 +238,56 @@ function validateEvent(s: OpMatchState, ev: NewEvent, now: number): string | nul
       now - e.recordedAt < DUPLICATE_WINDOW_MS,
   );
   if (dup) return "This looks like a duplicate of the event you just recorded";
+  return null;
+}
+
+/** Special rules: mirrors private.sr_check_event (the server stays authoritative). */
+function specialProblem(
+  s: OpMatchState,
+  ev: NewEvent,
+  st: (n: number | null | undefined) => PlayerStatus | undefined,
+  now: number,
+): string | null {
+  const p = st(ev.shirt);
+  const no = `No. ${ev.shirt}`;
+  if (p?.sentOff) return `${no} has been excluded from the match`;
+  const suspended = !!p?.suspended;
+  const off = p?.lastMove === "OFF" || p?.lastMove === "RED";
+  switch (ev.type) {
+    case "GOAL":
+    case "PENALTY_GOAL":
+    case "OWN_GOAL":
+    case "PENALTY_MISS":
+      if (ev.shirt !== null && suspended) return `${no} is serving a suspension`;
+      if (ev.shirt !== null && off) return `${no} is not on the pitch`;
+      return null;
+    case "YELLOW_CARD":
+      return p?.yellow ? `${no} already has a yellow — use Second yellow` : null;
+    case "SECOND_YELLOW":
+      if (!p?.yellow) return `${no} has no yellow card yet — record a yellow instead`;
+      return p?.lastMove === "OFF" ? `${no} is not on the pitch` : null;
+    case "RED_CARD":
+      return p?.lastMove === "OFF" ? `${no} is not on the pitch — use Exclude for misconduct off the pitch` : null;
+    case "SUSPENSION_RETURN": {
+      if (!suspended) return `${no} is not serving a suspension`;
+      const left = suspensionRemaining(s, p, now);
+      return left > 0 ? `${no} still has ${formatCountdown(left)} to serve` : null;
+    }
+    case "EXCLUSION":
+      return (ev.reason ?? "").trim().length < 3 ? "Give the reason for the exclusion" : null;
+    case "SUBSTITUTION": {
+      if (ev.shirtIn == null) return "Choose the player coming on";
+      if (ev.shirtIn === ev.shirt) return "Player on and player off must be different";
+      if (suspended) return `${no} is serving a suspension and cannot be replaced`;
+      if (off) return `${no} is not on the pitch`;
+      const incoming = st(ev.shirtIn);
+      if (incoming?.sentOff) return `No. ${ev.shirtIn} has been excluded from the match`;
+      if (incoming?.suspended) return `No. ${ev.shirtIn} is serving a suspension`;
+      if (incoming?.lastMove === "ON" || incoming?.lastMove === "RETURN") return `No. ${ev.shirtIn} is already on the pitch`;
+      if (!s.rules?.rollingSubs && (incoming?.exits ?? 0) > 0) return `No. ${ev.shirtIn} can't return to the pitch`;
+      return null;
+    }
+  }
   return null;
 }
 
@@ -194,6 +340,7 @@ export function applyCommand(state: OpMatchState, input: CommandInput, ctx: Appl
       return { ok: true, state: next({ clock: resumeClock(state.clock, now), log: log("RESUMED") }) };
 
     case "SET_STOPPAGE": {
+      if (state.clock.noAddedTime && input.minutes > 0) return { ok: false, reason: "There is no added time in this competition" };
       const minutes = Math.max(0, Math.min(30, Math.round(input.minutes)));
       return {
         ok: true,
@@ -221,6 +368,8 @@ export function applyCommand(state: OpMatchState, input: CommandInput, ctx: Appl
         recordedAt: now,
         voided: null,
         intentId: ctx.intentId,
+        ...(state.rules ? { activeAt: Math.floor(activeSeconds(state.clock, now)) } : {}),
+        ...(input.event.reason ? { reason: input.event.reason.trim() } : {}),
       };
       return { ok: true, state: next({ events: [...state.events, event] }), eventId: event.id };
     }

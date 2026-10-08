@@ -3,6 +3,7 @@
  * data source and the browser realtime layer.
  */
 import type { ID, MatchEvent, MatchEventType, MatchStats, MatchStatus, PublicClock, PublicLineup, TeamMatchStats } from "../../types";
+import { parseSpecialRules } from "../../rules/special.ts";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- RPC payloads are mapped explicitly below. */
 
@@ -27,6 +28,8 @@ const EVENT: Record<string, MatchEventType> = {
   SECOND_YELLOW: "RED_CARD", // shown as the resulting red card
   RED_CARD: "RED_CARD",
   SUBSTITUTION: "SUBSTITUTION",
+  SUSPENSION_RETURN: "SUSPENSION_RETURN",
+  EXCLUSION: "EXCLUSION",
 };
 
 /** Public clock fields → UI clock (the same maths as the operator console). */
@@ -43,6 +46,8 @@ export function toPublicClock(m: any): PublicClock | null {
     stoppageSeconds: m.stoppage_seconds ?? 0,
     ...(m.half_seconds ? { halfSeconds: m.half_seconds } : {}),
     ...(m.et_half_seconds ? { etHalfSeconds: m.et_half_seconds } : {}),
+    ...(parseSpecialRules(m.special_rules) ? { rules: parseSpecialRules(m.special_rules)! } : {}),
+    ...(m.active_base_seconds != null ? { activeBaseSeconds: Number(m.active_base_seconds) } : {}),
   };
 }
 
@@ -101,6 +106,9 @@ export function toLineups(raw: any): PublicLineup[] {
       sentOff: !!p.sent_off,
       booked: !!p.booked,
       goals: Number(p.goals ?? 0),
+      ...(p.suspended ? { suspended: true, suspensionEndsActive: num(p.suspension_ends_active) } : {}),
+      ...(p.excluded ? { excluded: true } : {}),
+      ...(p.entries != null ? { entries: Number(p.entries), exits: Number(p.exits ?? 0), redCards: Number(p.red_cards ?? 0) } : {}),
     })),
   }));
 }

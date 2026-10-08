@@ -55,9 +55,21 @@ export interface ClockState extends MatchDurations {
   accumulatedPauseSeconds: number;
   /** Announced stoppage for this period. Display only — never alters elapsed time. */
   stoppageSeconds: number;
+  /** Special rules: no added time — the display stops at the regulation end of the period. */
+  noAddedTime?: boolean;
+  /** Active playing time (s) of the periods already ended (server: active_base_seconds). */
+  activeBaseSeconds?: number;
 }
 
-export const initialClock = (d: MatchDurations = STANDARD_DURATIONS): ClockState => ({
+/** Settings a clock carries from one period to the next. */
+type Carry = MatchDurations & Partial<Pick<ClockState, "noAddedTime" | "activeBaseSeconds">>;
+const carry = (d: Carry) => ({
+  ...(d.noAddedTime ? { noAddedTime: true } : {}),
+  ...(d.activeBaseSeconds !== undefined ? { activeBaseSeconds: d.activeBaseSeconds } : {}),
+});
+
+export const initialClock = (d: Carry = STANDARD_DURATIONS): ClockState => ({
+  ...carry(d),
   halfSeconds: d.halfSeconds,
   etHalfSeconds: d.etHalfSeconds,
   period: null,
@@ -70,8 +82,9 @@ export const initialClock = (d: MatchDurations = STANDARD_DURATIONS): ClockState
   stoppageSeconds: 0,
 });
 
-export function startPeriodClock(period: 1 | 2, now: number, d: MatchDurations = STANDARD_DURATIONS): ClockState {
+export function startPeriodClock(period: 1 | 2, now: number, d: Carry = STANDARD_DURATIONS): ClockState {
   return {
+    ...carry(d),
     halfSeconds: d.halfSeconds,
     etHalfSeconds: d.etHalfSeconds,
     period,
@@ -102,7 +115,13 @@ export function resumeClock(c: ClockState, now: number): ClockState {
 /** Freeze the clock at the end of a period (folds any open pause in first). */
 export function stopClock(c: ClockState, now: number): ClockState {
   const resumed = resumeClock(c, now);
-  return { ...resumed, clockRunning: false, periodEndedAt: now };
+  const played = c.periodEndedAt === null ? elapsedSeconds(resumed, now) - c.periodOffsetSeconds : 0;
+  return {
+    ...resumed,
+    clockRunning: false,
+    periodEndedAt: now,
+    ...(c.activeBaseSeconds !== undefined ? { activeBaseSeconds: c.activeBaseSeconds + Math.max(0, played) } : {}),
+  };
 }
 
 export function setStoppage(c: ClockState, seconds: number): ClockState {
@@ -130,13 +149,18 @@ export interface ClockDisplay {
   /** Announced stoppage in whole minutes (0 if none). */
   announcedMinutes: number;
   paused: boolean;
+  /** The regulation time of the period has been reached (the operator ends the half). */
+  timeUp: boolean;
 }
 
 export function displayClock(c: ClockState, now: number): ClockDisplay {
-  const elapsed = elapsedSeconds(c, now);
+  const regulationEnd = c.periodOffsetSeconds + periodLengthSeconds(c.period, c);
+  const timeUp = c.period !== null && elapsedSeconds(c, now) >= regulationEnd;
+  // No added time: the clock shown stops at the regulation end (8:00, 16:00).
+  const elapsed = c.noAddedTime ? Math.min(elapsedSeconds(c, now), regulationEnd) : elapsedSeconds(c, now);
   // Rounded up: a 7:30 half ends in the 8th minute (added time from 8:00 → 8+1').
-  const regulationEndMinute = Math.ceil((c.periodOffsetSeconds + periodLengthSeconds(c.period, c)) / 60);
-  const rawMinute = Math.floor(elapsed / 60) + 1;
+  const regulationEndMinute = Math.ceil(regulationEnd / 60);
+  const rawMinute = Math.min(Math.floor(elapsed / 60) + 1, c.noAddedTime ? regulationEndMinute : Infinity);
   const over = rawMinute > regulationEndMinute;
   const minute = over ? regulationEndMinute : rawMinute;
   const addedTime = over ? rawMinute - regulationEndMinute : 0;
@@ -150,5 +174,17 @@ export function displayClock(c: ClockState, now: number): ClockDisplay {
     mmss: `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`,
     announcedMinutes: Math.round(c.stoppageSeconds / 60),
     paused: c.pausedAt !== null,
+    timeUp,
   };
+}
+
+/**
+ * Active playing time (s) at `now`: ended periods in full plus the running
+ * period, pauses and half-time excluded — the clock a temporary suspension
+ * is served on (mirrors private.active_seconds_now).
+ */
+export function activeSeconds(c: ClockState, now: number): number {
+  const base = c.activeBaseSeconds ?? 0;
+  if (c.periodStartedAt === null || c.periodEndedAt !== null) return base;
+  return base + Math.max(0, elapsedSeconds(c, now) - c.periodOffsetSeconds);
 }

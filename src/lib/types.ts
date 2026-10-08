@@ -5,6 +5,7 @@
  * Supabase-backed data source can return the same objects (rows + joins)
  * without the UI changing. All IDs are stable strings.
  */
+import type { RegulationsText, SpecialRules } from "./rules/special";
 
 export type ID = string;
 
@@ -34,6 +35,10 @@ export interface Competition {
   format: CompetitionFormat;
   /** Set only for short formats: length of each half in seconds (e.g. 450 = 7:30). */
   halfSeconds?: number;
+  /** Special competition rules (absent: normal football). */
+  specialRules?: SpecialRules | null;
+  /** Public Rules & Regulations text (special-rules competitions only). */
+  regulations?: RegulationsText | null;
   category: CompetitionCategory;
   description: string;
   /** Team IDs participating in the competition. */
@@ -124,6 +129,10 @@ export interface PublicClock {
   /** Half lengths of this match in seconds (45:00 / 15:00 unless the competition sets a short format). */
   halfSeconds?: number;
   etHalfSeconds?: number;
+  /** Special rules this match is played under (absent: normal football). */
+  rules?: SpecialRules;
+  /** Active playing time of the periods already ended (suspension countdowns). */
+  activeBaseSeconds?: number;
 }
 
 export type MatchEventType =
@@ -133,7 +142,11 @@ export type MatchEventType =
   | "PENALTY_MISS"
   | "YELLOW_CARD"
   | "RED_CARD"
-  | "SUBSTITUTION";
+  | "SUBSTITUTION"
+  /** Special rules only: return after a temporary red-card suspension. */
+  | "SUSPENSION_RETURN"
+  /** Special rules only: permanent exclusion. */
+  | "EXCLUSION";
 
 /**
  * Player reference. Demo data only carries shirt numbers — no names — so we
@@ -259,6 +272,14 @@ export interface PublicLineupPlayer {
   offMinute: number | null;
   offExtra: number | null;
   sentOff: boolean;
+  /** Special rules: serving a temporary suspension (ends at this active-play second). */
+  suspended?: boolean;
+  suspensionEndsActive?: number | null;
+  excluded?: boolean;
+  /** Times this player came on / went off (rolling substitutions). */
+  entries?: number;
+  exits?: number;
+  redCards?: number;
   booked: boolean;
   goals: number;
 }

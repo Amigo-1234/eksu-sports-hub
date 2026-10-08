@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
-    "test:operator": "node --experimental-strip-types --no-warnings --test tests/operator-engine.test.ts tests/match-duration.test.ts tests/operator-reconcile.test.ts tests/realtime-sync.test.ts tests/lineup.test.ts",
+    "test:operator": "node --experimental-strip-types --no-warnings --test tests/operator-engine.test.ts tests/match-duration.test.ts tests/special-rules.test.ts tests/operator-reconcile.test.ts tests/realtime-sync.test.ts tests/lineup.test.ts",
     "dev:users": "node --env-file-if-exists=.env.local scripts/dev-users.mjs",
     "test:backend": "node --env-file-if-exists=.env.local --test tests/backend/api.test.mjs",
     "test:db": "supabase test db",

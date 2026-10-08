@@ -100,6 +100,8 @@ export interface CompetitionDetail {
   /** Half lengths in seconds (2700 / 900 = normal football). */
   half_seconds: number;
   et_half_seconds: number;
+  /** Special competition rules (null: normal football). */
+  special_rules?: Record<string, unknown> | null;
   stages: Stage[];
   entries: Entry[];
   match_count: number;

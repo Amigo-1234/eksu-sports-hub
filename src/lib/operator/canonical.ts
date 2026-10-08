@@ -4,6 +4,7 @@
  */
 import { ET_HALF_SECONDS, HALF_SECONDS, initialClock, type ClockState, type MatchDurations } from "./clock.ts";
 import type { OpEvent, OpEventType, OpLogEntry, OpMatchState, OpPhase } from "./types.ts";
+import { parseSpecialRules } from "../rules/special.ts";
 
 /** Shape returned by the match RPCs (see supabase/migrations/*_match_rpc.sql). */
 export interface CanonicalMatch {
@@ -26,6 +27,10 @@ export interface CanonicalMatch {
   accumulated_pause_seconds: number | string;
   stoppage_seconds: number;
   active_operator_id?: string | null;
+  /** Special competition rules (absent / null: normal football). */
+  special_rules?: Record<string, unknown> | null;
+  /** Active playing time of the periods already ended (s). */
+  active_base_seconds?: number | null;
 }
 
 export interface CanonicalEvent {
@@ -43,6 +48,8 @@ export interface CanonicalEvent {
   recorded_at: string;
   voided_at: string | null;
   void_reason: string | null;
+  /** Active playing time (s) when it happened (null: no exact clock, e.g. an admin correction). */
+  active_at?: number | null;
 }
 
 export interface CanonicalLog {
@@ -110,7 +117,11 @@ export function durationsFromCanonical(m: Pick<CanonicalMatch, "half_seconds" | 
 }
 
 export function clockFromCanonical(m: CanonicalMatch): ClockState {
-  const d = durationsFromCanonical(m);
+  const d = {
+    ...durationsFromCanonical(m),
+    ...(parseSpecialRules(m.special_rules)?.noAddedTime ? { noAddedTime: true } : {}),
+    ...(m.active_base_seconds != null ? { activeBaseSeconds: Number(m.active_base_seconds) } : {}),
+  };
   if (m.current_period === null) return initialClock(d);
   return {
     ...d,
@@ -140,6 +151,7 @@ export function fromCanonical(c: CanonicalState): OpMatchState {
     voided: e.voided_at ? { at: Date.parse(e.voided_at), reason: e.void_reason ?? "" } : null,
     intentId: null,
     seq: e.seq,
+    ...(e.active_at !== undefined ? { activeAt: e.active_at } : {}),
   }));
   const log: OpLogEntry[] = (c.log ?? [])
     .filter((l) => LOG_KINDS.has(l.action as OpLogEntry["kind"]))
@@ -149,5 +161,6 @@ export function fromCanonical(c: CanonicalState): OpMatchState {
       kind: l.action as OpLogEntry["kind"],
       ...(typeof l.detail === "string" ? { detail: l.detail } : {}),
     }));
-  return { matchId: m.id, phase: PHASE[m.status], clock: clockFromCanonical(m), events, log, version: m.seq };
+  const rules = parseSpecialRules(m.special_rules);
+  return { matchId: m.id, phase: PHASE[m.status], clock: clockFromCanonical(m), events, log, version: m.seq, ...(rules ? { rules } : {}) };
 }

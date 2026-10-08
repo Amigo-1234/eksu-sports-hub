@@ -3,12 +3,13 @@ import { TeamCrest } from "@/components/team/TeamCrest";
 import { BallIcon, CardIcon, ShirtIcon } from "@/components/ui/icons";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { currentPitch, startingPitch } from "@/lib/lineup";
-import type { MatchDetail, PublicLineup, PublicLineupPlayer, Team } from "@/lib/types";
+import type { MatchDetail, PublicClock, PublicLineup, PublicLineupPlayer, Team } from "@/lib/types";
+import { SuspensionBadge } from "./RulesClock";
 import { DemoDataNote } from "./MatchPanels";
 
 const min = (m: number | null, extra: number | null) => (m === null ? "" : extra ? `${m}+${extra}'` : `${m}'`);
 
-function PlayerRow({ p }: { p: PublicLineupPlayer }) {
+function PlayerRow({ p, clock }: { p: PublicLineupPlayer; clock?: PublicClock | null }) {
   return (
     <li className="flex min-h-10 items-center gap-2.5 px-3 py-1.5 text-sm">
       <span className="w-6 shrink-0 text-right font-display text-base font-bold tabular-nums text-ink-muted">{p.shirtNumber}</span>
@@ -41,7 +42,21 @@ function PlayerRow({ p }: { p: PublicLineupPlayer }) {
         {p.sentOff && (
           <span>
             <CardIcon size={14} color="red" />
-            <span className="sr-only">Sent off</span>
+            <span className="sr-only">{p.excluded ? "Excluded" : "Sent off"}</span>
+          </span>
+        )}
+        {!p.sentOff && (p.redCards ?? 0) > 0 && (
+          <span>
+            <CardIcon size={14} color="red" />
+            {(p.redCards ?? 0) > 1 && <span aria-hidden="true">×{p.redCards}</span>}
+            <span className="sr-only">{p.redCards} temporary red card{(p.redCards ?? 0) > 1 ? "s" : ""}</span>
+          </span>
+        )}
+        {p.excluded && <span className="rounded bg-ink px-1.5 py-px text-[11px] font-bold text-white">Excluded</span>}
+        {p.suspended && <SuspensionBadge clock={clock} endsActive={p.suspensionEndsActive} />}
+        {(p.entries ?? 0) > 1 && (
+          <span className="font-semibold text-win" title="Times this player came on (rolling substitutions)">
+            ↑×{p.entries}<span className="sr-only"> entries</span>
           </span>
         )}
         {p.subbedOn && (
@@ -73,10 +88,10 @@ function TeamSheet({ team, lineup, match }: { team: Team; lineup: PublicLineup |
   }
   const started = match.score !== null;
   const events = [...match.events].sort((a, b) => (a.seq ?? 0) - (b.seq ?? 0));
-  const onPitch = started ? currentPitch(lineup, team.id, events) : startingPitch(lineup);
+  const onPitch = started ? currentPitch(lineup, team.id, events, !!match.clock?.rules?.redCardSuspensionSeconds) : startingPitch(lineup);
   const starters = lineup.players.filter((p) => p.role === "STARTER");
   const subs = lineup.players.filter((p) => p.role === "SUBSTITUTE");
-  const startLabel = starters.length === 11 ? "Starting XI" : "Starting line-up";
+  const startLabel = starters.length === 11 ? "Starting XI" : starters.length === 6 ? "Starting six" : "Starting line-up";
   return (
     <section aria-label={heading} className="min-w-0 space-y-3">
       <TeamHeader team={team} formation={lineup.formation} />
@@ -88,7 +103,7 @@ function TeamSheet({ team, lineup, match }: { team: Team; lineup: PublicLineup |
         <h3 className="border-b border-line px-3 py-2 text-xs font-bold tracking-wide text-ink-muted uppercase">{startLabel}</h3>
         <ol className="divide-y divide-line">
           {starters.map((p) => (
-            <PlayerRow key={p.shirtNumber} p={p} />
+            <PlayerRow key={p.shirtNumber} p={p} clock={match.clock} />
           ))}
         </ol>
         <h3 className="border-y border-line px-3 py-2 text-xs font-bold tracking-wide text-ink-muted uppercase">Substitutes</h3>
@@ -97,7 +112,7 @@ function TeamSheet({ team, lineup, match }: { team: Team; lineup: PublicLineup |
         ) : (
           <ol className="divide-y divide-line">
             {subs.map((p) => (
-              <PlayerRow key={p.shirtNumber} p={p} />
+              <PlayerRow key={p.shirtNumber} p={p} clock={match.clock} />
             ))}
           </ol>
         )}

@@ -25,6 +25,7 @@ import { TakeOverBanner } from "./TakeOverBanner";
 import { QueueBanner } from "./QueueBanner";
 import { Scoreboard } from "./Scoreboard";
 import { Sheet } from "./Sheet";
+import { SuspensionsPanel } from "./SuspensionsPanel";
 
 const TITLES: Record<SheetKind, string> = {
   goal: "Goal",
@@ -96,6 +97,7 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
       <OpAudience matchId={matchId} />
       <QueueBanner />
       {!completed && !inControl && <TakeOverBanner matchId={matchId} />}
+      {!completed && <SuspensionsPanel seed={seed} state={state} now={now} inControl={inControl} />}
 
       {completed ? (
         <section className="mt-4 rounded-2xl border-[3px] border-ink p-4 text-center" aria-live="polite">

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { TeamCrest } from "@/components/team/TeamCrest";
 import { displayClock } from "@/lib/operator/clock";
+import { formatCountdown, halftimeRemaining } from "@/lib/rules/special";
 import { computeScore } from "@/lib/operator/engine";
 import { isLivePhase, PHASE_LABEL } from "@/lib/operator/machine";
 import type { AssignmentSeed, OpMatchState, PauseReason } from "@/lib/operator/types";
@@ -20,6 +21,9 @@ export function Scoreboard({ seed, state, now }: { seed: AssignmentSeed; state: 
   const clock = running && now ? displayClock(state.clock, now) : null;
   const pauseReason = [...state.log].reverse().find((l) => l.kind === "PAUSED")?.detail as PauseReason | undefined;
   const live = isLivePhase(state.phase);
+  // Special rules: no added time → prompt at the regulation end; a timed half-time break.
+  const timeUp = !!clock?.timeUp && !!state.clock.noAddedTime;
+  const breakLeft = state.phase === "HALF_TIME" && now ? halftimeRemaining(state.rules, state.clock.periodEndedAt, now) : null;
 
   return (
     <section aria-label="Match state" className="sticky top-0 z-30 -mx-3 border-b-2 border-ink bg-surface px-3 pt-2 pb-2.5">
@@ -80,6 +84,18 @@ export function Scoreboard({ seed, state, now }: { seed: AssignmentSeed; state: 
         )}
       </div>
 
+      {timeUp && (
+        <p role="status" className="mt-2 rounded-lg bg-live px-3 py-2 text-center text-sm font-extrabold tracking-wide text-white uppercase">
+          ⏱ Time — {state.phase === "FIRST_HALF" ? "end the half" : "end the match"} on the referee&apos;s whistle · no added time
+        </p>
+      )}
+      {breakLeft !== null && (
+        <p role="status" className={`mt-2 rounded-lg px-3 py-2 text-center text-sm font-extrabold tracking-wide uppercase ${breakLeft > 0 ? "bg-accent-400 text-ink" : "bg-win text-white"}`}>
+          {breakLeft > 0
+            ? <>Half-time break · <span className="tabular-nums">{formatCountdown(breakLeft)}</span></>
+            : "Break over — start the 2nd half when the referee signals"}
+        </p>
+      )}
       {clock?.paused && (
         <p role="status" className="mt-2 rounded-lg bg-accent-400 px-3 py-2 text-center text-sm font-extrabold tracking-wide text-ink uppercase">
           ❚❚ Clock paused{pauseReason ? ` · ${PAUSE_LABEL[pauseReason]}` : ""}

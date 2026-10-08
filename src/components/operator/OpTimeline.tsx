@@ -3,7 +3,7 @@
 import type { Intent, IntentState } from "@/lib/operator/queue";
 import type { AssignmentSeed, OpEvent, OpLogEntry, OpMatchState, PauseReason } from "@/lib/operator/types";
 import { CardGlyph } from "./CardGlyph";
-import { EVENT_LABEL, PAUSE_LABEL } from "./labels";
+import { eventLabel, PAUSE_LABEL } from "./labels";
 
 type Sync = IntentState | "VOIDED";
 
@@ -21,6 +21,8 @@ function EventIcon({ e }: { e: OpEvent }) {
   if (e.type === "SECOND_YELLOW") return <CardGlyph kind="SECOND_YELLOW" size={26} />;
   if (e.type === "SUBSTITUTION") return <span className="text-xl font-black">⇅</span>;
   if (e.type === "PENALTY_MISS") return <span className="text-lg font-black">✕</span>;
+  if (e.type === "SUSPENSION_RETURN") return <span className="text-xl font-black text-win">↩</span>;
+  if (e.type === "EXCLUSION") return <span className="grid size-7 place-items-center rounded bg-live text-xs font-black text-white">EX</span>;
   return <span className="text-xl">⚽︎</span>;
 }
 
@@ -84,13 +86,13 @@ export function OpTimeline({ seed, state, intents }: { seed: AssignmentSeed; sta
             <div className="min-w-0">
               <div className={e.voided ? "line-through decoration-2" : undefined}>
               <p className="truncate text-sm font-extrabold">
-                {EVENT_LABEL[e.type]} · {team.code}
+                {eventLabel(e, state.rules)} · {team.code}
                 <span className="font-semibold text-ink-muted"> ({e.side === "home" ? "H" : "A"})</span>
               </p>
               <p className="truncate text-xs font-semibold text-ink-muted">
                 {e.type === "SUBSTITUTION"
                   ? `↑ No. ${e.shirtIn ?? "?"} on · ↓ No. ${e.shirt ?? "?"} off`
-                  : e.shirt !== null ? `No. ${e.shirt}${e.type === "OWN_GOAL" ? " (own goal)" : ""}` : "Player not recorded"}
+                  : e.shirt !== null ? `No. ${e.shirt}${e.type === "OWN_GOAL" ? " (own goal)" : ""}${e.reason ? ` · ${e.reason}` : ""}` : "Player not recorded"}
               </p>
               </div>
               {e.voided && <p className="text-xs font-bold text-ink">{e.voided.reason}</p>}

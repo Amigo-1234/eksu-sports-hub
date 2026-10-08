@@ -1,4 +1,5 @@
-import type { OpEventType, PauseReason } from "@/lib/operator/types";
+import type { OpEvent, OpEventType, PauseReason } from "@/lib/operator/types";
+import type { SpecialRules } from "@/lib/rules/special";
 
 export const EVENT_LABEL: Record<OpEventType, string> = {
   GOAL: "Goal",
@@ -9,7 +10,16 @@ export const EVENT_LABEL: Record<OpEventType, string> = {
   RED_CARD: "Red card",
   SUBSTITUTION: "Substitution",
   PENALTY_MISS: "Penalty missed",
+  SUSPENSION_RETURN: "Returned after suspension",
+  EXCLUSION: "Excluded (permanent)",
 };
+
+/** Event label under the match's rules: a temporary red card says so. */
+export function eventLabel(e: Pick<OpEvent, "type">, rules: SpecialRules | null | undefined): string {
+  const secs = rules?.redCardSuspensionSeconds;
+  if (secs && (e.type === "RED_CARD" || e.type === "SECOND_YELLOW")) return `${EVENT_LABEL[e.type]} · ${secs} s suspension`;
+  return EVENT_LABEL[e.type];
+}
 
 export const PAUSE_REASONS: { value: PauseReason; label: string }[] = [
   { value: "INJURY", label: "Injury" },

@@ -66,6 +66,7 @@ function toRpc(intent: Intent): { fn: string; args: Record<string, unknown> } {
           p_related_player_id: e.type === "SUBSTITUTION" ? playerId(intent.matchId, e.side, e.shirtIn) : null,
           p_client_ts: new Date(intent.clientTimestamp).toISOString(),
           p_client_queued: !!intent.queuedOffline || intent.attempts > 1,
+          ...(e.reason ? { p_payload: { reason: e.reason } } : {}),
         },
       };
     }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { operatorActions } from "@/lib/operator/actions";
 import { playerStatuses } from "@/lib/operator/engine";
+import { hasPlayerRules } from "@/lib/rules/special";
 import type { AssignmentSeed, OpMatchState, Side } from "@/lib/operator/types";
 import { ChosenTeam, ConfirmButton, ErrorNote, ShirtGrid, TeamPicker } from "../pickers";
 import { useSubmit } from "./useSubmit";
@@ -27,12 +28,19 @@ export function SubFlow({
 
   const team = side === "home" ? homeTeam : awayTeam;
   const statuses = playerStatuses(state, side);
+  const special = hasPlayerRules(state.rules);
+  const rolling = !!state.rules?.rollingSubs;
   const reset = () => { setSide(null); setOff(null); setOn(null); setError(null); };
 
   return (
     <div>
       <ChosenTeam team={team} side={side} label="Substitution" onChange={reset} />
       <ErrorNote message={error} />
+      {rolling && (
+        <p className="mb-3 rounded-lg bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">
+          Rolling substitutions: unlimited changes, and players who went off may come back on. A suspended player cannot be replaced.
+        </p>
+      )}
 
       <div className="mb-4 grid grid-cols-2 gap-2" aria-live="polite">
         <button
@@ -62,7 +70,7 @@ export function SubFlow({
           value={off}
           onChange={setOff}
           statuses={statuses}
-          unavailable={(_, s) => (s?.sentOff ? "Sent off" : s?.subbedOff ? "Off" : null)}
+          unavailable={(_, s) => (special ? (s?.sentOff ? "Excluded" : s?.suspended ? "Susp." : null) : s?.sentOff ? "Sent off" : s?.subbedOff ? "Off" : null)}
           scope="onField"
         />
       ) : (
@@ -73,8 +81,12 @@ export function SubFlow({
           value={on}
           onChange={setOn}
           statuses={statuses}
-          unavailable={(n, s) => (n === off ? "Going off" : s?.subbedOff || s?.sentOff ? "Used" : s?.subbedOn ? "On" : null)}
+          unavailable={(n, s) =>
+            n === off ? "Going off"
+            : special ? (s?.sentOff ? "Excluded" : s?.suspended ? "Susp." : null)
+            : s?.subbedOff || s?.sentOff ? "Used" : s?.subbedOn ? "On" : null}
           scope="bench"
+          rolling={rolling}
         />
       )}
 

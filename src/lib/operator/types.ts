@@ -7,6 +7,7 @@
  */
 import type { MatchDetail } from "../types.ts";
 import type { ClockState } from "./clock.ts";
+import type { SpecialRules } from "../rules/special.ts";
 
 export type Side = "home" | "away";
 
@@ -29,7 +30,11 @@ export type OpEventType =
   | "RED_CARD"
   | "SUBSTITUTION"
   /** Recorded by the backend model; never changes the score. */
-  | "PENALTY_MISS";
+  | "PENALTY_MISS"
+  /** Special rules only: operator-approved return after a temporary red-card suspension. */
+  | "SUSPENSION_RETURN"
+  /** Special rules only: permanent exclusion for serious or repeated misconduct (with a reason). */
+  | "EXCLUSION";
 
 /** Network/sync state of an event, mirrored from its intent. */
 export type SyncState = "PENDING" | "SENDING" | "CONFIRMED" | "FAILED";
@@ -54,6 +59,10 @@ export interface OpEvent {
   intentId: string | null;
   /** Server-assigned order (absent until confirmed). */
   seq?: number;
+  /** Active playing time (s) when it happened — the clock suspensions are served on. */
+  activeAt?: number | null;
+  /** EXCLUSION: the referee's reason (audited). */
+  reason?: string;
 }
 
 export type PauseReason = "INJURY" | "WEATHER" | "CROWD" | "TECHNICAL" | "OTHER";
@@ -83,6 +92,8 @@ export interface OpMatchState {
   log: OpLogEntry[];
   /** Bumped on every change; lets the store detect stale writes. */
   version: number;
+  /** Special competition rules this match is played under (absent: normal football). */
+  rules?: SpecialRules | null;
 }
 
 export type AssignmentRole = "PRIMARY" | "BACKUP";

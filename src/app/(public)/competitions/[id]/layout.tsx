@@ -14,6 +14,8 @@ export default async function CompetitionLayout({ children, params }: LayoutProp
     { href: `${base}/fixtures`, label: "Fixtures" },
     { href: `${base}/results`, label: "Results" },
     ...(competition.format === "league" ? [{ href: `${base}/table`, label: "Table" }] : []),
+    // Special-rules competitions only: their official Rules & Regulations.
+    ...(competition.regulations ? [{ href: `${base}/rules`, label: "Rules" }] : []),
   ];
 
   return (

@@ -102,13 +102,15 @@ export function ActionPad({
         </button>
         <button
           type="button"
-          disabled={!available.has("SET_STOPPAGE")}
+          disabled={!available.has("SET_STOPPAGE") || !!state.clock.noAddedTime}
           onClick={() => onOpen("stoppage")}
           className="flex min-h-16 flex-col items-center justify-center rounded-xl border-2 border-ink bg-surface leading-tight disabled:border-line disabled:text-ink-faint"
         >
           <span className="text-[13px] font-black whitespace-nowrap uppercase">+ Stoppage</span>
           <span className="text-[11px] font-semibold">
-            {state.clock.stoppageSeconds ? `+${Math.round(state.clock.stoppageSeconds / 60)} set` : "Announce"}
+            {state.clock.noAddedTime
+              ? "No added time"
+              : state.clock.stoppageSeconds ? `+${Math.round(state.clock.stoppageSeconds / 60)} set` : "Announce"}
           </span>
         </button>
         {available.has("RESUME") ? (

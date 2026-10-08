@@ -18,16 +18,31 @@ export type ConsoleSquads = { home: ConsolePlayer[]; away: ConsolePlayer[] };
 
 /** On the pitch now: started or came on, and neither substituted off nor sent off. */
 export function isOnField(p: ConsolePlayer, s: PlayerStatus | undefined): boolean {
-  if (s?.sentOff || s?.subbedOff) return false;
+  if (s?.lastMove !== undefined) {
+    // Special rules (rolling substitutions / temporary red cards): the latest movement decides.
+    return s.lastMove === "ON" || s.lastMove === "RETURN";
+  }
+  if (s?.sentOff || s?.subbedOff || s?.suspended) return false;
   if (p.role === null) return true; // no line-up: unknown, offer everyone
   return p.role === "STARTER" || !!s?.subbedOn;
 }
 
-/** Available to come on: a named substitute who has not entered or been dismissed. */
-export function isAvailableSub(p: ConsolePlayer, s: PlayerStatus | undefined): boolean {
+/**
+ * Available to come on. Normal football: a named substitute who has not
+ * entered or been dismissed. Rolling substitutions: anyone in the line-up who
+ * is off the pitch and neither suspended nor excluded (players may return).
+ */
+export function isAvailableSub(p: ConsolePlayer, s: PlayerStatus | undefined, rolling = false): boolean {
+  if (rolling) {
+    if (s?.sentOff || s?.suspended) return false;
+    return !isOnField(p, s);
+  }
   if (s?.sentOff || s?.subbedOff || s?.subbedOn) return false;
   return p.role === null || p.role === "SUBSTITUTE";
 }
+
+/** Special rules: serving a temporary red-card suspension. */
+export const isSuspended = (s: PlayerStatus | undefined): boolean => !!s?.suspended;
 
 export function hasLineup(players: ConsolePlayer[]): boolean {
   return players.some((p) => p.role !== null);

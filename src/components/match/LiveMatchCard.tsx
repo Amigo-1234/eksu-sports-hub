@@ -19,6 +19,8 @@ const LAST_EVENT: Record<MatchEventType, string> = {
   YELLOW_CARD: "Yellow card",
   RED_CARD: "Red card",
   SUBSTITUTION: "Substitution",
+  SUSPENSION_RETURN: "Return",
+  EXCLUSION: "Exclusion",
 };
 
 function lastEventText(e: MatchEvent, m: MatchSummary): string {

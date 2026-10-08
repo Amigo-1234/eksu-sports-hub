@@ -419,6 +419,26 @@ table or function carries them.
   the last minute). `match_events.clock_seconds` stores the exact clock second.
 - Half-time has no fixed interval: the operator restarts play when ready.
 
+### Special competition rules (migration `20261012002200`)
+
+An isolated, per-competition rules module. `competitions.special_rules` (jsonb) is NULL for every normal competition, and then
+every code path falls through to unchanged football behaviour. Set or clear it with `admin_set_special_rules` (admin only, validated,
+audited as `SPECIAL_RULES_CHANGED`) or the **Special rules** card on the admin competition page (six-a-side novelty preset).
+
+| Setting | Effect |
+|---|---|
+| `starters` | Exact starters (6 = six-a-side); only formations with that many slots are offered (`2-2-1`, `2-1-2`, `3-1-1`, `1-2-2`) |
+| `no_added_time` | No `+minutes`, no stoppage; the clock display stops at the regulation end, the operator ends the half |
+| `halftime_seconds` | Half-time break countdown (display only; the operator restarts play) |
+| `rolling_subs` | Unlimited substitutions with re-entry; on-pitch state is event-sourced (latest movement wins) |
+| `red_card_suspension_seconds` | Red card / second yellow = temporary suspension of *active playing time* (pauses and half-time excluded); the player is eligible after it, and returns only via an operator `SUSPENSION_RETURN` event |
+| `offside`, `title`, `summary`, `regulations` | Public text: the competition's **Rules** tab |
+
+`EXCLUSION` (reason required, audited `PLAYER_EXCLUDED`) removes a player for the rest of the match. Both new event types are refused
+for competitions without these rules. At kick-off the behavioural settings are snapshotted onto `matches.special_rules`, so played
+matches keep their rules if the configuration later changes or is removed (`guard_match_special_rules`). Tests:
+`supabase/tests/13_special_rules.test.sql`, `tests/special-rules.test.ts`.
+
 ## Authentication
 Email + password through Supabase Auth (works without external services).
 Public sign-up is disabled (`[auth] enable_signup = false`); accounts are

@@ -7,6 +7,7 @@ import { matchWinner, type Side } from "@/lib/match";
 import { isClockRunning, isDisrupted, isLive, showsScore, statusLongLabel } from "@/lib/status";
 import type { MatchDetail, Team } from "@/lib/types";
 import { LiveMinute } from "./LiveMinute";
+import { HalftimeCountdown } from "./RulesClock";
 
 function HeroTeam({ team, dim }: { team: Team; dim: boolean }) {
   return (
@@ -42,7 +43,10 @@ function StatusPill({ match, serverNow }: { match: MatchDetail; serverNow: numbe
             <LiveMinute status={status} periodStartedAt={match.periodStartedAt} clock={match.clock} serverNow={serverNow} />
           </>
         ) : (
-          "Half-time"
+          <>
+            Half-time
+            <HalftimeCountdown status={status} clock={match.clock} prefix=" · " />
+          </>
         )}
       </span>
     );

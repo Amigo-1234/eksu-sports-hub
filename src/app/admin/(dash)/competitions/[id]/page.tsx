@@ -18,6 +18,7 @@ import {
   updateEntry,
 } from "@/lib/admin/actions/competitions";
 import { MatchLengthForm } from "@/components/admin/MatchLengthForm";
+import { SpecialRulesForm } from "@/components/admin/SpecialRulesForm";
 import { getCompetition } from "@/lib/admin/data/competitions";
 import { listSeasons, listSports } from "@/lib/admin/data/reference";
 import { listTeamRefs } from "@/lib/admin/data/teams";
@@ -243,7 +244,21 @@ export default async function CompetitionPage({ params, searchParams }: PageProp
           id="match-length"
           description={c.matches_started ? "Locked: a match has kicked off. Started matches keep their own length." : "Applies to every match of this competition from kick-off."}
         >
-          <MatchLengthForm competitionId={c.id} halfSeconds={c.half_seconds} etHalfSeconds={c.et_half_seconds} locked={Boolean(c.matches_started)} />
+          <MatchLengthForm
+            competitionId={c.id}
+            halfSeconds={c.half_seconds}
+            etHalfSeconds={c.et_half_seconds}
+            locked={Boolean(c.matches_started)}
+            noAddedTime={c.special_rules?.no_added_time === true}
+            halftimeSeconds={typeof c.special_rules?.halftime_seconds === "number" ? c.special_rules.halftime_seconds : null}
+          />
+        </Card>
+        <Card
+          title="Special rules"
+          id="special-rules"
+          description="Competition-specific rules, isolated from normal football. Started matches keep the rules they kicked off under."
+        >
+          <SpecialRulesForm competitionId={c.id} rules={c.special_rules} />
         </Card>
         <Card title="Settings" id="settings">
           <ActionForm action={updateCompetition}>

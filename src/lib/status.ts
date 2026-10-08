@@ -1,4 +1,4 @@
-import { displayClock, ET_HALF_SECONDS, HALF_SECONDS } from "./operator/clock.ts";
+import { activeSeconds, displayClock, ET_HALF_SECONDS, HALF_SECONDS } from "./operator/clock.ts";
 import type { MatchStatus, PublicClock } from "./types";
 
 /**
@@ -155,8 +155,31 @@ export function computePublicClock(
       pausedAt: ms(clock.pausedAt),
       accumulatedPauseSeconds: clock.accumulatedPauseSeconds,
       stoppageSeconds: clock.stoppageSeconds,
+      ...(clock.rules?.noAddedTime ? { noAddedTime: true } : {}),
     },
     now,
   );
   return { minute: d.minute, addedTime: d.addedTime, paused: d.paused };
+}
+
+/** Active playing time (s) of a match at `now` — the clock temporary suspensions are served on. */
+export function publicActiveSeconds(clock: PublicClock | null | undefined, now: number): number | null {
+  if (!clock || clock.activeBaseSeconds === undefined) return null;
+  const ms = (iso: string | null) => (iso ? Date.parse(iso) : null);
+  return activeSeconds(
+    {
+      halfSeconds: clock.halfSeconds ?? HALF_SECONDS,
+      etHalfSeconds: clock.etHalfSeconds ?? ET_HALF_SECONDS,
+      period: clock.period === 2 ? 2 : clock.period === 1 ? 1 : null,
+      periodOffsetSeconds: clock.periodOffsetSeconds,
+      periodStartedAt: ms(clock.periodStartedAt),
+      periodEndedAt: ms(clock.periodEndedAt),
+      clockRunning: clock.clockRunning,
+      pausedAt: ms(clock.pausedAt),
+      accumulatedPauseSeconds: clock.accumulatedPauseSeconds,
+      stoppageSeconds: clock.stoppageSeconds,
+      activeBaseSeconds: clock.activeBaseSeconds,
+    },
+    now,
+  );
 }

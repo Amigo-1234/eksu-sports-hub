@@ -94,6 +94,7 @@ export function ShirtGrid({
   allowUnknown = false,
   tone = "neutral",
   scope = "all",
+  rolling = false,
 }: {
   /** Whose squad to show. */
   side: Side;
@@ -106,13 +107,15 @@ export function ShirtGrid({
   allowUnknown?: boolean;
   tone?: ShirtTone;
   scope?: ShirtScope;
+  /** Rolling substitutions: anyone off the pitch (not suspended/excluded) may come on. */
+  rolling?: boolean;
 }) {
   const squads = useContext(SquadContext);
   const all: ConsolePlayer[] = squads ? squads[side] : DEMO_SHIRTS.map((n) => ({ shirt: n, name: null, role: null }));
   const lineup = hasLineup(all);
   const shown = !lineup || scope === "all"
     ? all
-    : all.filter((p) => (scope === "onField" ? isOnField(p, statuses.get(p.shirt)) : isAvailableSub(p, statuses.get(p.shirt))));
+    : all.filter((p) => (scope === "onField" ? isOnField(p, statuses.get(p.shirt)) : isAvailableSub(p, statuses.get(p.shirt), rolling)));
   const groups: { title: string | null; players: ConsolePlayer[] }[] =
     lineup && scope === "all"
       ? [
@@ -135,7 +138,9 @@ export function ShirtGrid({
             ? scope === "onField"
               ? "Confirmed line-up — players on the pitch"
               : scope === "bench"
-                ? "Confirmed line-up — substitutes available"
+                ? rolling
+                  ? "Rolling substitutions — anyone off the pitch may come on, including players who left earlier"
+                  : "Confirmed line-up — substitutes available"
                 : "Confirmed line-up"
             : "Squad — no confirmed line-up"}
       </p>
