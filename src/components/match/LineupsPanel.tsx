@@ -16,7 +16,7 @@ function PlayerRow({ p, clock }: { p: PublicLineupPlayer; clock?: PublicClock | 
       <span className="min-w-0 flex-1 truncate font-medium">
         {p.name ?? `No. ${p.shirtNumber}`}
         {p.captain && (
-          <span className="ml-1.5 rounded bg-ink px-1 text-[10px] font-black text-white" title="Captain">
+          <span className="ml-1.5 rounded bg-ink px-1 text-[10px] font-black text-canvas" title="Captain">
             C<span className="sr-only">aptain</span>
           </span>
         )}
@@ -52,7 +52,7 @@ function PlayerRow({ p, clock }: { p: PublicLineupPlayer; clock?: PublicClock | 
             <span className="sr-only">{p.redCards} temporary red card{(p.redCards ?? 0) > 1 ? "s" : ""}</span>
           </span>
         )}
-        {p.excluded && <span className="rounded bg-ink px-1.5 py-px text-[11px] font-bold text-white">Excluded</span>}
+        {p.excluded && <span className="rounded bg-ink px-1.5 py-px text-[11px] font-bold text-canvas">Excluded</span>}
         {p.suspended && <SuspensionBadge clock={clock} endsActive={p.suspensionEndsActive} />}
         {(p.entries ?? 0) > 1 && (
           <span className="font-semibold text-win" title="Times this player came on (rolling substitutions)">

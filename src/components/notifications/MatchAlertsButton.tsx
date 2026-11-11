@@ -69,7 +69,7 @@ export function MatchAlertsButton({ matchId, status, home, away }: { matchId: st
         data-testid="match-alerts-button"
         data-state={on ? "on" : "off"}
         className={`inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-bold whitespace-nowrap transition-colors ${
-          on ? "border-brand-200 bg-brand-50 text-brand-700 hover:bg-brand-100" : "border-line bg-surface text-ink hover:bg-subtle"
+          on ? "border-brand-200 bg-brand-50 text-brand-fg hover:bg-brand-100" : "border-line bg-surface text-ink hover:bg-subtle"
         }`}
       >
         <BellIcon size={17} filled={on} />

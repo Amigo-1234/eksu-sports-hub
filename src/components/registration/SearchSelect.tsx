@@ -118,7 +118,7 @@ export function SearchSelect({
               }}
               onMouseEnter={() => setActive(i)}
               className={`flex min-h-11 cursor-pointer flex-col justify-center px-3 py-2 text-sm ${i === active ? "bg-brand-50" : ""} ${
-                o.value === value ? "font-bold text-brand-700" : ""
+                o.value === value ? "font-bold text-brand-fg" : ""
               }`}
             >
               {o.label}

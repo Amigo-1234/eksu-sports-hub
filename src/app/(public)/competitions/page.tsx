@@ -15,24 +15,24 @@ export default async function CompetitionsPage() {
   return (
     <>
       <PageHeader title="Competitions" subtitle="EKSU leagues and cups" />
-      <div className="space-y-7">
+      <div className="max-w-3xl space-y-5">
         {sports.filter((s) => s.status === "active").map((sport) => {
           const list = competitions.filter((c) => c.sportId === sport.id);
           return (
             <section key={sport.id} aria-labelledby={`sport-${sport.id}`}>
-              <h2 id={`sport-${sport.id}`} className="mb-2.5 flex items-center gap-2 px-1 font-display text-xl font-bold">
+              <h2 id={`sport-${sport.id}`} className="mb-2 flex items-center gap-2 px-1 font-display text-[19px] leading-none font-bold tracking-[0.02em] uppercase">
                 {sport.name}
               </h2>
               {list.length > 0 ? (
                 <CompetitionLinkList competitions={list} />
               ) : (
-                <EmptyState compact icon={<TrophyIcon size={22} />} title="No competitions yet" />
+                <EmptyState icon={<TrophyIcon size={18} />} title="No competitions yet" />
               )}
             </section>
           );
         })}
         {comingSoon.length > 0 && (
-          <section aria-labelledby="coming-soon" className="rounded-card border border-dashed border-line-strong bg-surface px-4 py-3.5">
+          <section aria-labelledby="coming-soon" className="rounded-card border border-line bg-surface px-4 py-3">
             <h2 id="coming-soon" className="text-xs font-bold tracking-wide text-ink-faint uppercase">
               Coming soon
             </h2>

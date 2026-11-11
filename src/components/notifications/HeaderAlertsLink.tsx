@@ -14,11 +14,11 @@ export function HeaderAlertsLink() {
       href="/notifications"
       aria-label={alerts.pushOn ? "Alerts (on)" : "Alerts"}
       aria-current={active ? "page" : undefined}
-      className={`relative grid size-10 shrink-0 place-items-center rounded-full ${
+      className={`relative grid size-9 shrink-0 min-[400px]:size-10 place-items-center rounded-full ${
         active ? "bg-brand-700 text-white" : "text-ink-muted hover:bg-subtle hover:text-ink"
       }`}
     >
-      <BellIcon size={21} filled={alerts.pushOn && !active} className={alerts.pushOn && !active ? "text-brand-700" : undefined} />
+      <BellIcon size={21} filled={alerts.pushOn && !active} className={alerts.pushOn && !active ? "text-brand-fg" : undefined} />
     </Link>
   );
 }

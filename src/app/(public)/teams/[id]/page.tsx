@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LiveMatchCard } from "@/components/match/LiveMatchCard";
 import { MatchCardList } from "@/components/match/MatchList";
 import { TeamFollowButton } from "@/components/notifications/TeamFollowButton";
 import { StandingsTable } from "@/components/standings/StandingsTable";
@@ -50,10 +49,11 @@ export default async function TeamPage({ params }: PageProps<"/teams/[id]">) {
   return (
     <div className="pt-2 sm:pt-4">
       <BackLink />
-      <section className="flex items-center gap-4 rounded-card border border-line bg-surface p-4">
+      <section className="relative flex items-center gap-4 overflow-hidden rounded-card border border-line bg-surface p-4">
+        <span className="absolute inset-x-0 top-0 h-[3px]" style={{ background: team.colors.primary }} aria-hidden="true" />
         <TeamCrest team={team} size="xl" />
         <div className="min-w-0">
-          <h1 className="font-display text-2xl leading-tight font-extrabold tracking-tight sm:text-3xl">{team.name}</h1>
+          <h1 className="font-display text-[26px] leading-none font-extrabold tracking-[0.01em] uppercase sm:text-[32px]">{team.name}</h1>
           <p className="mt-0.5 text-sm text-ink-muted">
             {team.kind === "faculty" ? "Faculty side" : "Departmental side"} ·{" "}
             {team.category === "women" ? "Women" : "Men"}
@@ -63,7 +63,7 @@ export default async function TeamPage({ params }: PageProps<"/teams/[id]">) {
               <li key={c.id}>
                 <Link
                   href={`/competitions/${c.id}`}
-                  className="inline-flex h-7 items-center rounded-full bg-subtle px-2.5 text-xs font-semibold text-ink-muted hover:text-brand-700"
+                  className="inline-flex h-7 items-center rounded-full bg-subtle px-2.5 text-xs font-semibold text-ink-muted hover:text-brand-fg"
                 >
                   {c.shortName}
                 </Link>
@@ -93,14 +93,12 @@ export default async function TeamPage({ params }: PageProps<"/teams/[id]">) {
         </div>
       </dl>
 
-      <div className="mt-7 grid gap-x-6 gap-y-7 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="min-w-0 space-y-7">
+      <div className="mt-5 grid gap-x-5 gap-y-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="min-w-0 space-y-5">
           {live.length > 0 && (
             <section aria-labelledby="t-live">
               <SectionHeader id="t-live" title="Playing now" />
-              {live.map((m) => (
-                <LiveMatchCard key={m.id} match={m} serverNow={now} />
-              ))}
+              <MatchCardList matches={live} serverNow={now} />
             </section>
           )}
           <section aria-labelledby="t-next">

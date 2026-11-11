@@ -32,7 +32,7 @@ export function TeamFollowButton({ teamId, teamName }: { teamId: string; teamNam
         data-testid="team-follow-button"
         data-state={following ? "on" : "off"}
         className={`inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-bold whitespace-nowrap transition-colors ${
-          following ? "border-brand-200 bg-brand-50 text-brand-700 hover:bg-brand-100" : "border-brand-700 bg-brand-700 text-white hover:bg-brand-800"
+          following ? "border-brand-200 bg-brand-50 text-brand-fg hover:bg-brand-100" : "border-brand-700 bg-brand-700 text-white hover:bg-brand-800"
         }`}
       >
         <HeartIcon size={17} filled={following} />

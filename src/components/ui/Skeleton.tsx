@@ -4,9 +4,9 @@ export function Skeleton({ className = "" }: { className?: string }) {
 
 export function MatchRowSkeleton() {
   return (
-    <div className="grid min-h-16 grid-cols-[3.25rem_1fr_1.5rem] items-center gap-x-2 px-3 py-2.5 sm:px-4">
+    <div className="grid min-h-[3.75rem] grid-cols-[3rem_1fr_1.5rem] items-center gap-x-2 py-2 pr-3 pl-1 sm:grid-cols-[3.75rem_1fr_1.5rem] sm:pr-4">
       <Skeleton className="mx-auto h-3.5 w-9" />
-      <div className="space-y-2.5 border-l border-line pl-3">
+      <div className="space-y-2.5">
         <Skeleton className="h-3.5 w-3/5" />
         <Skeleton className="h-3.5 w-1/2" />
       </div>

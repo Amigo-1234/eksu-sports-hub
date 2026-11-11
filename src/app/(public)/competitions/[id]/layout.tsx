@@ -21,17 +21,17 @@ export default async function CompetitionLayout({ children, params }: LayoutProp
 
   return (
     <>
-      <div className="flex items-center gap-3 pt-4 pb-3 sm:pt-6">
-        <CompetitionBadge competition={competition} size={48} />
+      <div className="flex items-center gap-3 pt-3 pb-3 sm:pt-5">
+        <CompetitionBadge competition={competition} size={44} />
         <div className="min-w-0">
-          <h1 className="font-display text-2xl leading-tight font-extrabold tracking-tight sm:text-3xl">
+          <h1 className="font-display text-[22px] leading-[1.05] font-extrabold tracking-[0.01em] uppercase sm:text-[28px]">
             {competition.name}
           </h1>
-          <p className="text-sm text-ink-muted">{competitionMeta(competition)}</p>
+          <p className="mt-1 text-[13px] text-ink-muted">{competitionMeta(competition)}</p>
         </div>
       </div>
       <LinkTabs label="Competition sections" tabs={tabs} />
-      <div className="pt-4">{children}</div>
+      <div className="pt-3 sm:pt-4">{children}</div>
     </>
   );
 }

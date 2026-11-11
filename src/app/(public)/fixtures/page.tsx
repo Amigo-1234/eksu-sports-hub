@@ -17,15 +17,15 @@ export default async function FixturesPage({ searchParams }: PageProps<"/fixture
   const fixtures = await getMatches({ scope: "upcoming", competitionId: selected?.id });
 
   return (
-    <>
+    <div className="mx-auto max-w-3xl">
       <PageHeader title="Fixtures" subtitle="Upcoming matches · times in WAT" />
       <FilterChips label="Filter by competition" options={competitionChips("/fixtures", competitions, selected?.id)} />
-      <div className="mt-4">
+      <div className="mt-3">
         {fixtures.length > 0 ? (
           <MatchesByDate matches={fixtures} serverNow={now} />
         ) : (
           <EmptyState
-            icon={<CalendarIcon size={22} />}
+            icon={<CalendarIcon size={18} />}
             title="No upcoming fixtures"
             description={
               selected
@@ -36,6 +36,6 @@ export default async function FixturesPage({ searchParams }: PageProps<"/fixture
           />
         )}
       </div>
-    </>
+    </div>
   );
 }

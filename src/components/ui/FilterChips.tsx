@@ -13,17 +13,17 @@ export interface ChipOption {
 export function FilterChips({ label, options }: { label: string; options: ChipOption[] }) {
   return (
     <nav aria-label={label} className="-mx-3 sm:mx-0">
-      <ul className="scrollbar-none flex gap-2 overflow-x-auto px-3 py-1 sm:flex-wrap sm:px-0">
+      <ul className="scrollbar-none flex gap-1.5 overflow-x-auto px-3 py-1 sm:flex-wrap sm:px-0">
         {options.map((o) => (
           <li key={o.href} className="shrink-0">
             <Link
               href={o.href}
               scroll={false}
               aria-current={o.active ? "true" : undefined}
-              className={`inline-flex h-9 items-center rounded-full border px-3.5 text-sm font-semibold whitespace-nowrap transition-colors ${
+              className={`inline-flex h-8 items-center rounded-full border px-3.5 text-[13px] font-semibold whitespace-nowrap transition-colors ${
                 o.active
                   ? "border-brand-700 bg-brand-700 text-white"
-                  : "border-line bg-surface text-ink-muted hover:border-line-strong hover:text-ink"
+                  : "border-line-strong bg-transparent text-ink-muted hover:border-ink-faint hover:text-ink"
               }`}
             >
               {o.label}

@@ -39,7 +39,7 @@ export function SuspensionBadge({ clock, endsActive }: { clock: PublicClock | nu
   const active = now ? publicActiveSeconds(clock, now) : null;
   const left = endsActive == null || active === null ? null : Math.max(0, endsActive - active);
   return (
-    <span className="inline-flex items-center gap-1 rounded bg-live px-1.5 py-px text-[11px] font-bold text-white tabular-nums">
+    <span className="inline-flex items-center gap-1 rounded bg-live px-1.5 py-px text-[11px] font-bold text-canvas tabular-nums">
       {left === null ? "Suspended" : left > 0 ? <>⏱ {formatCountdown(left)}<span className="sr-only"> of suspension left</span></> : "Can return"}
     </span>
   );

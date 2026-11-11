@@ -25,14 +25,14 @@ export function LinkTabs({ label, tabs }: { label: string; tabs: LinkTab[] }) {
                 href={t.href}
                 scroll={false}
                 aria-current={active ? "page" : undefined}
-                className={`relative flex h-11 items-center px-3.5 text-sm font-semibold transition-colors ${
-                  active ? "text-brand-700" : "text-ink-faint hover:text-ink"
+                className={`relative flex h-11 items-center px-3.5 text-[13px] font-bold tracking-[0.04em] uppercase transition-colors ${
+                  active ? "text-ink" : "text-ink-faint hover:text-ink"
                 }`}
               >
                 {t.label}
                 <span
                   aria-hidden="true"
-                  className={`absolute inset-x-2 -bottom-px h-[3px] rounded-t ${active ? "bg-brand-700" : "bg-transparent"}`}
+                  className={`absolute inset-x-2 -bottom-px h-[3px] rounded-t ${active ? "bg-brand-600" : "bg-transparent"}`}
                 />
               </Link>
             </li>

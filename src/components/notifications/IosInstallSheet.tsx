@@ -43,7 +43,7 @@ export function IosInstallSheet({ open, onClose }: { open: boolean; onClose: () 
               {i + 1}
             </span>
             <span className="min-w-0 flex-1 text-[15px] leading-snug">{s.text}</span>
-            {s.icon && <span className="shrink-0 text-brand-700">{s.icon}</span>}
+            {s.icon && <span className="shrink-0 text-brand-fg">{s.icon}</span>}
           </li>
         ))}
       </ol>

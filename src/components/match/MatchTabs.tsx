@@ -36,7 +36,7 @@ export function MatchTabs({ tabs, initial }: { tabs: TabDef[]; initial?: string 
         role="tablist"
         aria-label="Match information"
         onKeyDown={onKeyDown}
-        className="sticky top-[calc(var(--header-h)+5px)] z-30 -mx-3 flex border-b border-line bg-canvas/95 px-3 backdrop-blur sm:mx-0 sm:px-0"
+        className="sticky top-[calc(var(--header-total)+1px)] z-30 -mx-3 flex border-b border-line bg-canvas/95 px-3 backdrop-blur sm:mx-0 sm:px-0"
       >
         {tabs.map((t, i) => {
           const selected = t.id === active;
@@ -54,13 +54,13 @@ export function MatchTabs({ tabs, initial }: { tabs: TabDef[]; initial?: string 
               tabIndex={selected ? 0 : -1}
               onClick={() => setActive(t.id)}
               className={`relative h-12 flex-1 text-[13px] font-bold tracking-wide uppercase transition-colors sm:flex-none sm:px-6 ${
-                selected ? "text-brand-700" : "text-ink-faint hover:text-ink"
+                selected ? "text-ink" : "text-ink-faint hover:text-ink"
               }`}
             >
               {t.label}
               <span
                 aria-hidden="true"
-                className={`absolute inset-x-3 -bottom-px h-[3px] rounded-t ${selected ? "bg-brand-700" : "bg-transparent"}`}
+                className={`absolute inset-x-3 -bottom-px h-[3px] rounded-t ${selected ? "bg-brand-600" : "bg-transparent"}`}
               />
             </button>
           );

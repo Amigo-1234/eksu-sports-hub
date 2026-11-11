@@ -13,8 +13,8 @@ export function competitionMeta(c: Competition): string {
 export function CompetitionBadge({ competition, size = 36 }: { competition: Competition; size?: number }) {
   return (
     <span
-      className={`grid shrink-0 place-items-center rounded-lg ${
-        competition.format === "league" ? "bg-brand-50 text-brand-700" : "bg-accent-100 text-accent-700"
+      className={`grid shrink-0 place-items-center rounded-md ${
+        competition.format === "league" ? "bg-brand-50 text-brand-fg" : "bg-accent-100 text-accent-700"
       }`}
       style={{ width: size, height: size }}
       aria-hidden="true"
@@ -31,14 +31,14 @@ export function CompetitionLinkList({ competitions }: { competitions: Competitio
         <li key={c.id}>
           <Link
             href={`/competitions/${c.id}`}
-            className="flex min-h-14 items-center gap-3 px-3 py-2.5 hover:bg-subtle sm:px-4"
+            className="flex min-h-12 items-center gap-3 px-3 py-2 transition-colors hover:bg-subtle"
           >
-            <CompetitionBadge competition={c} />
+            <CompetitionBadge competition={c} size={30} />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[15px] font-semibold">{c.name}</span>
+              <span className="block truncate text-[14px] font-semibold">{c.name}</span>
               <span className="block truncate text-xs text-ink-faint">{competitionMeta(c)}</span>
             </span>
-            <ChevronRightIcon size={18} className="shrink-0 text-ink-faint" />
+            <ChevronRightIcon size={16} className="shrink-0 text-ink-faint" />
           </Link>
         </li>
       ))}

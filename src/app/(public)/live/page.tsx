@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { LiveMatchCard } from "@/components/match/LiveMatchCard";
-import { MatchesByDate } from "@/components/match/MatchList";
+import { CompetitionMatchGroup, MatchesByDate } from "@/components/match/MatchList";
 import { DemoNotice } from "@/components/ui/DemoNotice";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -23,51 +22,41 @@ export default async function LivePage() {
       .slice(0, 3);
     return (
       <LiveScoresProvider enabled={DATA_SOURCE_KIND === "live"} renderedLiveIds={[]}>
+        <div className="mx-auto max-w-3xl">
         <PageHeader title="Live" subtitle="Matches in progress" actions={<RefreshButton />} />
         <EmptyState
-          icon={<LiveIcon size={22} />}
-          title="No matches live right now"
-          description="Check back at kick-off. Here's what's coming up next."
+          icon={<LiveIcon size={18} />}
+          title="No live matches right now"
+          description="Check back at kick-off — here's what's coming up next."
           action={{ href: "/fixtures", label: "See all fixtures" }}
         />
         {next.length > 0 && (
-          <section aria-labelledby="next-up" className="mt-7">
+          <section aria-labelledby="next-up" className="mt-5">
             <SectionHeader id="next-up" title="Next up" href="/fixtures" linkLabel="Fixtures" />
             <MatchesByDate matches={next} serverNow={now} />
           </section>
         )}
         <DemoNotice />
+        </div>
       </LiveScoresProvider>
     );
   }
 
   return (
     <LiveScoresProvider enabled={DATA_SOURCE_KIND === "live"} renderedLiveIds={live.map((m) => m.id)}>
+      <div className="mx-auto max-w-3xl">
       <PageHeader
         title="Live"
         subtitle={`${live.length} ${live.length === 1 ? "match" : "matches"} in progress`}
         actions={<RefreshButton />}
       />
-      <div className="space-y-6">
+      <div className="space-y-2.5">
         {groupByCompetition(live).map((g) => (
-          <section key={g.competition.id} aria-labelledby={`live-${g.competition.id}`}>
-            <h2
-              id={`live-${g.competition.id}`}
-              className="mb-2 px-1 text-xs font-bold tracking-wide text-ink-muted uppercase"
-            >
-              {g.competition.name}
-            </h2>
-            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {g.matches.map((m) => (
-                <li key={m.id}>
-                  <LiveMatchCard match={m} serverNow={now} />
-                </li>
-              ))}
-            </ul>
-          </section>
+          <CompetitionMatchGroup key={g.competition.id} group={g} serverNow={now} headingLevel={2} />
         ))}
       </div>
       <DemoNotice />
+      </div>
     </LiveScoresProvider>
   );
 }

@@ -17,10 +17,10 @@ export default async function TablePage({ searchParams }: PageProps<"/table">) {
 
   if (!selected) {
     return (
-      <>
+      <div className="mx-auto max-w-3xl">
         <PageHeader title="Tables" />
-        <EmptyState icon={<TableIcon size={22} />} title="No league tables yet" description="Tables appear once a league competition starts." />
-      </>
+        <EmptyState icon={<TableIcon size={18} />} title="No league tables yet" description="Tables appear once a league competition starts." />
+      </div>
     );
   }
 
@@ -28,7 +28,7 @@ export default async function TablePage({ searchParams }: PageProps<"/table">) {
   const promotion = promotionFor(selected);
 
   return (
-    <>
+    <div className="mx-auto max-w-3xl">
       <PageHeader title="Tables" subtitle={`${selected.name} · ${selected.season}`} />
       <FilterChips
         label="Choose competition"
@@ -38,7 +38,7 @@ export default async function TablePage({ searchParams }: PageProps<"/table">) {
           active: c.id === selected.id,
         }))}
       />
-      <div className="mt-4">
+      <div className="mt-3">
         {rows.length > 0 ? (
           <StandingsTable
             rows={rows}
@@ -47,12 +47,12 @@ export default async function TablePage({ searchParams }: PageProps<"/table">) {
             promotionLabel={promotion?.label}
           />
         ) : (
-          <EmptyState icon={<TableIcon size={22} />} title="Table not available" description="Standings will appear after the first matches are played." />
+          <EmptyState icon={<TableIcon size={18} />} title="Table not available" description="Standings will appear after the first matches are played." />
         )}
         <p className="mt-3 px-1 text-xs text-ink-faint">
           Only completed matches count. Abandoned, postponed and cancelled fixtures are excluded.
         </p>
       </div>
-    </>
+    </div>
   );
 }

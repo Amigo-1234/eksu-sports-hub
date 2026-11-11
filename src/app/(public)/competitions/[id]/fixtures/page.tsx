@@ -21,7 +21,7 @@ export default async function CompetitionFixtures({ params }: PageProps<"/compet
     <MatchesByDate matches={matches} serverNow={now} />
   ) : (
     <EmptyState
-      icon={<CalendarIcon size={22} />}
+      icon={<CalendarIcon size={18} />}
       title="No upcoming fixtures"
       description={`Nothing else is scheduled in the ${competition.name} yet.`}
       action={{ href: `/competitions/${id}/results`, label: "See results" }}

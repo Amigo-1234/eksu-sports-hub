@@ -12,7 +12,7 @@ export function FollowedBell({ matchId, teamIds, status, className = "" }: { mat
   const eff = effectiveMatchPrefs(alerts.state, matchId, teamIds);
   if (!eff.enabled || eff.events.length === 0) return null;
   return (
-    <span className={`inline-flex text-brand-700 ${className}`} data-testid="followed-bell">
+    <span className={`inline-flex text-brand-fg ${className}`} data-testid="followed-bell">
       <BellIcon size={12} filled />
       <span className="sr-only">Alerts on</span>
     </span>

@@ -252,10 +252,10 @@ export function AlertsProvider({ available, children }: { available: boolean; ch
           <div
             role="status"
             aria-live="polite"
-            className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+0.75rem)] z-50 flex justify-center px-4 md:bottom-6"
+            className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+0.75rem)] z-50 flex justify-center px-4 lg:bottom-6"
           >
             {toastMsg && (
-              <p className="pointer-events-auto max-w-sm rounded-xl bg-ink px-4 py-3 text-center text-sm font-semibold text-white shadow-lg" data-testid="alerts-toast">
+              <p className="pointer-events-auto max-w-sm rounded-xl bg-ink px-4 py-3 text-center text-sm font-semibold text-canvas shadow-lg" data-testid="alerts-toast">
                 {toastMsg}
               </p>
             )}

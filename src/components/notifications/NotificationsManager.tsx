@@ -194,7 +194,7 @@ export function NotificationsManager() {
                 return ok;
               }, "All notifications are off")
             }
-            className="h-12 w-full rounded-xl bg-live text-base font-bold text-white disabled:opacity-50"
+            className="h-12 w-full rounded-xl bg-live text-base font-bold text-canvas disabled:opacity-50"
           >
             {busy === "all" ? "Turning off…" : "Disable all notifications"}
           </button>

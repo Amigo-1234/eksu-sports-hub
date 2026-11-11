@@ -22,18 +22,18 @@ export default async function CompetitionScorers({ params }: PageProps<"/competi
     <>
       <AutoRefresh seconds={30} />
       {rows.length === 0 ? (
-        <EmptyState icon={<BallIcon size={22} />} title="No goals yet" description="The top scorers appear here as goals are recorded." />
+        <EmptyState icon={<BallIcon size={18} />} title="No goals yet" description="The top scorers appear here as goals are recorded." />
       ) : (
-        <div className="rounded-card border border-line bg-surface">
+        <div className="max-w-3xl overflow-hidden rounded-card border border-line bg-surface">
           {leaders.length > 1 && (
-            <p className="border-b border-line px-3 py-2 text-xs font-bold text-ink-muted">
+            <p className="border-b border-line bg-subtle/70 px-3 py-2 text-xs font-bold text-ink-muted">
               Joint leaders on {leaders[0].goals} goal{leaders[0].goals === 1 ? "" : "s"}
             </p>
           )}
           <table className="w-full text-sm">
             <caption className="sr-only">{competition.name} top scorers</caption>
             <thead>
-              <tr className="border-b border-line text-left text-xs font-bold tracking-wide text-ink-muted uppercase">
+              <tr className="border-b border-line text-left text-[11px] font-bold tracking-wide text-ink-faint uppercase">
                 <th scope="col" className="w-10 px-3 py-2 text-center">#</th>
                 <th scope="col" className="px-2 py-2">Player</th>
                 <th scope="col" className="px-2 py-2">Team</th>
@@ -44,11 +44,19 @@ export default async function CompetitionScorers({ params }: PageProps<"/competi
               {rows.map((r, i) => {
                 const tied = rows.filter((x) => x.rank === r.rank).length > 1;
                 return (
-                  <tr key={`${r.teamId}-${r.playerName}-${i}`}>
-                    <td className="px-3 py-2 text-center font-display font-bold tabular-nums">{tied ? `=${r.rank}` : r.rank}</td>
+                  <tr key={`${r.teamId}-${r.playerName}-${i}`} className="hover:bg-subtle/60">
+                    <td className="px-2 py-2 text-center">
+                      <span
+                        className={`inline-grid h-6 min-w-6 place-items-center rounded px-1 text-[12px] font-bold tabular-nums ${
+                          r.rank === 1 ? "bg-accent-400 text-canvas" : "text-ink-muted"
+                        }`}
+                      >
+                        {tied ? `=${r.rank}` : r.rank}
+                      </span>
+                    </td>
                     <td className="px-2 py-2 font-semibold">{r.playerName ?? "Unnamed player"}</td>
                     <td className="px-2 py-2 text-ink-muted">{r.teamShortName}</td>
-                    <td className="px-3 py-2 text-right font-display text-base font-extrabold tabular-nums">{r.goals}</td>
+                    <td className="px-3 py-2 text-right font-display text-[18px] font-extrabold tabular-nums">{r.goals}</td>
                   </tr>
                 );
               })}

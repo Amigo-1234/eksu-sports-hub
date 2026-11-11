@@ -262,7 +262,7 @@ export function RegistrationWizard({ mode, window: w }: { mode: RegistrationType
   return (
     <div className="mx-auto max-w-2xl pb-6">
       <div className="pt-4 pb-3 sm:pt-6">
-        <p className="text-xs font-bold tracking-wide text-brand-700 uppercase">
+        <p className="text-xs font-bold tracking-wide text-brand-fg uppercase">
           {w.competition.short_name} · {w.season.name}
         </p>
         <p className="font-display text-lg leading-tight font-extrabold">{isPlayer ? "Register as a player" : "Register a team"}</p>
@@ -577,7 +577,7 @@ function RosterEditor({
         <button
           type="button"
           onClick={() => setEditing(emptyPerson())}
-          className="inline-flex h-12 w-full items-center justify-center rounded-lg border-2 border-dashed border-brand-300 text-sm font-bold text-brand-700 hover:bg-brand-50"
+          className="inline-flex h-12 w-full items-center justify-center rounded-lg border-2 border-dashed border-brand-300 text-sm font-bold text-brand-fg hover:bg-brand-50"
         >
           + Add player
         </button>
@@ -605,7 +605,7 @@ function Row({ k, v }: { k: string; v: string }) {
 
 function EditLink({ to, onEdit }: { to: string; onEdit: (step: string) => void }) {
   return (
-    <button type="button" onClick={() => onEdit(to)} className="inline-flex h-9 items-center rounded-md px-2 text-sm font-bold text-brand-700 hover:bg-brand-50">
+    <button type="button" onClick={() => onEdit(to)} className="inline-flex h-9 items-center rounded-md px-2 text-sm font-bold text-brand-fg hover:bg-brand-50">
       Edit<span className="sr-only"> {to}</span>
     </button>
   );

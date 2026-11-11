@@ -19,7 +19,7 @@ export default async function CompetitionTable({ params }: PageProps<"/competiti
   if (competition.format !== "league") {
     return (
       <EmptyState
-        icon={<TableIcon size={22} />}
+        icon={<TableIcon size={18} />}
         title="No table for this competition"
         description="This is a knockout competition — follow progress round by round on the overview."
         action={{ href: `/competitions/${id}`, label: "View rounds" }}
@@ -42,6 +42,6 @@ export default async function CompetitionTable({ params }: PageProps<"/competiti
       </p>
     </>
   ) : (
-    <EmptyState icon={<TableIcon size={22} />} title="Table not available yet" />
+    <EmptyState icon={<TableIcon size={18} />} title="Table not available yet" />
   );
 }

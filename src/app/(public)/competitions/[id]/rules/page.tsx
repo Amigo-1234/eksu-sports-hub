@@ -21,14 +21,15 @@ export default async function CompetitionRules({ params }: PageProps<"/competiti
   ];
 
   return (
-    <article aria-labelledby="rules-title" className="space-y-4">
-      <header className="rounded-card border border-line bg-surface p-4">
+    <article aria-labelledby="rules-title" className="max-w-3xl space-y-3">
+      <header className="relative overflow-hidden rounded-card border border-line bg-surface p-4">
+        <span className="absolute inset-x-0 top-0 h-[3px] bg-brand-700" aria-hidden="true" />
         <h2 id="rules-title" className="font-display text-xl font-extrabold tracking-tight uppercase">{title}</h2>
         {summary && <p className="mt-1 text-sm text-ink-muted">{summary}</p>}
         {facts.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Key rules">
             {facts.map((f) => (
-              <li key={f} className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-800">{f}</li>
+              <li key={f} className="rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-fg">{f}</li>
             ))}
           </ul>
         )}
@@ -36,7 +37,7 @@ export default async function CompetitionRules({ params }: PageProps<"/competiti
       <ol className="divide-y divide-line rounded-card border border-line bg-surface">
         {items.map((r, i) => (
           <li key={r.title} className="flex gap-3 px-4 py-3">
-            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-ink font-display text-sm font-bold text-white tabular-nums" aria-hidden="true">
+            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-700 font-display text-sm font-bold text-white tabular-nums" aria-hidden="true">
               {i + 1}
             </span>
             <div className="min-w-0">

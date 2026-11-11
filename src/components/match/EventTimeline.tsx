@@ -97,7 +97,7 @@ function EventBody({ entry, match }: { entry: TimelineEntry; match: MatchDetail 
           {event.type === "OWN_GOAL" && ` · ${team.shortName}`}
         </span>
         {entry.scoreAfter && (
-          <span className="shrink-0 rounded bg-ink px-1 py-px text-[11px] font-bold text-white tabular-nums">
+          <span className="shrink-0 rounded bg-line-strong px-1 py-px text-[11px] font-bold text-ink tabular-nums">
             {entry.scoreAfter.home}–{entry.scoreAfter.away}
           </span>
         )}

@@ -17,15 +17,15 @@ export default async function ResultsPage({ searchParams }: PageProps<"/results"
   const results = await getMatches({ scope: "results", competitionId: selected?.id });
 
   return (
-    <>
+    <div className="mx-auto max-w-3xl">
       <PageHeader title="Results" subtitle="Completed matches, most recent first" />
       <FilterChips label="Filter by competition" options={competitionChips("/results", competitions, selected?.id)} />
-      <div className="mt-4">
+      <div className="mt-3">
         {results.length > 0 ? (
           <MatchesByDate matches={results} serverNow={now} />
         ) : (
           <EmptyState
-            icon={<ResultsIcon size={22} />}
+            icon={<ResultsIcon size={18} />}
             title="No results yet"
             description={
               selected
@@ -36,6 +36,6 @@ export default async function ResultsPage({ searchParams }: PageProps<"/results"
           />
         )}
       </div>
-    </>
+    </div>
   );
 }

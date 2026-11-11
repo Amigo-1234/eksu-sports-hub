@@ -23,12 +23,12 @@ export default async function RegisterPage() {
           they can be named in a squad.
         </p>
         {windows.length === 0 ? (
-          <EmptyState icon={<ShirtIcon size={22} />} title="Registration is closed" description="No competition is taking registrations right now. Check back soon." />
+          <EmptyState icon={<ShirtIcon size={18} />} title="Registration is closed" description="No competition is taking registrations right now. Check back soon." />
         ) : (
           <ul className="space-y-3">
             {windows.map((w) => (
               <li key={w.id} className="rounded-card border border-line bg-surface p-4">
-                <p className="text-xs font-bold tracking-wide text-brand-700 uppercase">
+                <p className="text-xs font-bold tracking-wide text-brand-fg uppercase">
                   {w.competition.short_name} · {w.season.name}
                 </p>
                 <h2 className="mt-0.5 font-display text-xl leading-tight font-extrabold">
@@ -58,7 +58,7 @@ export default async function RegisterPage() {
         )}
         <p className="text-sm">
           Already registered?{" "}
-          <Link href="/register/status" className="font-bold text-brand-700 underline-offset-2 hover:underline">
+          <Link href="/register/status" className="font-bold text-brand-fg underline-offset-2 hover:underline">
             Check your registration status
           </Link>
         </p>

@@ -156,7 +156,7 @@ function SheetBody({
   return (
     <div>
       <p className="text-[15px] leading-snug text-ink-muted">{subtitle}</p>
-      {note && <p className="mt-2 rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-800">{note}</p>}
+      {note && <p className="mt-2 rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-fg">{note}</p>}
       {problem === "dismissed" && (
         <p className="mt-3 rounded-lg bg-subtle px-3 py-2 text-sm text-ink-muted" role="status">
           No problem — nothing was turned on. Tap the button again whenever you&apos;re ready.

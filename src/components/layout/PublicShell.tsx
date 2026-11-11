@@ -22,17 +22,18 @@ export async function PublicShell({ children }: { children: ReactNode }) {
   // Alerts need real match IDs (live data) and the server flag; the VAPID key comes from Vault.
   const alerts = DATA_SOURCE_KIND === "live" && pushNotificationsEnabled();
   return (
+    <div className="theme-dark flex min-h-dvh flex-col bg-canvas text-ink">
     <AlertsProvider available={alerts}>
       <a
         href="#main"
-        className="sr-only z-50 rounded-md bg-accent-500 px-4 py-2 font-semibold text-ink focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+        className="sr-only z-50 rounded-md bg-accent-500 px-4 py-2 font-semibold text-canvas focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
       >
         Skip to content
       </a>
       <AppHeader liveCount={liveCount} />
       <main
         id="main"
-        className="mx-auto w-full max-w-6xl flex-1 px-3 pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+1.5rem)] sm:px-4 md:pb-12"
+        className="mx-auto w-full max-w-7xl flex-1 px-3 pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+1.25rem)] sm:px-4 lg:pb-12"
       >
         {children}
       </main>
@@ -40,5 +41,6 @@ export async function PublicShell({ children }: { children: ReactNode }) {
       <BottomNav liveCount={liveCount} />
       <NavigationTracker />
     </AlertsProvider>
+    </div>
   );
 }

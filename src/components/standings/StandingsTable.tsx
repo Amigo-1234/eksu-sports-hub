@@ -25,6 +25,7 @@ export function StandingsTable({
   promotionLabel,
   compact = false,
   showForm = true,
+  title,
 }: {
   rows: StandingRow[];
   caption: string;
@@ -35,11 +36,18 @@ export function StandingsTable({
   /** Preview mode: fewer columns regardless of width. */
   compact?: boolean;
   showForm?: boolean;
+  /** Optional visible title bar (e.g. the competition name on a preview). */
+  title?: string;
 }) {
   const cols = compact ? COLS.filter((c) => c.key === "played" || c.key === "goalDifference") : COLS;
 
   return (
     <div className="overflow-hidden rounded-card border border-line bg-surface">
+      {title && (
+        <p className="truncate border-b border-line bg-subtle/70 px-3 py-2 text-[12px] font-bold tracking-[0.02em] text-ink uppercase" aria-hidden="true">
+          {title}
+        </p>
+      )}
       <table className="w-full table-fixed border-collapse text-sm">
         <caption className="sr-only">{caption}</caption>
         <colgroup>
@@ -52,7 +60,7 @@ export function StandingsTable({
           {showForm && !compact && <col className="hidden w-36 lg:table-column" />}
         </colgroup>
         <thead>
-          <tr className="border-b border-line bg-subtle/60 text-[11px] font-bold tracking-wide text-ink-faint uppercase">
+          <tr className="border-b border-line text-[11px] font-bold tracking-wide text-ink-faint uppercase">
             <th scope="col" className="py-2 text-center">
               <abbr title="Position" className="no-underline">#</abbr>
             </th>
@@ -62,7 +70,7 @@ export function StandingsTable({
                 <abbr title={c.title} className="no-underline">{c.abbr}</abbr>
               </th>
             ))}
-            <th scope="col" className="py-2 pr-2 text-center text-ink">
+            <th scope="col" className="py-2 pr-2 text-center text-ink-muted">
               <abbr title="Points" className="no-underline">Pts</abbr>
             </th>
             {showForm && !compact && (
@@ -75,18 +83,21 @@ export function StandingsTable({
             const highlighted = highlightTeamIds.includes(r.teamId);
             const promoted = r.position <= promotionSpots;
             return (
-              <tr key={r.teamId} className={highlighted ? "bg-accent-100/60" : "hover:bg-subtle/60"}>
-                <td className="relative py-2.5 text-center font-semibold tabular-nums text-ink-muted">
-                  {promoted && (
-                    <span className="absolute inset-y-1 left-0 w-[3px] rounded-r bg-brand-600" aria-hidden="true" />
-                  )}
-                  {r.position}
+              <tr key={r.teamId} className={highlighted ? "bg-accent-100" : "hover:bg-subtle/60"}>
+                <td className="relative py-2 text-center tabular-nums">
+                  <span
+                    className={`inline-grid size-6 place-items-center rounded text-[12px] font-bold ${
+                      promoted ? "bg-brand-700 text-white" : "text-ink-muted"
+                    }`}
+                  >
+                    {r.position}
+                  </span>
                   {promoted && promotionLabel && <span className="sr-only">, {promotionLabel}</span>}
                 </td>
                 <th scope="row" className="py-1.5 pl-1 text-left font-normal">
                   <Link
                     href={`/teams/${r.teamId}`}
-                    className="flex min-w-0 items-center gap-2 rounded py-1 hover:text-brand-700"
+                    className="flex min-w-0 items-center gap-2 rounded py-1 hover:text-brand-fg"
                   >
                     <TeamCrest team={r.team} size="sm" />
                     <span className={`truncate ${highlighted ? "font-bold" : "font-semibold"}`}>
@@ -102,16 +113,16 @@ export function StandingsTable({
                 {cols.map((c) => {
                   const v = r[c.key];
                   return (
-                    <td key={c.key} className={`py-2.5 text-center tabular-nums text-ink-muted ${c.cls}`}>
+                    <td key={c.key} className={`py-2 text-center tabular-nums text-ink-muted ${c.cls}`}>
                       {c.key === "goalDifference" && v > 0 ? `+${v}` : v}
                     </td>
                   );
                 })}
-                <td className="py-2.5 pr-2 text-center font-display text-base font-bold tabular-nums">
+                <td className="py-2 pr-2 text-center font-display text-[17px] font-bold tabular-nums text-ink">
                   {r.points}
                 </td>
                 {showForm && !compact && (
-                  <td className="hidden py-2.5 pr-3 lg:table-cell">
+                  <td className="hidden py-2 pr-3 lg:table-cell">
                     <FormGuide form={r.form} size="sm" />
                   </td>
                 )}
@@ -122,7 +133,7 @@ export function StandingsTable({
       </table>
       {promotionSpots > 0 && promotionLabel && !compact && (
         <p className="flex items-center gap-2 border-t border-line px-3 py-2 text-xs text-ink-muted">
-          <span className="h-3 w-[3px] rounded bg-brand-600" aria-hidden="true" />
+          <span className="size-3 rounded-sm bg-brand-700" aria-hidden="true" />
           {promotionLabel}
         </p>
       )}

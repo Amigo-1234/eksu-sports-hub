@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { LiveMatchCard } from "@/components/match/LiveMatchCard";
 import { MatchesByCompetition, MatchesByDate } from "@/components/match/MatchList";
 import { LiveDot } from "@/components/match/MatchStatusLabel";
 import { StandingsTable } from "@/components/standings/StandingsTable";
@@ -40,47 +39,47 @@ export default async function HomePage() {
 
   return (
     <LiveScoresProvider enabled={DATA_SOURCE_KIND === "live"} renderedLiveIds={live.map((m) => m.id)}>
-    <div className="pt-3 sm:pt-5">
-      <h1 className="sr-only">EKSU Sports — what&apos;s on</h1>
-      <p className="mb-3 px-1 text-xs font-semibold tracking-wide text-ink-faint uppercase">
+    <div className="pt-3 sm:pt-4">
+      <h1 className="sr-only">EKSU Sports — live scores, fixtures and results</h1>
+      <p className="mb-2.5 flex items-center gap-2 px-1 text-[11px] font-bold tracking-[0.1em] text-ink-faint uppercase">
         <time dateTime={today}>{formatLongDate(new Date(now).toISOString())}</time>
+        <span aria-hidden="true">·</span>
+        <span>WAT</span>
       </p>
 
       {nothingAtAll ? (
         <EmptyState
-          icon={<CalendarIcon size={22} />}
+          icon={<CalendarIcon size={18} />}
           title="No matches scheduled"
           description="Fixtures will appear here as soon as the organisers publish them."
           action={{ href: "/competitions", label: "Browse competitions" }}
         />
       ) : (
-        <div className="grid gap-x-6 gap-y-7 lg:grid-cols-[minmax(0,1fr)_22rem]">
-          <div className="min-w-0 space-y-7">
+        <div className="grid gap-x-5 gap-y-5 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="min-w-0 space-y-5">
             {live.length > 0 ? (
               <section aria-labelledby="live-now">
                 <SectionHeader
                   id="live-now"
-                  title="Live now"
+                  title="Live"
                   href="/live"
                   linkLabel="Live centre"
-                  adornment={<LiveDot />}
+                  adornment={
+                    <span className="flex items-center gap-1.5 rounded-full bg-live-soft px-2 py-0.5 font-sans text-xs font-bold tracking-normal text-live normal-case">
+                      <LiveDot />
+                      {live.length}
+                      <span className="sr-only"> in progress</span>
+                    </span>
+                  }
                 />
-                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {live.map((m) => (
-                    <li key={m.id}>
-                      <LiveMatchCard match={m} serverNow={now} />
-                    </li>
-                  ))}
-                </ul>
+                <MatchesByCompetition matches={live} serverNow={now} />
               </section>
             ) : (
               <section aria-label="Live status">
-                <div className="flex items-center gap-3 rounded-card border border-line bg-surface px-3.5 py-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-subtle text-ink-faint">
-                    <ClockIcon size={18} />
-                  </span>
+                <div className="flex items-center gap-3 rounded-card border border-line bg-surface py-2 pr-1.5 pl-3">
+                  <span className="relative flex size-2 shrink-0 rounded-full bg-ink-faint/60" aria-hidden="true" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">No matches live right now</p>
+                    <p className="text-[13px] font-semibold">No live matches right now</p>
                     {nextUp && (
                       <p className="truncate text-xs text-ink-muted">
                         Next: {formatKickoff(nextUp.kickoffAt, now)} · {nextUp.homeTeam.shortName} v{" "}
@@ -92,7 +91,7 @@ export default async function HomePage() {
                     <Link
                       href={matchHref(nextUp.id)}
                       aria-label={`Next match: ${nextUp.homeTeam.name} versus ${nextUp.awayTeam.name}`}
-                      className="grid size-9 shrink-0 place-items-center rounded-full text-brand-700 hover:bg-brand-50"
+                      className="grid size-9 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-subtle hover:text-ink"
                     >
                       <ChevronRightIcon size={18} />
                     </Link>
@@ -118,21 +117,29 @@ export default async function HomePage() {
               {laterFixtures.length > 0 ? (
                 <MatchesByDate matches={laterFixtures} serverNow={now} />
               ) : (
-                <EmptyState compact title="No upcoming fixtures" description="New fixtures will show up here." />
+                <EmptyState
+                  icon={<CalendarIcon size={18} />}
+                  title="No upcoming fixtures"
+                  description="Your next fixtures will appear here."
+                />
               )}
             </section>
 
             <section aria-labelledby="results">
-              <SectionHeader id="results" title="Recent results" href="/results" linkLabel="All results" />
+              <SectionHeader id="results" title="Results" href="/results" linkLabel="All results" />
               {recentResults.length > 0 ? (
                 <MatchesByDate matches={recentResults} serverNow={now} />
               ) : (
-                <EmptyState compact title="No results yet" description="Completed matches will appear here." />
+                <EmptyState
+                  icon={<ClockIcon size={18} />}
+                  title="No results yet"
+                  description="Completed matches will appear here."
+                />
               )}
             </section>
           </div>
 
-          <aside className="min-w-0 space-y-7" aria-label="Tables and competitions">
+          <aside className="min-w-0 space-y-5 lg:sticky lg:top-[calc(var(--header-total)+1rem)] lg:self-start" aria-label="Tables and competitions">
             {featured && table.length > 0 && (
               <section aria-labelledby="table-preview">
                 <SectionHeader
@@ -141,10 +148,12 @@ export default async function HomePage() {
                   href={`/competitions/${featured.id}/table`}
                   linkLabel="Full table"
                 />
-                <p className="mb-2 px-1 text-xs font-semibold tracking-wide text-ink-faint uppercase">
-                  {featured.name}
-                </p>
-                <StandingsTable rows={table} caption={`${featured.name} — top ${table.length}`} compact />
+                <StandingsTable
+                  rows={table}
+                  caption={`${featured.name} — top ${table.length}`}
+                  title={featured.name}
+                  compact
+                />
               </section>
             )}
             <section aria-labelledby="competitions">

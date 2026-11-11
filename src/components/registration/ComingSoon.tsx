@@ -10,10 +10,10 @@ export function RegistrationComingSoon() {
           <div className="h-full w-1/3 bg-accent-500" />
         </div>
         <div className="px-5 py-8 sm:px-8">
-          <div className="mx-auto grid size-14 place-items-center rounded-full bg-brand-50 text-brand-700">
+          <div className="mx-auto grid size-14 place-items-center rounded-full bg-brand-50 text-brand-fg">
             <ShirtIcon size={26} />
           </div>
-          <p className="mt-4 text-xs font-bold tracking-[0.18em] text-brand-700 uppercase">Player registration</p>
+          <p className="mt-4 text-xs font-bold tracking-[0.18em] text-brand-fg uppercase">Player registration</p>
           <h1 id="coming-soon-title" className="mt-1 font-display text-4xl leading-none font-extrabold tracking-tight uppercase sm:text-5xl">
             Coming soon
           </h1>

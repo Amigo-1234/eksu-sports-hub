@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { LiveMatchCard } from "@/components/match/LiveMatchCard";
 import { MatchCardList, MatchesByDate } from "@/components/match/MatchList";
 import { StandingsTable } from "@/components/standings/StandingsTable";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -35,11 +34,12 @@ export default async function CompetitionOverview({ params }: PageProps<"/compet
   const rounds = competition.format === "knockout" ? [...new Set(all.map((m) => m.round))].reverse() : [];
 
   return (
-    <div className="grid gap-x-6 gap-y-7 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <div className="min-w-0 space-y-7">
-        <section aria-label="About" className="rounded-card border border-line bg-surface p-4">
-          <p className="text-sm text-ink-muted">{competition.description}</p>
-          <dl className="mt-4 grid grid-cols-3 divide-x divide-line text-center">
+    <>
+    <div className="grid gap-x-5 gap-y-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="min-w-0 space-y-5">
+        <section aria-label="About" className="rounded-card border border-line bg-surface p-3 sm:p-4">
+          {competition.description && <p className="mb-3 text-sm text-ink-muted">{competition.description}</p>}
+          <dl className="grid grid-cols-3 divide-x divide-line text-center">
             {[
               ["Teams", competition.teamIds.length],
               ["Played", completed.length],
@@ -56,13 +56,7 @@ export default async function CompetitionOverview({ params }: PageProps<"/compet
         {live.length > 0 && (
           <section aria-labelledby="c-live">
             <SectionHeader id="c-live" title="Live now" />
-            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {live.map((m) => (
-                <li key={m.id}>
-                  <LiveMatchCard match={m} serverNow={now} />
-                </li>
-              ))}
-            </ul>
+            <MatchCardList matches={live} serverNow={now} showCompetition={false} />
           </section>
         )}
 
@@ -111,5 +105,6 @@ export default async function CompetitionOverview({ params }: PageProps<"/compet
         </aside>
       )}
     </div>
+    </>
   );
 }

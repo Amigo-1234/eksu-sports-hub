@@ -24,6 +24,12 @@
   --color-accent-500: #f29b0c;
   --color-accent-700: #9a5a00; /* accent text on light surfaces (AA) */
 
+  /* Brand as a text/icon colour (links, active tabs). Light: brand-700; dark: a lifted burgundy-pink. */
+  --color-brand-fg: #761530;
+
+  /* Header / bottom-bar chrome */
+  --color-chrome: #ffffff;
+
   /* Neutrals */
   --color-canvas: #f4f2f1; /* app background */
   --color-surface: #ffffff; /* cards, rows */
@@ -75,7 +81,77 @@
 :root {
   color-scheme: light;
   --header-h: 3.5rem;
-  --bottom-nav-h: 4rem;
+  --header-stripe: 3px;
+  /* Everything sticky below the header offsets by this. */
+  --header-total: calc(var(--header-h) + var(--header-stripe));
+  --bottom-nav-h: 3.75rem;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --header-h: 4rem;
+  }
+}
+
+/*
+ * Public app theme — dark, scores-first. Scoped to the public shell
+ * (.theme-dark) so the admin dashboard and operator console keep their own
+ * light theme. Every Tailwind colour utility reads these variables, so the
+ * same components re-skin without per-component colour forks.
+ * Contrast (WCAG AA) checked for: ink / ink-muted / ink-faint / brand-fg /
+ * live on canvas, surface and subtle; white on brand-700/600; canvas on live,
+ * win, loss, draw.
+ */
+.theme-dark {
+  color-scheme: dark;
+
+  --color-brand-50: #2a1219;
+  --color-brand-100: #3a1822;
+  --color-brand-200: #5a2232;
+  --color-brand-300: #f08aa0;
+  --color-brand-500: #e04a6c;
+  --color-brand-600: #c62a50;
+  --color-brand-700: #b01e43; /* fills — white text 6.7:1 */
+  --color-brand-800: #921838;
+  --color-brand-900: #420b1a;
+  --color-brand-fg: #f27a92; /* text/icons — 6.7:1 on surface */
+
+  --color-accent-100: #2b2312;
+  --color-accent-300: #8a6a1e;
+  --color-accent-700: #fbc964;
+
+  --color-chrome: #08090b;
+  --color-canvas: #0d0e11;
+  --color-surface: #16181c;
+  --color-subtle: #1e2126;
+  --color-line: #262a30;
+  --color-line-strong: #353a42;
+  --color-ink: #f3f4f6;
+  --color-ink-muted: #a3a9b2;
+  --color-ink-faint: #858c96;
+
+  --color-live: #ff5a36; /* LIVE minute / dot — 5.7:1 on surface; fills take text-canvas */
+  --color-live-soft: #2a1612;
+
+  /* Tighter corners: lists read as one sheet, not floating cards. */
+  --radius-card: 0.5rem;
+
+  --color-win: #22c55e;
+  --color-draw: #858c96;
+  --color-loss: #f05252;
+
+  --color-warn: #fbbf24;
+  --color-warn-soft: #2a2410;
+
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+/* The page behind the shell (overscroll, safe areas) matches the theme. */
+html:has(.theme-dark),
+html:has(.theme-dark) body {
+  background: #0d0e11;
+  color-scheme: dark;
 }
 
 html {

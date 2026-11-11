@@ -1,9 +1,9 @@
 import type { FormResult } from "@/lib/types";
 
 const STYLE = {
-  W: "bg-win text-white",
-  D: "bg-draw text-white",
-  L: "bg-loss text-white",
+  W: "bg-win text-canvas",
+  D: "bg-draw text-canvas",
+  L: "bg-loss text-canvas",
 } as const;
 
 const LABEL = { W: "Win", D: "Draw", L: "Loss" } as const;
