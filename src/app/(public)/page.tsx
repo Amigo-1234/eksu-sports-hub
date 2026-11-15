@@ -3,6 +3,11 @@ import { MatchesByCompetition, MatchesByDate } from "@/components/match/MatchLis
 import { LiveDot } from "@/components/match/MatchStatusLabel";
 import { StandingsTable } from "@/components/standings/StandingsTable";
 import { CompetitionLinkList } from "@/components/competition/CompetitionLinkList";
+import { OpenOnboardingButton } from "@/components/onboarding/Onboarding";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { cookies } from "next/headers";
+import { THEME_COOKIE, parseTheme } from "@/lib/theme";
+import { BellIcon, DownloadIcon } from "@/components/ui/icons";
 import { DemoNotice } from "@/components/ui/DemoNotice";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -160,6 +165,17 @@ export default async function HomePage() {
               <SectionHeader id="competitions" title="Competitions" href="/competitions" linkLabel="All" />
               <CompetitionLinkList competitions={competitions} />
             </section>
+            <OpenOnboardingButton className="flex w-full items-center gap-3 rounded-card border border-line bg-surface px-3 py-3 text-left shadow-card transition-colors hover:bg-subtle">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-fg" aria-hidden="true">
+                <DownloadIcon size={18} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold">Install the app &amp; get match alerts</span>
+                <span className="block text-xs text-ink-muted">Home Screen access, goals and results as they happen</span>
+              </span>
+              <BellIcon size={18} className="shrink-0 text-ink-faint" />
+            </OpenOnboardingButton>
+            <ThemeToggle variant="row" initial={parseTheme((await cookies()).get(THEME_COOKIE)?.value)} className="lg:hidden" />
           </aside>
         </div>
       )}

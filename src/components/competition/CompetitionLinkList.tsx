@@ -26,7 +26,7 @@ export function CompetitionBadge({ competition, size = 36 }: { competition: Comp
 
 export function CompetitionLinkList({ competitions }: { competitions: Competition[] }) {
   return (
-    <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
+    <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-surface shadow-card">
       {competitions.map((c) => (
         <li key={c.id}>
           <Link

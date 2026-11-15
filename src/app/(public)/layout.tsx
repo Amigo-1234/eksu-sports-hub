@@ -1,8 +1,8 @@
 import type { Viewport } from "next";
 import { PublicShell } from "@/components/layout/PublicShell";
 
-/** The public app is dark; match the browser UI to the header chrome. */
-export const viewport: Viewport = { themeColor: "#08090b" };
+/** Light by default: match the browser UI to the white header. */
+export const viewport: Viewport = { themeColor: "#ffffff" };
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return <PublicShell>{children}</PublicShell>;

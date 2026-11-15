@@ -1,8 +1,12 @@
 import type { ReactNode } from "react";
+import { cookies } from "next/headers";
+import { THEME_CLASS, THEME_COOKIE, parseTheme } from "@/lib/theme";
 import { AppHeader } from "./AppHeader";
 import { BottomNav } from "./BottomNav";
 import { SiteFooter } from "./SiteFooter";
 import { AlertsProvider } from "@/components/notifications/AlertsProvider";
+import { Onboarding } from "@/components/onboarding/Onboarding";
+import { INSTALL_CAPTURE_SCRIPT } from "@/components/onboarding/install-prompt";
 import { NavigationTracker } from "@/components/ui/BackLink";
 import { DATA_SOURCE_KIND, getMatches } from "@/lib/data";
 import { pushNotificationsEnabled } from "@/lib/notifications/server";
@@ -18,11 +22,12 @@ async function liveMatchCount(): Promise<number> {
 
 /** Chrome for the public app: header, content area, footer, bottom nav. */
 export async function PublicShell({ children }: { children: ReactNode }) {
-  const liveCount = await liveMatchCount();
+  const [liveCount, jar] = await Promise.all([liveMatchCount(), cookies()]);
+  const theme = parseTheme(jar.get(THEME_COOKIE)?.value);
   // Alerts need real match IDs (live data) and the server flag; the VAPID key comes from Vault.
   const alerts = DATA_SOURCE_KIND === "live" && pushNotificationsEnabled();
   return (
-    <div className="theme-dark flex min-h-dvh flex-col bg-canvas text-ink">
+    <div data-theme-root className={`${theme === "dark" ? THEME_CLASS : ""} flex min-h-dvh flex-col bg-canvas text-ink`}>
     <AlertsProvider available={alerts}>
       <a
         href="#main"
@@ -30,7 +35,7 @@ export async function PublicShell({ children }: { children: ReactNode }) {
       >
         Skip to content
       </a>
-      <AppHeader liveCount={liveCount} />
+      <AppHeader liveCount={liveCount} theme={theme} />
       <main
         id="main"
         className="mx-auto w-full max-w-7xl flex-1 px-3 pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+1.25rem)] sm:px-4 lg:pb-12"
@@ -40,6 +45,9 @@ export async function PublicShell({ children }: { children: ReactNode }) {
       <SiteFooter />
       <BottomNav liveCount={liveCount} />
       <NavigationTracker />
+      <Onboarding />
+      {/* Capture the native install prompt before hydration (it can fire early). */}
+      <script dangerouslySetInnerHTML={{ __html: INSTALL_CAPTURE_SCRIPT }} />
     </AlertsProvider>
     </div>
   );

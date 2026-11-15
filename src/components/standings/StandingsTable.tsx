@@ -42,7 +42,7 @@ export function StandingsTable({
   const cols = compact ? COLS.filter((c) => c.key === "played" || c.key === "goalDifference") : COLS;
 
   return (
-    <div className="overflow-hidden rounded-card border border-line bg-surface">
+    <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
       {title && (
         <p className="truncate border-b border-line bg-subtle/70 px-3 py-2 text-[12px] font-bold tracking-[0.02em] text-ink uppercase" aria-hidden="true">
           {title}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EksuLogo } from "./EksuLogo";
+import { OpenOnboardingButton } from "@/components/onboarding/Onboarding";
 
 export function SiteFooter() {
   return (
@@ -15,6 +16,7 @@ export function SiteFooter() {
         <nav aria-label="Footer" className="flex items-center gap-4">
           <Link href="/competitions" className="hover:text-ink">Competitions</Link>
           <Link href="/register" className="hover:text-ink">Register</Link>
+          <OpenOnboardingButton className="hover:text-ink">Install app &amp; alerts</OpenOnboardingButton>
           <span>All times are West Africa Time (WAT).</span>
         </nav>
       </div>

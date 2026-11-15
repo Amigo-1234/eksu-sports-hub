@@ -29,7 +29,7 @@ export function CompetitionMatchGroup({
   const liveCount = group.matches.filter((m) => isLive(m.status)).length;
   const rounds = roundsOf(group);
   return (
-    <section className="overflow-hidden rounded-card border border-line bg-surface">
+    <section className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
       <H>
         <Link
           href={`/competitions/${group.competition.id}`}
@@ -125,7 +125,7 @@ export function MatchCardList({
   showCompetition?: boolean;
 }) {
   return (
-    <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
+    <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-surface shadow-card">
       {matches.map((m) => (
         <li key={m.id}>
           <MatchRow match={m} serverNow={serverNow} showCompetition={showCompetition} showDate />

@@ -19,7 +19,7 @@ export function EmptyState({
   compact?: boolean;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-card border border-line bg-surface px-3 py-3 sm:px-4">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-card border border-line bg-surface px-3 py-3 sm:px-4 shadow-card">
       {icon && (
         <span className="grid size-9 shrink-0 place-items-center rounded-full bg-subtle text-ink-faint" aria-hidden="true">
           {icon}

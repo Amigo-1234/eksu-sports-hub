@@ -31,11 +31,11 @@
   --color-chrome: #ffffff;
 
   /* Neutrals */
-  --color-canvas: #f4f2f1; /* app background */
+  --color-canvas: #f6f6f8; /* app background — clean, near-white */
   --color-surface: #ffffff; /* cards, rows */
-  --color-subtle: #f0edec; /* inset / hover */
-  --color-line: #e5e0de; /* borders, dividers */
-  --color-line-strong: #d3ccc9;
+  --color-subtle: #f1f1f4; /* inset / hover */
+  --color-line: #e6e6eb; /* borders, dividers */
+  --color-line-strong: #d3d3da;
   --color-ink: #1c1719; /* primary text */
   --color-ink-muted: #564d50; /* secondary text */
   --color-ink-faint: #736a6d; /* tertiary text, still AA on white */
@@ -62,6 +62,9 @@
   --font-display: var(--font-barlow), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
   --radius-card: 0.75rem;
+
+  /* Soft elevation for cards on the light theme (none on dark). */
+  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.05), 0 1px 3px rgb(16 24 40 / 0.04);
 
   --animate-live-pulse: live-pulse 1.8s ease-out infinite;
 
@@ -135,6 +138,7 @@
 
   /* Tighter corners: lists read as one sheet, not floating cards. */
   --radius-card: 0.5rem;
+  --shadow-card: none;
 
   --color-win: #22c55e;
   --color-draw: #858c96;
@@ -192,4 +196,27 @@ body {
 
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* First-visit onboarding (disabled automatically under prefers-reduced-motion via motion-safe:). */
+@keyframes onb-rise {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes onb-up {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes onb-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes onb-pulse {
+  0% { transform: scale(0.85); opacity: 0.9; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+@keyframes onb-ring {
+  0%, 60%, 100% { transform: translateX(-50%) rotate(0); }
+  8%, 24% { transform: translateX(-50%) rotate(-12deg); }
+  16%, 32% { transform: translateX(-50%) rotate(12deg); }
 }

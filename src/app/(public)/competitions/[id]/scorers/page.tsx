@@ -48,7 +48,7 @@ export default async function CompetitionScorers({ params }: PageProps<"/competi
                     <td className="px-2 py-2 text-center">
                       <span
                         className={`inline-grid h-6 min-w-6 place-items-center rounded px-1 text-[12px] font-bold tabular-nums ${
-                          r.rank === 1 ? "bg-accent-400 text-canvas" : "text-ink-muted"
+                          r.rank === 1 ? "bg-accent-400 text-brand-900" : "text-ink-muted"
                         }`}
                       >
                         {tied ? `=${r.rank}` : r.rank}

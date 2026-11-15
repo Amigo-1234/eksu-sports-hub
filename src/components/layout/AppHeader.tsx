@@ -3,6 +3,8 @@ import { DesktopNav } from "./DesktopNav";
 import { EksuLogo } from "./EksuLogo";
 import { HeaderAlertsLink } from "@/components/notifications/HeaderAlertsLink";
 import { ShirtIcon, TrophyIcon } from "@/components/ui/icons";
+import type { SiteTheme } from "@/lib/theme";
+import { ThemeToggle } from "./ThemeToggle";
 
 const iconBtn =
   "grid size-9 shrink-0 place-items-center rounded-full text-ink-muted transition-colors hover:bg-subtle hover:text-ink min-[400px]:size-10";
@@ -11,7 +13,7 @@ const iconBtn =
  * Compact branded app bar. Primary nav lives here from lg up; phones and
  * tablets use the BottomNav and keep the secondary actions as icons.
  */
-export function AppHeader({ liveCount }: { liveCount: number }) {
+export function AppHeader({ liveCount, theme }: { liveCount: number; theme: SiteTheme }) {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-chrome">
       {/* EKSU stripe: burgundy with a gold lead */}
@@ -27,7 +29,7 @@ export function AppHeader({ liveCount }: { liveCount: number }) {
         >
           <EksuLogo plate priority heightClass="h-[31px] min-[360px]:h-[34px] min-[400px]:h-[36px] md:h-[44px]" />
           <span
-            className="flex flex-col font-display leading-none font-extrabold tracking-[0.04em] text-white uppercase"
+            className="flex flex-col font-display leading-none font-extrabold tracking-[0.04em] text-ink uppercase"
             aria-hidden="true"
           >
             <span className="text-[19px] min-[400px]:text-[21px] md:text-[26px]">Sports</span>
@@ -55,7 +57,12 @@ export function AppHeader({ liveCount }: { liveCount: number }) {
           <Link href="/register" aria-label="Register" className={`${iconBtn} max-[359px]:hidden lg:hidden`}>
             <ShirtIcon size={20} />
           </Link>
-          <Link href="/competitions" aria-label="Competitions" className={`${iconBtn} lg:hidden`}>
+          <Link
+            href="/competitions"
+            aria-label="Competitions"
+            // 320px phones: make room for the live pill while matches are on.
+            className={`${iconBtn} lg:hidden ${liveCount > 0 ? "max-[359px]:hidden" : ""}`}
+          >
             <TrophyIcon size={20} />
           </Link>
           <Link
@@ -65,6 +72,7 @@ export function AppHeader({ liveCount }: { liveCount: number }) {
             <ShirtIcon size={16} className="text-brand-fg" />
             Register
           </Link>
+          <ThemeToggle initial={theme} className="hidden lg:grid" />
           <HeaderAlertsLink />
         </div>
       </div>

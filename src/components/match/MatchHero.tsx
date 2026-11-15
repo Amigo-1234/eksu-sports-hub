@@ -107,14 +107,14 @@ export function MatchHero({ match, serverNow }: { match: MatchDetail; serverNow:
   return (
     <section
       aria-label="Scoreboard"
-      className="relative -mx-3 overflow-hidden border-y border-line bg-surface sm:mx-0 sm:rounded-card sm:border-x"
+      className="relative -mx-3 overflow-hidden border-y border-line bg-surface sm:mx-0 sm:rounded-card sm:border-x sm:shadow-card"
     >
       <span className="absolute inset-x-0 top-0 h-[3px] bg-brand-700" aria-hidden="true" />
       {demo ? (
         <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-b border-line px-4 pt-3 pb-2 text-center">
           <Link
             href={`/competitions/${match.competition.id}`}
-            className="rounded-full bg-accent-400 px-2.5 py-0.5 text-[11px] font-black tracking-wider text-canvas uppercase hover:underline"
+            className="rounded-full bg-accent-400 px-2.5 py-0.5 text-[11px] font-black tracking-wider text-brand-900 uppercase hover:underline"
           >
             {demo.badge}
           </Link>
