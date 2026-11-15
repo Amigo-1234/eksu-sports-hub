@@ -107,13 +107,19 @@ export function Scoreboard({ seed, state, now }: { seed: AssignmentSeed; state: 
 
 function TeamSide({ team, side, align = "start" }: { team: AssignmentSeed["match"]["homeTeam"]; side: string; align?: "start" | "end" }) {
   return (
-    <div className={`flex min-w-0 items-center gap-2 ${align === "end" ? "flex-row-reverse text-right" : ""}`}>
+    // Narrow phones stack the crest above the name so long single-word names
+    // (e.g. "PATHFINDER") get the full column instead of being clipped mid-word.
+    <div
+      className={`flex min-w-0 gap-1 max-[399px]:flex-col min-[400px]:items-center min-[400px]:gap-2 ${
+        align === "end" ? "text-right max-[399px]:items-end min-[400px]:flex-row-reverse" : "max-[399px]:items-start"
+      }`}
+    >
       <TeamCrest team={team} size="md" />
-      <div className="min-w-0">
+      <div className="w-full min-w-0">
         <p className="text-[10px] font-extrabold tracking-widest text-ink-muted uppercase">{side}</p>
-        <p className="text-[15px] leading-tight font-extrabold">
+        <p className="text-[15px] leading-tight font-extrabold" title={team.shortName}>
           <span className="min-[360px]:hidden">{team.code}</span>
-          <span className="line-clamp-2 max-[359px]:hidden">{team.shortName}</span>
+          <span className="line-clamp-2 hyphens-auto [overflow-wrap:anywhere] max-[359px]:hidden">{team.shortName}</span>
         </p>
       </div>
     </div>
