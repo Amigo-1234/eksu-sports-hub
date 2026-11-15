@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { CalendarIcon, ChevronRightIcon, ClockIcon } from "@/components/ui/icons";
 import { LiveScoresProvider } from "@/components/realtime/LiveScores";
+import { NewsSection } from "@/components/news/NewsSection";
 import { DATA_SOURCE_KIND, getCompetitions, getMatches, getNow, getStandings } from "@/lib/data";
 import { dateKey, formatKickoff, formatLongDate } from "@/lib/format";
 import { matchHref } from "@/lib/match";
@@ -142,6 +143,8 @@ export default async function HomePage() {
                 />
               )}
             </section>
+
+            <NewsSection />
           </div>
 
           <aside className="min-w-0 space-y-5 lg:sticky lg:top-[calc(var(--header-total)+1rem)] lg:self-start" aria-label="Tables and competitions">
