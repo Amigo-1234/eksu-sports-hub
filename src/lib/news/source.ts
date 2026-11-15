@@ -1,5 +1,6 @@
 import "server-only";
-import { parseNewsFeed, type NewsPage } from "./feed";
+import { parseNewsFeed, type NewsItem, type NewsPage } from "./feed";
+import { publishedStories, type Story } from "./stories";
 
 /**
  * Server-side, read-only fetch of published Sports News previews from Amigo
@@ -14,7 +15,12 @@ export const NEWS_PAGE_SIZE = 12;
 
 export async function getNews({ page = 1, limit = NEWS_PAGE_SIZE }: { page?: number; limit?: number } = {}): Promise<NewsPage> {
   const feed = process.env.AMIGO_NEWS_FEED_URL;
-  if (!feed) return { status: "unconfigured", items: [], hasMore: false };
+  if (!feed) {
+    // Amigo World not launched yet: stories published on EKSU Sports Hub itself.
+    const all = publishedStories().map(storyItem);
+    const start = (Math.max(1, Math.floor(page)) - 1) * limit;
+    return { status: "ok", items: all.slice(start, start + limit), hasMore: all.length > start + limit };
+  }
   let articleHost: string | null = null;
   try {
     const origin = process.env.AMIGO_WORLD_ORIGIN;
@@ -32,4 +38,24 @@ export async function getNews({ page = 1, limit = NEWS_PAGE_SIZE }: { page?: num
   } catch {
     return { status: "unavailable", items: [], hasMore: false };
   }
+}
+
+/** A Sports Hub story as a preview card (full story at /news/<id> on this site). */
+export function storyItem(s: Story): NewsItem {
+  return {
+    id: s.id,
+    headline: s.headline,
+    summary: s.summary,
+    category: s.category,
+    kind: s.kind,
+    publishedAt: s.publishedAt,
+    url: `/news/${s.id}`,
+    imageUrl: s.image.src,
+    imageAlt: s.image.alt,
+    imageCredit: s.imageCredit,
+    featured: s.featured,
+    matchId: s.matchId,
+    teamId: null,
+    competitionId: null,
+  };
 }

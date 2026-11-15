@@ -49,3 +49,16 @@ test("feed: newest first, duplicates removed, bad payloads tolerated", () => {
   assert.deepEqual(parseNewsFeed(null, HOST), { items: [], hasMore: false });
   assert.deepEqual(parseNewsFeed({ items: "nope" }, HOST), { items: [], hasMore: false });
 });
+
+import { getStory, publishedStories, STORIES } from "../src/lib/news/stories.ts";
+
+test("Sports Hub stories: only published ones are listed; each has an image, summary and internal page", () => {
+  const ids = publishedStories().map((s) => s.id);
+  assert.ok(ids.includes("downfall-lead-school-gate-at-half-time"));
+  for (const s of STORIES.filter((x) => !x.published)) assert.equal(getStory(s.id), null);
+  for (const s of publishedStories()) {
+    assert.ok(s.headline && s.summary && s.body.length && s.image.src.startsWith("/news/") && s.image.alt);
+    assert.ok(!/amigo/i.test(JSON.stringify(s)), "no Amigo links until it launches");
+  }
+  assert.equal(getStory("does-not-exist"), null);
+});

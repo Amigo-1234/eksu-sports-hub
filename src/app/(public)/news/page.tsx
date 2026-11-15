@@ -7,7 +7,7 @@ import { getNews } from "@/lib/news/source";
 
 export const metadata: Metadata = {
   title: "Sports News",
-  description: "EKSU sports news — match reports, player spotlights and team updates. Read the full stories and join the conversation on Amigo World.",
+  description: "EKSU sports news — match reports, player spotlights and team updates.",
 };
 
 /** Published Sports News previews, newest first, 12 per page. */
@@ -20,7 +20,7 @@ export default async function NewsPage({ searchParams }: PageProps<"/news">) {
     <div className="space-y-4 pt-4">
       <header>
         <h1 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">Sports News</h1>
-        <p className="text-sm text-ink-muted">Follow the game here. Read the full stories and join the conversation on Amigo World.</p>
+        <p className="text-sm text-ink-muted">Match reports, player spotlights and team updates.</p>
       </header>
       {items.length === 0 ? (
         status === "unavailable" ? (
