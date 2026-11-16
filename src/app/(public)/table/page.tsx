@@ -4,7 +4,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterChips } from "@/components/ui/FilterChips";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { TableIcon } from "@/components/ui/icons";
-import { getCompetitions, getStandings } from "@/lib/data";
+import { AutoRefresh } from "@/components/ui/AutoRefresh";
+import { getCompetitions, getMatches, getStandings } from "@/lib/data";
 import { param } from "@/lib/filters";
 import { promotionFor } from "@/lib/competition";
 
@@ -24,12 +25,14 @@ export default async function TablePage({ searchParams }: PageProps<"/table">) {
     );
   }
 
-  const rows = await getStandings(selected.id);
+  const [rows, live] = await Promise.all([getStandings(selected.id), getMatches({ scope: "live", competitionId: selected.id })]);
   const promotion = promotionFor(selected);
 
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Tables" subtitle={`${selected.name} · ${selected.season}`} />
+      {/* Standings change at full-time: refresh only while this league has a match in play. */}
+      {live.length > 0 && <AutoRefresh seconds={60} />}
       <FilterChips
         label="Choose competition"
         options={leagues.map((c) => ({

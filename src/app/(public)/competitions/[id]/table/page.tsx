@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { StandingsTable } from "@/components/standings/StandingsTable";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { TableIcon } from "@/components/ui/icons";
-import { getCompetition, getStandings } from "@/lib/data";
+import { AutoRefresh } from "@/components/ui/AutoRefresh";
+import { getCompetition, getMatches, getStandings } from "@/lib/data";
 import { promotionFor } from "@/lib/competition";
 
 export async function generateMetadata({ params }: PageProps<"/competitions/[id]/table">): Promise<Metadata> {
@@ -27,10 +28,12 @@ export default async function CompetitionTable({ params }: PageProps<"/competiti
     );
   }
 
-  const rows = await getStandings(id);
+  const [rows, live] = await Promise.all([getStandings(id), getMatches({ scope: "live", competitionId: id })]);
   const promotion = promotionFor(competition);
   return rows.length > 0 ? (
     <>
+      {/* Standings change at full-time: refresh only while this competition has a match in play. */}
+      {live.length > 0 && <AutoRefresh seconds={60} />}
       <StandingsTable
         rows={rows}
         caption={`${competition.name} standings`}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { HeadToHeadPanel, type PreMatchTeam } from "@/components/match/MatchPanels";
 import { LiveLineupsPanel, LiveMatchHero, LiveMatchProvider, LiveStatsPanel, LiveSummaryPanel } from "@/components/realtime/LiveMatch";
+import { LiveMatchAlerts, LiveSoundControls } from "@/components/realtime/LiveAlerts";
 import { MatchTabs } from "@/components/match/MatchTabs";
 import { MatchAlertsButton } from "@/components/notifications/MatchAlertsButton";
 import { AudienceTracker } from "@/components/audience/AudienceTracker";
@@ -52,7 +53,9 @@ export default async function MatchPage({ params }: PageProps<"/matches/[id]">) 
     <div className="pt-2 sm:pt-4">
       <BackLink fallbackHref="/fixtures" />
       <LiveMatchHero serverNow={now} />
-      <div className="mt-3 flex justify-end empty:hidden">
+      <LiveMatchAlerts />
+      <div className="mt-3 flex flex-wrap items-center justify-end gap-2 empty:hidden">
+        <LiveSoundControls />
         <MatchAlertsButton
           matchId={match.id}
           status={match.status}

@@ -7,6 +7,7 @@ import { NotAvailablePanel, StatsPanel, SummaryPanel, type PreMatchTeam } from "
 import { onResume, publicClient, subscribeHints } from "@/lib/realtime/client";
 import { applyFeed, knownSeq, shouldFetch } from "@/lib/realtime/matchSync";
 import { setServerTime } from "@/lib/realtime/serverTime";
+import { simulationSteps } from "./simulate";
 import { isLive } from "@/lib/status";
 import type { MatchDetail } from "@/lib/types";
 
@@ -29,6 +30,19 @@ export function LiveMatchProvider({
   children: ReactNode;
 }) {
   const [match, setMatch] = useState(initial);
+
+  // Demo data only: `?simulate` replays a scripted sequence (see ./simulate).
+  useEffect(() => {
+    if (enabled || !new URLSearchParams(window.location.search).has("simulate")) return;
+    const steps = simulationSteps();
+    let i = 0;
+    const t = setInterval(() => {
+      const step = steps[i++];
+      if (!step) return clearInterval(t);
+      setMatch((m) => step(m));
+    }, Number(new URLSearchParams(window.location.search).get("simulate")) || 4000);
+    return () => clearInterval(t);
+  }, [enabled]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -96,7 +110,7 @@ export function LiveMatchProvider({
   return <MatchCtx.Provider value={match}>{children}</MatchCtx.Provider>;
 }
 
-function useLiveMatch(): MatchDetail {
+export function useLiveMatch(): MatchDetail {
   const m = useContext(MatchCtx);
   if (!m) throw new Error("LiveMatchProvider missing");
   return m;

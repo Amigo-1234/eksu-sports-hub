@@ -17,7 +17,8 @@
     "test:registration": "node --experimental-strip-types --no-warnings --test tests/registration.test.ts",
     "test:notifications": "node --experimental-strip-types --no-warnings --test tests/notifications.test.ts",
     "test:audience": "node --experimental-strip-types --no-warnings --test tests/audience.test.ts",
-    "test:news": "node --experimental-strip-types --no-warnings --test tests/news.test.ts"
+    "test:news": "node --experimental-strip-types --no-warnings --test tests/news.test.ts",
+    "test:live": "node --experimental-strip-types --no-warnings --test tests/live-alerts.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
