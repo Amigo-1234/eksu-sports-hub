@@ -21,6 +21,8 @@ export interface Story {
   gallery: { src: string; alt: string; width: number; height: number }[];
   imageCredit: string | null;
   matchId: string | null;
+  /** Byline. Defaults to the EKSU Sports Hub desk; never an invented person. */
+  author?: string;
 }
 
 const DIR = "/news/2026-11-15-downfall-school-gate";

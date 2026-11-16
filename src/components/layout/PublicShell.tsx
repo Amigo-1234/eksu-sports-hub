@@ -11,6 +11,7 @@ import { INSTALL_CAPTURE_SCRIPT } from "@/components/onboarding/install-prompt";
 import { NavigationTracker } from "@/components/ui/BackLink";
 import { DATA_SOURCE_KIND, getMatches } from "@/lib/data";
 import { pushNotificationsEnabled } from "@/lib/notifications/server";
+import { getNews } from "@/lib/news/source";
 
 async function liveMatchCount(): Promise<number> {
   try {
@@ -21,9 +22,19 @@ async function liveMatchCount(): Promise<number> {
   }
 }
 
+/** Publication time of the newest published article (drives the News "new" dot). */
+async function latestNewsAt(): Promise<number | null> {
+  try {
+    const t = Date.parse((await getNews({ page: 1, limit: 1 })).items[0]?.publishedAt ?? "");
+    return Number.isNaN(t) ? null : t;
+  } catch {
+    return null; // news must never take the shell down
+  }
+}
+
 /** Chrome for the public app: header, content area, footer, bottom nav. */
 export async function PublicShell({ children }: { children: ReactNode }) {
-  const [liveCount, jar] = await Promise.all([liveMatchCount(), cookies()]);
+  const [liveCount, jar, latestNews] = await Promise.all([liveMatchCount(), cookies(), latestNewsAt()]);
   const theme = parseTheme(jar.get(THEME_COOKIE)?.value);
   // Alerts need real match IDs (live data) and the server flag; the VAPID key comes from Vault.
   const alerts = DATA_SOURCE_KIND === "live" && pushNotificationsEnabled();
@@ -38,7 +49,7 @@ export async function PublicShell({ children }: { children: ReactNode }) {
       >
         Skip to content
       </a>
-      <AppHeader liveCount={liveCount} theme={theme} />
+      <AppHeader liveCount={liveCount} theme={theme} latestNews={latestNews} />
       <main
         id="main"
         className="mx-auto w-full max-w-7xl flex-1 px-3 pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+1.25rem)] sm:px-4 lg:pb-12"
@@ -46,7 +57,7 @@ export async function PublicShell({ children }: { children: ReactNode }) {
         {children}
       </main>
       <SiteFooter />
-      <BottomNav liveCount={liveCount} />
+      <BottomNav liveCount={liveCount} latestNews={latestNews} />
       <NavigationTracker />
       <VisitorGate enabled={visitors} />
       <Onboarding />

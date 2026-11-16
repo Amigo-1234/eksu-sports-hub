@@ -28,6 +28,10 @@ const ev =
 const goal = ev("GOAL");
 const pen = ev("PENALTY_GOAL");
 const penMiss = ev("PENALTY_MISS");
+const penAwarded = ev("PENALTY_AWARDED");
+const penSaved = ev("PENALTY_SAVED");
+const injury = ev("INJURY");
+const y2 = ev("SECOND_YELLOW");
 /** `side` is the team of the player who put it into their own net. */
 const og = ev("OWN_GOAL");
 const yc = ev("YELLOW_CARD");
@@ -120,8 +124,9 @@ const fixtures: FixtureSpec[] = [
     disposition: "POSTPONED", statusNote: "Postponed due to a waterlogged pitch. New date to be announced." },
   { id: "ifc-md4-sci-art", competitionId: IFC, round: "Matchday 4", home: "fac-sci", away: "fac-art", venue: MAIN, when: { day: -3, time: "16:30" }, played: true,
     events: [
-      goal("H", 6, 9), pen("H", 21, 10), goal("A", 38, 9), yc("A", 39, 4),
-      sub("H", 60, 7, 15), goal("H", 74, 15), sub("A", 75, 11, 18), goal("H", "90+3", 9),
+      goal("H", 6, 9), penAwarded("H", 20, 0), pen("H", 21, 10), goal("A", 38, 9), yc("A", 39, 4),
+      injury("A", 52, 6), penAwarded("A", 58, 0), penSaved("A", 59, 9),
+      sub("H", 60, 7, 15), goal("H", 74, 15), sub("A", 75, 11, 18), y2("A", 81, 4), goal("H", "90+3", 9),
     ] },
   { id: "ifc-md4-eng-law", competitionId: IFC, round: "Matchday 4", home: "fac-eng", away: "fac-law", venue: EDUF, when: { day: -3, time: "16:30" }, played: true,
     events: [
@@ -228,8 +233,9 @@ function resolveTiming(when: When, anchor: number) {
   return { kickoff: roundKickoff(periodStart - HALF - BREAK), phase: "2H" as const, periodStart };
 }
 
+/** 0 = no player recorded (e.g. a penalty awarded to a team). */
 function toPlayer(n: number): PlayerRef {
-  return { shirtNumber: n };
+  return { shirtNumber: n === 0 ? null : n };
 }
 
 function minuteSortKey(e: { minute: number; addedTime?: number }) {

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { CompetitionBadge, competitionMeta } from "@/components/competition/CompetitionLinkList";
+import { BackLink } from "@/components/ui/BackLink";
 import { LinkTabs } from "@/components/ui/LinkTabs";
 import { getCompetition } from "@/lib/data";
 
@@ -21,7 +22,10 @@ export default async function CompetitionLayout({ children, params }: LayoutProp
 
   return (
     <>
-      <div className="flex items-center gap-3 pt-3 pb-3 sm:pt-5">
+      <div className="pt-2 sm:pt-4">
+        <BackLink fallbackHref="/competitions" label="Competitions" />
+      </div>
+      <div className="flex items-center gap-3 pb-3">
         <CompetitionBadge competition={competition} size={44} />
         <div className="min-w-0">
           <h1 className="font-display text-[22px] leading-[1.05] font-extrabold tracking-[0.01em] uppercase sm:text-[28px]">

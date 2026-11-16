@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NewsDot } from "@/components/news/NewsDot";
 import { NAV_ITEMS, isActivePath } from "./navigation";
 
 /** Header category nav (lg+): text tabs with an underline for the current section. */
-export function DesktopNav({ liveCount }: { liveCount: number }) {
+export function DesktopNav({ liveCount, latestNews }: { liveCount: number; latestNews: number | null }) {
   const pathname = usePathname();
   return (
     <nav aria-label="Primary" className="hidden h-full lg:block">
@@ -32,7 +33,10 @@ export function DesktopNav({ liveCount }: { liveCount: number }) {
                     <span className="relative size-2 rounded-full bg-live" />
                   </span>
                 )}
-                {label}
+                <span className="relative">
+                  {label}
+                  {href === "/news" && <NewsDot latest={latestNews} className="-top-0.5 -right-2.5" />}
+                </span>
                 {isLive && liveCount > 0 && (
                   <span className="grid h-[18px] min-w-[18px] place-items-center rounded-full bg-live px-1 text-[11px] leading-none font-bold text-canvas tabular-nums">
                     {liveCount}

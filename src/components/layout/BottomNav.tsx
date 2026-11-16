@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NewsDot } from "@/components/news/NewsDot";
 import { NAV_ITEMS, isActivePath } from "./navigation";
 
 /** Thumb-reachable primary navigation for phones and tablets. Hidden from lg up. */
-export function BottomNav({ liveCount }: { liveCount: number }) {
+export function BottomNav({ liveCount, latestNews }: { liveCount: number; latestNews: number | null }) {
   const pathname = usePathname();
   const items = NAV_ITEMS.filter((i) => i.inBottomBar);
 
@@ -38,6 +39,7 @@ export function BottomNav({ liveCount }: { liveCount: number }) {
                     size={22}
                     className={isLiveTab && liveCount > 0 ? "text-live" : active ? "text-brand-fg" : undefined}
                   />
+                  {href === "/news" && <NewsDot latest={latestNews} className="-top-0.5 -right-1" />}
                   {isLiveTab && liveCount > 0 && (
                     <span className="absolute -top-1.5 -right-2.5 grid h-4 min-w-4 place-items-center rounded-full bg-live px-1 text-[10px] leading-none font-bold text-canvas tabular-nums">
                       {liveCount}

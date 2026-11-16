@@ -1,6 +1,6 @@
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { getNews } from "@/lib/news/source";
-import { NewsCard } from "./NewsCard";
+import { NewsHero, NewsRow } from "./NewsTiles";
 
 /**
  * Homepage Sports News: the featured story plus the latest few. Renders
@@ -15,12 +15,14 @@ export async function NewsSection({ limit = 4 }: { limit?: number }) {
   return (
     <section aria-labelledby="sports-news">
       <SectionHeader id="sports-news" title="Sports News" href="/news" linkLabel="All news" />
-      <div className="grid gap-3 sm:grid-cols-2">
-        <NewsCard item={lead} lead />
-        {rest.map((i) => (
-          <NewsCard key={i.id} item={i} />
-        ))}
-      </div>
+      <NewsHero item={lead} />
+      {rest.length > 0 && (
+        <div className="mt-1 divide-y divide-line">
+          {rest.map((i) => (
+            <NewsRow key={i.id} item={i} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

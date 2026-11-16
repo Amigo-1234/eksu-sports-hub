@@ -3,6 +3,7 @@ import {
   CalendarIcon,
   HomeIcon,
   LiveIcon,
+  NewsIcon,
   ResultsIcon,
   ShirtIcon,
   TableIcon,
@@ -22,7 +23,8 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/live", label: "Live", icon: LiveIcon, inBottomBar: true },
   { href: "/fixtures", label: "Fixtures", icon: CalendarIcon, inBottomBar: true },
   { href: "/results", label: "Results", icon: ResultsIcon, inBottomBar: true },
-  { href: "/table", label: "Table", icon: TableIcon, inBottomBar: true },
+  { href: "/table", label: "Table", icon: TableIcon, inBottomBar: false },
+  { href: "/news", label: "News", icon: NewsIcon, inBottomBar: true },
   { href: "/competitions", label: "Competitions", icon: TrophyIcon, inBottomBar: false },
   { href: "/register", label: "Register", icon: ShirtIcon, inBottomBar: false },
 ];

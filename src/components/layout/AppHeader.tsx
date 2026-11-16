@@ -13,7 +13,7 @@ const iconBtn =
  * Compact branded app bar. Primary nav lives here from lg up; phones and
  * tablets use the BottomNav and keep the secondary actions as icons.
  */
-export function AppHeader({ liveCount, theme }: { liveCount: number; theme: SiteTheme }) {
+export function AppHeader({ liveCount, theme, latestNews }: { liveCount: number; theme: SiteTheme; latestNews: number | null }) {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-chrome">
       {/* EKSU stripe: burgundy with a gold lead */}
@@ -37,7 +37,7 @@ export function AppHeader({ liveCount, theme }: { liveCount: number; theme: Site
           </span>
         </Link>
 
-        <DesktopNav liveCount={liveCount} />
+        <DesktopNav liveCount={liveCount} latestNews={latestNews} />
 
         <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
           {liveCount > 0 && (

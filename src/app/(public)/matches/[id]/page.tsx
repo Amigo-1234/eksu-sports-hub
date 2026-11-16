@@ -50,7 +50,7 @@ export default async function MatchPage({ params }: PageProps<"/matches/[id]">) 
   return (
     <LiveMatchProvider initial={match} enabled={DATA_SOURCE_KIND === "live"}>
     <div className="pt-2 sm:pt-4">
-      <BackLink />
+      <BackLink fallbackHref="/fixtures" />
       <LiveMatchHero serverNow={now} />
       <div className="mt-3 flex justify-end empty:hidden">
         <MatchAlertsButton

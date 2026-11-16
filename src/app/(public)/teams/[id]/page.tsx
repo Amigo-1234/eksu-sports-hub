@@ -50,7 +50,7 @@ export default async function TeamPage({ params }: PageProps<"/teams/[id]">) {
 
   return (
     <div className="pt-2 sm:pt-4">
-      <BackLink />
+      <BackLink fallbackHref="/competitions" />
       <section className="relative flex items-center gap-4 overflow-hidden rounded-card border border-line bg-surface p-4">
         <span className="absolute inset-x-0 top-0 h-[3px]" style={{ background: team.colors.primary }} aria-hidden="true" />
         <TeamCrest team={team} size="xl" />
