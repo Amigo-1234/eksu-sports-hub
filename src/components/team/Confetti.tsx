@@ -17,7 +17,7 @@ export function Confetti({ count = 42 }: { count?: number }) {
     };
   });
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden motion-reduce:hidden" aria-hidden="true">
+    <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden motion-reduce:hidden" aria-hidden="true">
       {pieces.map((p, i) => (
         <span
           key={i}

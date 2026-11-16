@@ -5,7 +5,7 @@ const GROUPS: { key: string; label: string }[] = [
   { key: "DF", label: "Defenders" },
   { key: "MF", label: "Midfielders" },
   { key: "FW", label: "Forwards" },
-  { key: "", label: "Squad" },
+  { key: "", label: "More players" },
 ];
 
 /** Public squad list grouped by position. Names, shirt numbers and positions only. */
