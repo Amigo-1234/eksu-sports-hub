@@ -1,4 +1,10 @@
+import Image from "next/image";
 import type { Team } from "@/lib/types";
+
+/** Official club crests supplied by the teams, keyed by team id (files in /public/crests). */
+const CRESTS: Record<string, string> = {
+  "e95b26a1-4a64-4f34-941b-e3bb94a78efc": "/crests/downfall-fc.png", // Downfall FC
+};
 
 const SIZES = {
   xs: 18,
@@ -19,11 +25,24 @@ export function TeamCrest({
   size = "md",
   className = "",
 }: {
-  team: Pick<Team, "code" | "colors" | "name">;
+  team: Pick<Team, "code" | "colors" | "name"> & { id?: string };
   size?: CrestSize;
   className?: string;
 }) {
   const px = SIZES[size];
+  const crest = team.id ? CRESTS[team.id] : undefined;
+  if (crest) {
+    return (
+      <Image
+        src={crest}
+        alt=""
+        aria-hidden="true"
+        width={px}
+        height={px}
+        className={`shrink-0 rounded-full ${className}`}
+      />
+    );
+  }
   const fontSize = team.code.length > 3 ? 10 : 12.5;
   return (
     <svg
