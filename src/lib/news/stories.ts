@@ -29,9 +29,30 @@ const FT = "/news/2026-11-15-downfall-school-gate-ft";
 
 export const STORIES: Story[] = [
   {
-    id: "downfall-beat-school-gate-3-0",
+    id: "preview-khe-v-downfall-17-nov",
     published: true,
     featured: true,
+    category: "UPDATE",
+    kind: "report",
+    publishedAt: "2026-11-16T20:30:00+01:00",
+    headline: "Preview: Downfall FC take on KHE in Tuesday friendly",
+    summary:
+      "Fresh from Sunday's 3–0 win over School Gate United, Downfall FC face KHE at 11:30 on Tuesday 17 November in a Sports Directorate friendly.",
+    body: [
+      "Downfall FC are back in action on Tuesday 17 November, when they face KHE in a Sports Directorate friendly. Kick-off is at 11:30 AM.",
+      "Downfall go into the game on the back of Sunday's 3–0 win over School Gate United, when goals from Al Ameen, Zico (penalty) and substitute Seeygo gave them a clean-sheet victory.",
+      "The match is a friendly, not part of any league or cup, so no points or table are at stake. It is the second of two friendlies on Tuesday, following Crystal Bams against Political Science at 10:00 AM.",
+      "The Sports Directorate has asked all teams to arrive at the pitch before their assigned time. Follow the match live on EKSU Sports Hub.",
+    ],
+    image: { src: `${FT}/shape.jpg`, alt: "Downfall FC in action against School Gate United on Sunday", width: 1600, height: 1200 },
+    gallery: [],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4705804f-a7c5-40df-bfd2-184bbb3d62df",
+  },
+  {
+    id: "downfall-beat-school-gate-3-0",
+    published: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-15T09:15:00+01:00",
