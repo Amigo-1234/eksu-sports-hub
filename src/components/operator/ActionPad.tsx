@@ -6,7 +6,7 @@ import type { OpEvent, OpMatchState } from "@/lib/operator/types";
 import { HoldButton } from "./HoldButton";
 import { EVENT_LABEL } from "./labels";
 
-export type SheetKind = "goal" | "card" | "sub" | "stoppage" | "pause" | "correct" | "finalise";
+export type SheetKind = "goal" | "card" | "sub" | "penalty" | "injury" | "stoppage" | "pause" | "correct" | "finalise";
 
 /**
  * Operator controls. Every enabled/disabled state comes from `available`
@@ -76,6 +76,22 @@ export function ActionPad({
           className="h-16 rounded-2xl border-[3px] border-ink bg-surface text-xl font-black tracking-wider text-ink uppercase disabled:border-line disabled:bg-subtle disabled:text-ink-faint"
         >
           ⇅ Sub
+        </button>
+        <button
+          type="button"
+          disabled={!canRecord}
+          onClick={() => onOpen("penalty")}
+          className="h-14 rounded-2xl border-[3px] border-ink bg-surface text-base font-black tracking-wider text-ink uppercase disabled:border-line disabled:bg-subtle disabled:text-ink-faint"
+        >
+          ◎ Penalty
+        </button>
+        <button
+          type="button"
+          disabled={!canRecord}
+          onClick={() => onOpen("injury")}
+          className="h-14 rounded-2xl border-[3px] border-ink bg-surface text-base font-black tracking-wider text-ink uppercase disabled:border-line disabled:bg-subtle disabled:text-ink-faint"
+        >
+          ✚ Injury
         </button>
       </div>
 

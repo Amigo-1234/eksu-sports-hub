@@ -17,11 +17,15 @@ const EVENT_LABEL: Record<MatchEventType, string> = {
   OWN_GOAL: "Own goal",
   PENALTY_GOAL: "Penalty",
   PENALTY_MISS: "Penalty missed",
+  PENALTY_AWARDED: "Penalty awarded",
+  PENALTY_SAVED: "Penalty saved",
   YELLOW_CARD: "Yellow card",
+  SECOND_YELLOW: "Second yellow",
   RED_CARD: "Red card",
   SUBSTITUTION: "Substitution",
   SUSPENSION_RETURN: "Return",
   EXCLUSION: "Exclusion",
+  INJURY: "Injury",
 };
 
 function lastEventText(e: MatchEvent, m: MatchSummary): string {

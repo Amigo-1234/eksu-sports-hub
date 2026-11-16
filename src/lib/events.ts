@@ -47,7 +47,8 @@ export function buildTimeline(m: MatchDetail): TimelineEntry[] {
 export function halfTimeScore(m: MatchDetail): Score {
   const s: Score = { home: 0, away: 0 };
   for (const e of m.events) {
-    if (e.minute <= 45 && isScoringEvent(e)) s[scoringSide(e, m)]++;
+    const firstHalf = e.period ? e.period === 1 : e.minute <= Math.ceil((m.clock?.halfSeconds ?? 45 * 60) / 60);
+    if (firstHalf && isScoringEvent(e)) s[scoringSide(e, m)]++;
   }
   return s;
 }

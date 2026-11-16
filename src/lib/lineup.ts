@@ -317,7 +317,7 @@ export function currentPitch(lineup: LineupLike, teamId: string, events: SubLike
   for (const e of events) {
     if (temporaryReds && e.teamId === teamId && e.player.shirtNumber != null) {
       const n = e.player.shirtNumber;
-      if (e.type === "RED_CARD" && onPitch.has(n)) {
+      if ((e.type === "RED_CARD" || e.type === "SECOND_YELLOW") && onPitch.has(n)) {
         vacated.set(n, onPitch.get(n)!);
         onPitch.delete(n);
         continue;

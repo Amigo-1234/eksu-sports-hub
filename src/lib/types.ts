@@ -140,9 +140,17 @@ export type MatchEventType =
   | "OWN_GOAL"
   | "PENALTY_GOAL"
   | "PENALTY_MISS"
+  /** Referee awards a penalty: never changes the score. */
+  | "PENALTY_AWARDED"
+  /** Penalty saved by the goalkeeper: never changes the score. */
+  | "PENALTY_SAVED"
   | "YELLOW_CARD"
+  /** Second booking: the player is sent off. */
+  | "SECOND_YELLOW"
   | "RED_CARD"
   | "SUBSTITUTION"
+  /** Play stopped for an injury (no medical details). */
+  | "INJURY"
   /** Special rules only: return after a temporary red-card suspension. */
   | "SUSPENSION_RETURN"
   /** Special rules only: permanent exclusion. */

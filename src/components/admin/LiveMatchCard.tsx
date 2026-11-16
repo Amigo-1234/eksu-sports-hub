@@ -16,6 +16,9 @@ const EVENT_LABEL: Record<string, string> = {
   SECOND_YELLOW: "Second yellow",
   RED_CARD: "Red card",
   SUBSTITUTION: "Substitution",
+  PENALTY_AWARDED: "Penalty awarded",
+  PENALTY_SAVED: "Penalty saved",
+  INJURY: "Injury",
 };
 export const eventLabel = (t: string) => EVENT_LABEL[t] ?? t;
 

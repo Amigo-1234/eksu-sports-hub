@@ -31,6 +31,12 @@ export type OpEventType =
   | "SUBSTITUTION"
   /** Recorded by the backend model; never changes the score. */
   | "PENALTY_MISS"
+  /** Referee awards a penalty (team only). Never changes the score. */
+  | "PENALTY_AWARDED"
+  /** Penalty saved. Never changes the score. */
+  | "PENALTY_SAVED"
+  /** Play stopped for an injury (team, optional player). No medical details. */
+  | "INJURY"
   /** Special rules only: operator-approved return after a temporary red-card suspension. */
   | "SUSPENSION_RETURN"
   /** Special rules only: permanent exclusion for serious or repeated misconduct (with a reason). */

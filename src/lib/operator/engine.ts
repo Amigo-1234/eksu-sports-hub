@@ -60,6 +60,9 @@ export const DUPLICATE_WINDOW_MS = 4000;
 
 export const SCORING_TYPES: readonly OpEventType[] = ["GOAL", "PENALTY_GOAL", "OWN_GOAL"];
 
+/** Events that may be recorded without a player (team only). */
+const SHIRT_OPTIONAL: readonly OpEventType[] = ["GOAL", "PENALTY_GOAL", "OWN_GOAL", "PENALTY_AWARDED", "PENALTY_MISS", "PENALTY_SAVED", "INJURY"];
+
 export const isScoring = (e: Pick<OpEvent, "type">) => SCORING_TYPES.includes(e.type);
 
 export const activeEvents = (s: OpMatchState) => s.events.filter((e) => !e.voided);
@@ -204,7 +207,7 @@ export function lastUndoable(s: OpMatchState): OpEvent | null {
 function validateEvent(s: OpMatchState, ev: NewEvent, now: number): string | null {
   const statuses = playerStatuses(s, ev.side);
   const st = (n: number | null | undefined) => (n == null ? undefined : statuses.get(n));
-  const needsShirt = ev.type !== "GOAL" && ev.type !== "PENALTY_GOAL" && ev.type !== "OWN_GOAL";
+  const needsShirt = !SHIRT_OPTIONAL.includes(ev.type);
 
   if (needsShirt && ev.shirt === null) return "Choose a shirt number";
   if (hasPlayerRules(s.rules)) {
@@ -258,6 +261,7 @@ function specialProblem(
     case "PENALTY_GOAL":
     case "OWN_GOAL":
     case "PENALTY_MISS":
+    case "PENALTY_SAVED":
       if (ev.shirt !== null && suspended) return `${no} is serving a suspension`;
       if (ev.shirt !== null && off) return `${no} is not on the pitch`;
       return null;

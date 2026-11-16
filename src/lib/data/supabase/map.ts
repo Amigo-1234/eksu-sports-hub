@@ -25,11 +25,14 @@ const EVENT: Record<string, MatchEventType> = {
   OWN_GOAL: "OWN_GOAL",
   PENALTY_MISS: "PENALTY_MISS",
   YELLOW_CARD: "YELLOW_CARD",
-  SECOND_YELLOW: "RED_CARD", // shown as the resulting red card
+  PENALTY_AWARDED: "PENALTY_AWARDED",
+  PENALTY_SAVED: "PENALTY_SAVED",
+  SECOND_YELLOW: "SECOND_YELLOW",
   RED_CARD: "RED_CARD",
   SUBSTITUTION: "SUBSTITUTION",
   SUSPENSION_RETURN: "SUSPENSION_RETURN",
   EXCLUSION: "EXCLUSION",
+  INJURY: "INJURY",
 };
 
 /** Public clock fields → UI clock (the same maths as the operator console). */

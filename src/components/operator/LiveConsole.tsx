@@ -16,6 +16,7 @@ import { DemoControls } from "./DemoControls";
 import { useFeedback } from "./Feedback";
 import { CardFlow } from "./flows/CardFlow";
 import { GoalFlow } from "./flows/GoalFlow";
+import { InjuryFlow, PenaltyFlow } from "./flows/PenaltyFlow";
 import { CorrectionFlow, FinaliseFlow, PauseFlow, StoppageFlow } from "./flows/SmallFlows";
 import { SubFlow } from "./flows/SubFlow";
 import { EVENT_LABEL } from "./labels";
@@ -31,6 +32,8 @@ const TITLES: Record<SheetKind, string> = {
   goal: "Goal",
   card: "Card",
   sub: "Substitution",
+  penalty: "Penalty",
+  injury: "Injury",
   stoppage: "Stoppage time",
   pause: "Pause clock",
   correct: "Correct an event",
@@ -155,6 +158,20 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
         )}
         {sheet === "sub" && (
           <SubFlow seed={seed} state={state} onDone={(eventId, label) => { close(); notify({ tone: "success", message: label, action: { label: "Undo", run: () => undoById(eventId) } }); }} />
+        )}
+        {sheet === "penalty" && (
+          <PenaltyFlow
+            seed={seed}
+            state={state}
+            onDone={(eventId, label, scored) => {
+              close();
+              if (scored) navigator.vibrate?.(30);
+              notify({ tone: "success", message: scored ? `${label} · ${scoreLine()}` : label, action: { label: "Undo", run: () => undoById(eventId) } });
+            }}
+          />
+        )}
+        {sheet === "injury" && (
+          <InjuryFlow seed={seed} state={state} onDone={(eventId, label) => { close(); notify({ tone: "success", message: label, action: { label: "Undo", run: () => undoById(eventId) } }); }} />
         )}
         {sheet === "stoppage" && (
           <StoppageFlow state={state} onDone={(m) => { close(); notify({ tone: "success", message: m ? `Stoppage +${m} announced` : "Stoppage cleared" }); }} />

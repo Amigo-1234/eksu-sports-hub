@@ -212,3 +212,53 @@ export const CheckIcon = (p: IconProps) => (
     <path d="M5 12.5 10 17.5 19 7" />
   </svg>
 );
+
+/** Newspaper: the News section. */
+export const NewsIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h10A1.5 1.5 0 0 1 17 5.5V19a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2V5.5Z" />
+    <path d="M17 9h2.5a.5.5 0 0 1 .5.5V19a2 2 0 0 1-2 2" />
+    <path d="M7.5 8h6M7.5 11.5h6M7.5 15h3.5" />
+  </svg>
+);
+
+/** Back arrow used by every back button. */
+export const BackArrowIcon = (p: IconProps) => (
+  <svg {...base({ strokeWidth: 2.2, ...p })}>
+    <path d="M19 12H5.5" />
+    <path d="m11 5.5-6.5 6.5 6.5 6.5" />
+  </svg>
+);
+
+/** Penalty spot with a ball: penalty awarded. */
+export const PenaltySpotIcon = (p: IconProps) => (
+  <svg {...base({ strokeWidth: 1.7, ...p })}>
+    <path d="M3 5h18M6 5v5h12V5" />
+    <circle cx="12" cy="16.5" r="3.5" />
+    <circle cx="12" cy="16.5" r="1" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+/** Gloved hand: penalty saved. */
+export const GloveIcon = (p: IconProps) => (
+  <svg {...base({ strokeWidth: 1.7, ...p })}>
+    <path d="M8 13V6a1.5 1.5 0 0 1 3 0v5M11 11V4.5a1.5 1.5 0 0 1 3 0V11M14 11V5.5a1.5 1.5 0 0 1 3 0V13" />
+    <path d="M8 11.5 6.6 10a1.6 1.6 0 0 0-2.4 2.1L7.5 17a6 6 0 0 0 5 3H13a4 4 0 0 0 4-4v-3" />
+  </svg>
+);
+
+/** Medical cross: injury stoppage (no medical detail). */
+export const MedicalIcon = (p: IconProps) => (
+  <svg {...base({ strokeWidth: 1.8, ...p })}>
+    <rect x="3.5" y="3.5" width="17" height="17" rx="4" />
+    <path d="M12 8v8M8 12h8" />
+  </svg>
+);
+
+/** Two cards (yellow behind red): a second yellow. */
+export const SecondYellowIcon = (p: IconProps) => (
+  <svg {...base({ ...p, stroke: "none" })}>
+    <rect x="4.5" y="4" width="10" height="15" rx="1.6" transform="rotate(-8 9.5 11.5)" className="fill-accent-400" />
+    <rect x="9.5" y="5" width="10" height="15" rx="1.6" transform="rotate(8 14.5 12.5)" className="fill-live" />
+  </svg>
+);

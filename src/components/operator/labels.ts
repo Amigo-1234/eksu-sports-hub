@@ -10,6 +10,9 @@ export const EVENT_LABEL: Record<OpEventType, string> = {
   RED_CARD: "Red card",
   SUBSTITUTION: "Substitution",
   PENALTY_MISS: "Penalty missed",
+  PENALTY_AWARDED: "Penalty awarded",
+  PENALTY_SAVED: "Penalty saved",
+  INJURY: "Injury",
   SUSPENSION_RETURN: "Returned after suspension",
   EXCLUSION: "Excluded (permanent)",
 };

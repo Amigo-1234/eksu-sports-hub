@@ -114,3 +114,42 @@ test("admin-only outcomes are never offered to operators", () => {
   assert.ok(!ops.has("ABANDON"));
   assert.ok(availableCommands(s, "admin").has("ABANDON"));
 });
+
+test("penalty awarded / saved / missed and injuries never change the score; a penalty goal counts once", () => {
+  let s: OpMatchState = { matchId: "m-pen", phase: "SCHEDULED", clock: initialClock(), events: [], log: [], version: 0 };
+  s = run(s, { command: "START_MATCH" }, T0);
+
+  // Awarded: team only, no player needed, score unchanged.
+  s = run(s, { command: "RECORD_EVENT", event: { type: "PENALTY_AWARDED", side: "home", shirt: null } }, T0 + 31.5 * MIN);
+  assert.equal(s.events.at(-1)!.type, "PENALTY_AWARDED");
+  assert.equal(s.events.at(-1)!.minute, 32);
+  assert.deepEqual(scored(s), { home: 0, away: 0 });
+  // Double tap on the award is caught as a duplicate.
+  assert.match(reject(s, { command: "RECORD_EVENT", event: { type: "PENALTY_AWARDED", side: "home", shirt: null } }, T0 + 31.5 * MIN + 500), /duplicate/);
+
+  // Scored: exactly one goal, and a double tap is rejected.
+  s = run(s, { command: "RECORD_EVENT", event: { type: "PENALTY_GOAL", side: "home", shirt: 9 } }, T0 + 33 * MIN);
+  assert.deepEqual(scored(s), { home: 1, away: 0 });
+  assert.match(reject(s, { command: "RECORD_EVENT", event: { type: "PENALTY_GOAL", side: "home", shirt: 9 } }, T0 + 33 * MIN + 700), /duplicate/);
+  assert.deepEqual(scored(s), { home: 1, away: 0 });
+
+  // Undo the penalty goal: voided (audit kept), score back to 0–0.
+  const goal = lastUndoable(s)!;
+  assert.equal(goal.type, "PENALTY_GOAL");
+  s = run(s, { command: "VOID_EVENT", eventId: goal.id, reason: "Undo" }, T0 + 33.2 * MIN);
+  assert.deepEqual(scored(s), { home: 0, away: 0 });
+  assert.ok(s.events.find((e) => e.id === goal.id)!.voided);
+
+  // Away penalty saved and missed, with and without a taker: no goals.
+  s = run(s, { command: "RECORD_EVENT", event: { type: "PENALTY_AWARDED", side: "away", shirt: null } }, T0 + 40 * MIN);
+  s = run(s, { command: "RECORD_EVENT", event: { type: "PENALTY_SAVED", side: "away", shirt: 10 } }, T0 + 41 * MIN);
+  s = run(s, { command: "RECORD_EVENT", event: { type: "PENALTY_MISS", side: "away", shirt: null } }, T0 + 42 * MIN);
+
+  // Injury: optional player, never scores.
+  s = run(s, { command: "RECORD_EVENT", event: { type: "INJURY", side: "home", shirt: null } }, T0 + 43 * MIN);
+  s = run(s, { command: "RECORD_EVENT", event: { type: "INJURY", side: "away", shirt: 4 } }, T0 + 44 * MIN);
+  assert.deepEqual(scored(s), { home: 0, away: 0 });
+
+  // Cards still need a player.
+  assert.match(reject(s, { command: "RECORD_EVENT", event: { type: "YELLOW_CARD", side: "home", shirt: null } }, T0 + 44.5 * MIN), /shirt/i);
+});

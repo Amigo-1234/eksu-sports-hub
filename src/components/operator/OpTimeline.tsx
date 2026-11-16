@@ -21,6 +21,9 @@ function EventIcon({ e }: { e: OpEvent }) {
   if (e.type === "SECOND_YELLOW") return <CardGlyph kind="SECOND_YELLOW" size={26} />;
   if (e.type === "SUBSTITUTION") return <span className="text-xl font-black">⇅</span>;
   if (e.type === "PENALTY_MISS") return <span className="text-lg font-black">✕</span>;
+  if (e.type === "PENALTY_AWARDED") return <span className="grid size-7 place-items-center rounded bg-ink text-[10px] font-black text-white">PEN</span>;
+  if (e.type === "PENALTY_SAVED") return <span className="text-lg font-black">🧤</span>;
+  if (e.type === "INJURY") return <span className="grid size-7 place-items-center rounded bg-loss text-base font-black text-white">+</span>;
   if (e.type === "SUSPENSION_RETURN") return <span className="text-xl font-black text-win">↩</span>;
   if (e.type === "EXCLUSION") return <span className="grid size-7 place-items-center rounded bg-live text-xs font-black text-white">EX</span>;
   return <span className="text-xl">⚽︎</span>;

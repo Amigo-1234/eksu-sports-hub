@@ -14,7 +14,11 @@ const EVENT_MAP: Partial<Record<MatchEventType, OpEventType>> = {
   YELLOW_CARD: "YELLOW_CARD",
   RED_CARD: "RED_CARD",
   SUBSTITUTION: "SUBSTITUTION",
-  // PENALTY_MISS is not recorded from the operator console yet.
+  PENALTY_MISS: "PENALTY_MISS",
+  PENALTY_AWARDED: "PENALTY_AWARDED",
+  PENALTY_SAVED: "PENALTY_SAVED",
+  SECOND_YELLOW: "SECOND_YELLOW",
+  INJURY: "INJURY",
 };
 
 function seedClock(m: MatchDetail): ClockState {

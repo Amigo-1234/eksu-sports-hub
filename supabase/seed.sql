@@ -26,6 +26,12 @@ insert into public.event_types (code, sport_id, name, requires_player) values
   ('SUSPENSION_RETURN', '20000000-0000-4000-8000-000000000001', 'Return after suspension', true),
   ('EXCLUSION',         '20000000-0000-4000-8000-000000000001', 'Permanent exclusion',     true)
 on conflict (code) do nothing;
+-- Added by migration 20261018002600 where event types already exist.
+insert into public.event_types (code, sport_id, name, requires_player) values
+  ('PENALTY_AWARDED', '20000000-0000-4000-8000-000000000001', 'Penalty awarded', false),
+  ('PENALTY_SAVED',   '20000000-0000-4000-8000-000000000001', 'Penalty saved',   false),
+  ('INJURY',          '20000000-0000-4000-8000-000000000001', 'Injury',          false)
+on conflict (code) do nothing;
 
 insert into public.seasons (id, name, starts_on, ends_on, is_current) values
   ('30000000-0000-4000-8000-000000000001', 'DEV 2026/27', '2026-08-01', '2027-07-31', true);
