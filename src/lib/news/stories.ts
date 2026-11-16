@@ -31,11 +31,39 @@ const FT = "/news/2026-11-15-downfall-school-gate-ft";
 
 const AMIGO = "/news/2026-11-17-amigo-unavailable";
 
+const ENG = "/news/2026-11-17-engineering-training";
+
 export const STORIES: Story[] = [
+  {
+    id: "engineering-training-ahead-of-competition",
+    published: true,
+    featured: true,
+    category: "TEAM_UPDATE",
+    kind: "report",
+    publishedAt: "2026-11-17T00:25:00+01:00",
+    headline: "Engineering turn up the intensity ahead of the new competition",
+    summary:
+      "Cones out, boots laced, no shortcuts: Engineering's footballers put in a hard shift on the training pitch, within sight of the university's main gate, as they build up to the upcoming competition.",
+    body: [
+      "Engineering are not waiting for the big kick-off to get serious. The team's footballers were out on the training pitch putting in the work ahead of the upcoming competition.",
+      "The session had a bit of everything: laps around the pitch to build the legs, quick-feet work weaving through the cones, and a small-sided game to finish, played out in the shadow of the Ekiti State University main gate.",
+      "The mood was sharp and the energy high, with players pushing each other through the drills and celebrating the good moments along the way.",
+      "Fixtures will appear on EKSU Sports Hub as soon as they are confirmed. Follow Engineering's journey, and every match, live here.",
+    ],
+    image: { src: `${ENG}/lead.jpg`, alt: "Engineering players in a small-sided game in front of the Ekiti State University main gate", width: 1200, height: 1600 },
+    gallery: [
+      { src: `${ENG}/laps.jpg`, alt: "Players running laps around the training pitch", width: 1200, height: 1600 },
+      { src: `${ENG}/cone-drills.jpg`, alt: "Quick-feet work through the cones", width: 1200, height: 1600 },
+      { src: `${ENG}/celebration.jpg`, alt: "A player leaps in celebration during the session", width: 1200, height: 1600 },
+      { src: `${ENG}/small-sided-game.jpg`, alt: "Players battle for the ball in a small-sided game", width: 1200, height: 1600 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: null,
+  },
   {
     id: "amigo-unavailable-downfall-v-khe",
     published: true,
-    featured: true,
+    featured: false,
     category: "TEAM_UPDATE",
     kind: "report",
     publishedAt: "2026-11-17T00:20:00+01:00",

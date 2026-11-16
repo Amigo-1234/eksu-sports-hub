@@ -6,6 +6,7 @@ import crest from "../../../../../public/brand/eksu-crest-192.png";
 import { NewsShare } from "@/components/news/NewsShare";
 import { CategoryTag, NewsTile } from "@/components/news/NewsTiles";
 import { BackLink } from "@/components/ui/BackLink";
+import { DownloadIcon } from "@/components/ui/icons";
 import { formatLongDate } from "@/lib/format";
 import { matchHref } from "@/lib/match";
 import { publishedStories, getStory } from "@/lib/news/stories";
@@ -27,6 +28,28 @@ export async function generateMetadata({ params }: PageProps<"/news/[id]">): Pro
     },
     twitter: { card: "summary_large_image", title: s.headline, description: s.summary, images: [s.image.src] },
   };
+}
+
+/** Saves the original photo (same-origin file, so the browser downloads it). */
+function DownloadPhoto({ src, slug, compact = false, className = "" }: { src: string; slug: string; compact?: boolean; className?: string }) {
+  const name = `eksu-sports-hub-${slug}-${src.split("/").pop()}`;
+  return (
+    <a
+      href={src}
+      download={name}
+      aria-label={compact ? "Download photo" : undefined}
+      className={`inline-flex items-center justify-center gap-1.5 rounded-full bg-black/65 text-xs font-bold text-white backdrop-blur-sm transition-colors hover:bg-black/80 ${
+        compact ? "size-9" : "h-9 px-3"
+      } ${className}`}
+    >
+      <DownloadIcon size={compact ? 16 : 15} />
+      {!compact && (
+        <>
+          Download<span className="sr-only"> photo</span>
+        </>
+      )}
+    </a>
+  );
 }
 
 const timeOf = (iso: string) =>
@@ -54,6 +77,7 @@ export default async function StoryPage({ params }: PageProps<"/news/[id]">) {
         <figure className="-mx-3 sm:mx-0">
           <div className="relative aspect-[4/3] overflow-hidden bg-subtle sm:aspect-[16/9] sm:rounded-card">
             <Image src={s.image.src} alt={s.image.alt} fill priority sizes="(min-width: 768px) 48rem, 100vw" className="object-cover" />
+            <DownloadPhoto src={s.image.src} slug={s.id} className="absolute right-3 bottom-3" />
           </div>
           <figcaption className="px-3 pt-2 text-xs leading-snug text-ink-faint sm:px-0">
             {s.image.alt}
@@ -114,6 +138,7 @@ export default async function StoryPage({ params }: PageProps<"/news/[id]">) {
                 <figure key={g.src} className="min-w-0">
                   <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-subtle">
                     <Image src={g.src} alt={g.alt} fill sizes="(min-width: 640px) 16rem, 50vw" className="object-cover" />
+                    <DownloadPhoto src={g.src} slug={s.id} compact className="absolute right-1.5 bottom-1.5" />
                   </div>
                   <figcaption className="mt-1 line-clamp-2 text-[11px] leading-snug text-ink-faint">{g.alt}</figcaption>
                 </figure>
