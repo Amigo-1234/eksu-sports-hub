@@ -37,6 +37,7 @@ export const NAV: { heading?: string; items: NavItem[] }[] = [
     heading: "People & records",
     items: [
       { href: "/admin/staff", label: "Staff & Operators", icon: "users" },
+      { href: "/admin/visitors", label: "Site Visitors", icon: "users" },
       { href: "/admin/audit", label: "Audit Log", icon: "log" },
       { href: "/admin/settings", label: "Settings", icon: "settings" },
     ],

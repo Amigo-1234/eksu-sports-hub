@@ -17,6 +17,7 @@ import {
   onboardingDone,
   promptInstall,
 } from "./install-prompt";
+import { gateStatus, subscribeGate } from "@/components/visitor/visitor-store";
 
 type Step = "intro" | "install" | "alerts" | "welcome";
 
@@ -28,16 +29,18 @@ const SKIP_PATHS = [/^\/register(\/|$)/, /^\/notifications(\/|$)/];
  * match alerts → welcome. Not a sign-up. Shown once per device (localStorage),
  * re-openable from the site via OPEN_ONBOARDING_EVENT or `?welcome=1`.
  */
-const noopSubscribe = () => () => {};
 const welcomeRequested = () => new URLSearchParams(window.location.search).get("welcome") === "1";
 
 export function Onboarding() {
   const pathname = usePathname();
   // null = follow the first-visit rule; otherwise an explicit open/close by the visitor.
   const [manual, setManual] = useState<"open" | "closed" | null>(null);
+  // Waits for the light sign-in ("What should we call you?") so the overlays never stack.
   const firstVisit = useSyncExternalStore(
-    noopSubscribe,
-    () => welcomeRequested() || (!onboardingDone() && !SKIP_PATHS.some((r) => r.test(window.location.pathname))),
+    subscribeGate,
+    () =>
+      welcomeRequested() ||
+      (gateStatus() === "done" && !onboardingDone() && !SKIP_PATHS.some((r) => r.test(window.location.pathname))),
     () => false, // server render: never (no flash for returning visitors)
   );
   const open = manual === "open" || (manual === null && firstVisit && !SKIP_PATHS.some((r) => r.test(pathname)));
