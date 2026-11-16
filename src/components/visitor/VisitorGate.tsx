@@ -8,7 +8,7 @@ import { CONTACT_MAX, NAME_MAX, cleanContact, cleanName, type VisitorState } fro
 import { gateStatus, readVisitor, setGateStatus, subscribeGate, todayWat, writeVisitor } from "./visitor-store";
 
 /** Pages where a full-screen welcome would get in the way of a task. */
-const SKIP_PATHS = [/^\/register(\/|$)/];
+const SKIP_PATHS = [/^\/register(\/|$)/, /^\/teams\/[^/]+\/welcome\/?$/];
 const BACKDROP = "/news/2026-11-15-downfall-school-gate-ft/lead.jpg";
 
 async function api(body?: unknown): Promise<{

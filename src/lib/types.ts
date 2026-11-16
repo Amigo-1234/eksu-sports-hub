@@ -285,6 +285,15 @@ export interface PublicLineupPlayer {
 }
 
 /** Competition top scorers row. Players with equal goals share a rank. */
+/** A player on a team's public squad list (active, screening-cleared, current season). */
+export interface SquadPlayer {
+  name: string;
+  shirtNumber: number;
+  /** GK, DF, MF, FW or null. */
+  position: string | null;
+  captain: boolean;
+}
+
 export interface TopScorer {
   rank: number;
   playerName: string | null;

@@ -3,11 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActionForm, Submit } from "@/components/admin/ActionForm";
 import { ConfirmAction } from "@/components/admin/ConfirmAction";
+import { ShareWelcomeLink } from "@/components/admin/ShareWelcomeLink";
 import { TeamFields } from "@/components/admin/TeamFields";
 import { Badge, btn, Card, Field, PageTitle, selectCls } from "@/components/admin/ui";
 import { createSquad, setTeamActive, updateTeam } from "@/lib/admin/actions/teams";
 import { listFaculties, listSeasons, listSports } from "@/lib/admin/data/reference";
 import { getTeam, listSquads } from "@/lib/admin/data/teams";
+import { siteOrigin, welcomePath } from "@/lib/site-url";
 
 export const metadata: Metadata = { title: "Team" };
 
@@ -16,6 +18,7 @@ export default async function TeamPage({ params, searchParams }: PageProps<"/adm
   const created = (await searchParams).created === "1";
   const [team, squads, seasons, faculties, sports] = await Promise.all([getTeam(id), listSquads(id), listSeasons(), listFaculties(), listSports()]);
   if (!team) notFound();
+  const welcomeUrl = `${await siteOrigin()}${welcomePath(team.id)}`;
   const missing = seasons.filter((s) => !s.archived_at && !squads.some((q) => q.season.id === s.id));
   return (
     <>
@@ -45,9 +48,19 @@ export default async function TeamPage({ params, searchParams }: PageProps<"/adm
           </>
         }
       />
-      {created && <p className="mb-4 rounded-lg border border-win/40 bg-win/10 px-3 py-2 text-sm font-semibold text-win">Team created. Create a squad below, then add screened players.</p>}
+      {created && <p className="mb-4 rounded-lg border border-win/40 bg-win/10 px-3 py-2 text-sm font-semibold text-win">Team created. Send the captain their welcome link below, then create a squad and add screened players.</p>}
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="min-w-0 space-y-6">
+          <Card
+            title="Welcome link"
+            description={
+              team.active
+                ? "A shareable congratulations page for the captain. It always shows this team's current name, badge and squad, so you can copy or resend it at any time. It does not mark registration or payment as complete."
+                : "This team is inactive. Reactivate it before sharing its welcome link."
+            }
+          >
+            {team.active ? <ShareWelcomeLink url={welcomeUrl} teamName={team.name} /> : null}
+          </Card>
           {squads.length === 0 && (
             <Card title="Squads">
               <p className="text-sm text-ink-muted">No squads yet. Create one for a season.</p>

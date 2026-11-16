@@ -5,11 +5,12 @@ import { MatchCardList } from "@/components/match/MatchList";
 import { TeamFollowButton } from "@/components/notifications/TeamFollowButton";
 import { StandingsTable } from "@/components/standings/StandingsTable";
 import { FormGuide } from "@/components/team/FormGuide";
+import { SquadList } from "@/components/team/SquadList";
 import { TeamCrest } from "@/components/team/TeamCrest";
 import { BackLink } from "@/components/ui/BackLink";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { getCompetitions, getMatches, getNow, getStandings, getTeam } from "@/lib/data";
+import { getCompetitions, getMatches, getNow, getSquad, getStandings, getTeam } from "@/lib/data";
 import { outcomeFor } from "@/lib/match";
 
 export async function generateMetadata({ params }: PageProps<"/teams/[id]">): Promise<Metadata> {
@@ -23,11 +24,12 @@ export default async function TeamPage({ params }: PageProps<"/teams/[id]">) {
   if (!team) notFound();
 
   const now = await getNow();
-  const [competitions, live, upcoming, results] = await Promise.all([
+  const [competitions, live, upcoming, results, squad] = await Promise.all([
     getCompetitions(),
     getMatches({ scope: "live", teamId: id }),
     getMatches({ scope: "upcoming", teamId: id }),
     getMatches({ scope: "results", teamId: id }),
+    getSquad(id).catch(() => []), // the squad list must never take the team page down
   ]);
   const teamCompetitions = competitions.filter((c) => c.teamIds.includes(id));
   const league = teamCompetitions.find((c) => c.format === "league");
@@ -115,6 +117,14 @@ export default async function TeamPage({ params }: PageProps<"/teams/[id]">) {
               <MatchCardList matches={results.slice(0, 6)} serverNow={now} />
             ) : (
               <EmptyState compact title="No results yet" />
+            )}
+          </section>
+          <section aria-labelledby="t-squad">
+            <SectionHeader id="t-squad" title="Squad" />
+            {squad.length > 0 ? (
+              <SquadList players={squad} accent={team.colors.primary} />
+            ) : (
+              <EmptyState compact title="Squad details coming soon" description="Players will appear here once the team's squad has been confirmed." />
             )}
           </section>
         </div>

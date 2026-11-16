@@ -1,11 +1,6 @@
 import Image from "next/image";
+import { crestFor } from "@/lib/crests";
 import type { Team } from "@/lib/types";
-
-/** Official club crests supplied by the teams, keyed by team id (files in /public/crests). */
-const CRESTS: Record<string, string> = {
-  "e95b26a1-4a64-4f34-941b-e3bb94a78efc": "/crests/downfall-fc.png", // Downfall FC
-  "c58f765e-52a0-4d03-93fa-8e48cf94cdcf": "/crests/khe.png", // KHE
-};
 
 const SIZES = {
   xs: 18,
@@ -13,6 +8,7 @@ const SIZES = {
   md: 32,
   lg: 52,
   xl: 68,
+  hero: 132,
 } as const;
 
 export type CrestSize = keyof typeof SIZES;
@@ -31,7 +27,7 @@ export function TeamCrest({
   className?: string;
 }) {
   const px = SIZES[size];
-  const crest = team.id ? CRESTS[team.id] : undefined;
+  const crest = crestFor(team.id);
   if (crest) {
     return (
       <Image
