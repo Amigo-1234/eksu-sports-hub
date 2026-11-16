@@ -42,7 +42,11 @@ export default async function TeamWelcomePage({ params }: PageProps<"/teams/[id]
     <div className="relative -mx-3 overflow-hidden px-3 pt-4 pb-6 sm:mx-0 sm:px-0">
       <Confetti />
       <section className="relative mx-auto max-w-md overflow-hidden rounded-3xl border border-line bg-surface text-center shadow-[0_12px_40px_-12px_rgb(0_0_0/0.18)]">
-        <div className="h-1.5" style={{ background: `linear-gradient(90deg, ${team.colors.primary}, #761530, #f5b700)` }} aria-hidden="true" />
+        <div
+          className="h-1.5"
+          style={{ background: `linear-gradient(90deg, ${team.colors.primary}, #761530, #f5b700)` }}
+          aria-hidden="true"
+        />
 
         <div className="flex items-center justify-center gap-2 pt-5">
           <Image src={crest} alt="" width={28} height={28} />
@@ -95,8 +99,7 @@ export default async function TeamWelcomePage({ params }: PageProps<"/teams/[id]
         </div>
       </section>
       <p className="relative mx-auto mt-4 max-w-md text-center text-xs text-ink-faint">
-        This page celebrates your team joining EKSU Sports Hub. Registration and payment are confirmed separately by the Sports
-        Directorate.
+        This page celebrates your team joining EKSU Sports Hub. Registration and payment are confirmed separately by the Sports Directorate.
       </p>
     </div>
   );

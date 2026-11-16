@@ -10,9 +10,10 @@ const GROUPS: { key: string; label: string }[] = [
 
 /** Public squad list grouped by position. Names, shirt numbers and positions only. */
 export function SquadList({ players, accent }: { players: SquadPlayer[]; accent: string }) {
-  const groups = GROUPS.map((g) => ({ ...g, players: players.filter((p) => (p.position ?? "") === g.key || (!g.key && !["GK", "DF", "MF", "FW"].includes(p.position ?? ""))) })).filter(
-    (g) => g.players.length > 0,
-  );
+  const groups = GROUPS.map((g) => ({
+    ...g,
+    players: players.filter((p) => (p.position ?? "") === g.key || (!g.key && !["GK", "DF", "MF", "FW"].includes(p.position ?? ""))),
+  })).filter((g) => g.players.length > 0);
   return (
     <div className="overflow-hidden rounded-card border border-line bg-surface">
       {groups.map((g) => (
