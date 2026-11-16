@@ -29,11 +29,33 @@ const DIR = "/news/2026-11-15-downfall-school-gate";
 
 const FT = "/news/2026-11-15-downfall-school-gate-ft";
 
+const AMIGO = "/news/2026-11-17-amigo-unavailable";
+
 export const STORIES: Story[] = [
+  {
+    id: "amigo-unavailable-downfall-v-khe",
+    published: true,
+    featured: true,
+    category: "TEAM_UPDATE",
+    kind: "report",
+    publishedAt: "2026-11-17T00:20:00+01:00",
+    headline: "Amigo left out of Downfall FC line-up for KHE friendly",
+    summary: "Amigo will not be available for Downfall FC's Sports Directorate friendly against KHE today, Tuesday 17 November.",
+    body: [
+      "Amigo has been left out of Downfall FC's line-up for today's Sports Directorate friendly against KHE and will not be available for the match.",
+      "Kick-off is at 11:30 AM on Tuesday 17 November.",
+      "Downfall go into the game after Sunday's 3–0 win over School Gate United.",
+      "Follow the match live on EKSU Sports Hub.",
+    ],
+    image: { src: `${AMIGO}/lead.jpg`, alt: "A Downfall FC player in action, alongside the Downfall FC crest", width: 1600, height: 1200 },
+    gallery: [{ src: `${AMIGO}/photo.jpg`, alt: "Downfall FC players in their orange kit on the pitch", width: 900, height: 1600 }],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4705804f-a7c5-40df-bfd2-184bbb3d62df",
+  },
   {
     id: "preview-khe-v-downfall-17-nov",
     published: true,
-    featured: true,
+    featured: false,
     category: "UPDATE",
     kind: "report",
     publishedAt: "2026-11-16T20:30:00+01:00",
