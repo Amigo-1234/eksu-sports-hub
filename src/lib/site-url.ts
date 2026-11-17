@@ -7,6 +7,8 @@ export async function siteOrigin(): Promise<string> {
   if (configured) return configured;
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "eksusportshub.com.ng";
+  // Production on Vercel: always share the real domain, never a *.vercel.app address.
+  if (process.env.VERCEL_ENV === "production" || host.endsWith("eksusportshub.com.ng")) return "https://eksusportshub.com.ng";
   const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
   return `${proto}://${host}`;
 }

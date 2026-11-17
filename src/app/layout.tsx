@@ -11,6 +11,8 @@ const barlow = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
+  // Shared links and previews always point at the real domain.
+  metadataBase: new URL("https://eksusportshub.com.ng"),
   title: {
     default: "EKSU Sports Hub — Live scores, fixtures & tables",
     template: "%s · EKSU Sports Hub",
