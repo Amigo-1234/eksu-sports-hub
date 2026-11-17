@@ -1,7 +1,7 @@
 export interface NavItem {
   href: string;
   label: string;
-  icon: "dashboard" | "trophy" | "calendar" | "shield" | "shirt" | "users" | "clipboard" | "live" | "table" | "log" | "settings" | "season" | "building" | "pin" | "check" | "squad" | "inbox";
+  icon: "dashboard" | "trophy" | "calendar" | "shield" | "shirt" | "users" | "clipboard" | "live" | "table" | "log" | "settings" | "season" | "building" | "pin" | "check" | "squad" | "inbox" | "news";
 }
 
 export const NAV: { heading?: string; items: NavItem[] }[] = [
@@ -17,6 +17,7 @@ export const NAV: { heading?: string; items: NavItem[] }[] = [
       { href: "/admin/matches", label: "Fixtures / Matches", icon: "calendar" },
       { href: "/admin/assignments", label: "Assignments", icon: "clipboard" },
       { href: "/admin/standings", label: "Standings", icon: "table" },
+      { href: "/admin/news", label: "News", icon: "news" },
     ],
   },
   {

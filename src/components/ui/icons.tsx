@@ -212,3 +212,11 @@ export const CheckIcon = (p: IconProps) => (
     <path d="M5 12.5 10 17.5 19 7" />
   </svg>
 );
+
+export const NewsIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M4 5.5h12v13a1.5 1.5 0 0 0 1.5 1.5H6a2 2 0 0 1-2-2z" />
+    <path d="M16 9h3.5v9.5a1.5 1.5 0 0 1-3 0" />
+    <path d="M7.5 9h5M7.5 12.5h5M7.5 16h3" />
+  </svg>
+);

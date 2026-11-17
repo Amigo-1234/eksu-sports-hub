@@ -67,10 +67,11 @@ export function AppHeader({ liveCount, theme }: { liveCount: number; theme: Site
           </Link>
           <Link
             href="/register"
-            className="hidden h-9 items-center gap-1.5 rounded-full border border-line-strong px-3.5 text-sm font-semibold text-ink transition-colors hover:border-brand-600 hover:bg-brand-50 lg:flex"
+            aria-label="Register"
+            className="hidden h-9 items-center gap-1.5 rounded-full border border-line-strong px-2.5 text-sm font-semibold text-ink transition-colors hover:border-brand-600 hover:bg-brand-50 lg:flex xl:px-3.5"
           >
             <ShirtIcon size={16} className="text-brand-fg" />
-            Register
+            <span className="hidden xl:inline">Register</span>
           </Link>
           <ThemeToggle initial={theme} className="hidden lg:grid" />
           <HeaderAlertsLink />

@@ -14,6 +14,8 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { CalendarIcon, ChevronRightIcon, ClockIcon } from "@/components/ui/icons";
 import { LiveScoresProvider } from "@/components/realtime/LiveScores";
 import { DATA_SOURCE_KIND, getCompetitions, getMatches, getNow, getStandings } from "@/lib/data";
+import { NewsList } from "@/components/news/NewsList";
+import { listNews } from "@/lib/news/public";
 import { dateKey, formatKickoff, formatLongDate } from "@/lib/format";
 import { matchHref } from "@/lib/match";
 import { isLive } from "@/lib/status";
@@ -24,12 +26,13 @@ export default async function HomePage() {
   const now = await getNow();
   const today = dateKey(now);
 
-  const [live, todays, upcoming, results, competitions] = await Promise.all([
+  const [live, todays, upcoming, results, competitions, news] = await Promise.all([
     getMatches({ scope: "live" }),
     getMatches({ date: today }),
     getMatches({ scope: "upcoming" }),
     getMatches({ scope: "results" }),
     getCompetitions(),
+    listNews(3),
   ]);
 
   const todayOther = todays.filter((m) => !isLive(m.status));
@@ -102,6 +105,13 @@ export default async function HomePage() {
                     </Link>
                   )}
                 </div>
+              </section>
+            )}
+
+            {news.length > 0 && (
+              <section aria-labelledby="news">
+                <SectionHeader id="news" title="News" href="/news" linkLabel="All news" />
+                <NewsList posts={news} />
               </section>
             )}
 
