@@ -33,11 +33,38 @@ const AMIGO = "/news/2026-11-17-amigo-unavailable";
 
 const ENG = "/news/2026-11-17-engineering-training";
 
+const MARK = "/news/2026-11-17-mark-ready";
+
 export const STORIES: Story[] = [
+  {
+    id: "mark-fit-for-downfall-v-khe",
+    published: true,
+    featured: true,
+    category: "PLAYER_SPOTLIGHT",
+    kind: "report",
+    publishedAt: "2026-11-17T09:10:00+01:00",
+    headline: "Mark fully fit and ready for Downfall's clash with KHE",
+    summary: "Downfall FC's number 11 is fit for today's friendly against KHE and is hoping to deliver a good performance.",
+    body: [
+      "Mark is fully fit and ready for Downfall FC's Sports Directorate friendly against KHE today, Tuesday 17 November.",
+      "The number 11 is in Downfall's starting line-up and goes into the game hoping to deliver a good performance for his side.",
+      "Downfall come into the match on the back of Sunday's 3–0 win over School Gate United. Kick-off is at 11:30 AM.",
+      "Follow every moment live on EKSU Sports Hub.",
+    ],
+    image: { src: `${MARK}/lead.jpg`, alt: "Mark of Downfall FC on the ball", width: 608, height: 1080 },
+    gallery: [
+      { src: `${MARK}/on-the-ball.jpg`, alt: "Mark, number 11, brings the ball under control", width: 608, height: 1080 },
+      { src: `${MARK}/in-action.jpg`, alt: "Mark in action for Downfall FC", width: 608, height: 1080 },
+      { src: `${MARK}/corner-flag.jpg`, alt: "Mark by the corner flag", width: 608, height: 1080 },
+      { src: `${MARK}/on-the-pitch.jpg`, alt: "Mark on the pitch in Downfall FC's orange kit", width: 608, height: 1080 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4705804f-a7c5-40df-bfd2-184bbb3d62df",
+  },
   {
     id: "engineering-training-ahead-of-competition",
     published: true,
-    featured: true,
+    featured: false,
     category: "TEAM_UPDATE",
     kind: "report",
     publishedAt: "2026-11-17T00:25:00+01:00",
