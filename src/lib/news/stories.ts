@@ -37,11 +37,44 @@ const MARK = "/news/2026-11-17-mark-ready";
 
 const CBPS = "/news/2026-11-17-crystal-bams-political-science";
 
+const PSFT = "/news/2026-11-17-political-science-beat-crystal-bams";
+
 export const STORIES: Story[] = [
+  {
+    id: "political-science-beat-crystal-bams-4-0",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-17T12:25:00+01:00",
+    headline: "Political Science hit four past Crystal Bams as super-sub Aloro shines",
+    summary:
+      "Four goals in 13 second-half minutes gave Political Science a 4–0 win in Tuesday's Sports Directorate friendly, with substitute Aloro named man of the match.",
+    body: [
+      "Political Science beat Crystal Bams 4–0 in Tuesday morning's Sports Directorate friendly, scoring all four goals in a devastating 13-minute spell after the break.",
+      "The first half ended goalless, and both sides turned to their benches five minutes after the restart: Aloro replaced Iwobi for Political Science, while Matic came on for Bruno for Crystal Bams.",
+      "The change sparked Political Science into life. Omo opened the scoring in the 64th minute, Tife doubled the lead four minutes later, Aloro got his name on the scoresheet in the 73rd minute and Santa completed the rout in the 77th.",
+      "Aloro was named man of the match after making the difference from the bench.",
+      "Crystal Bams will look to bounce back in their next outing, while Political Science can take plenty of confidence from a ruthless second-half display.",
+    ],
+    image: { src: `${PSFT}/aloro.jpg`, alt: "Man of the match Aloro of Political Science", width: 1200, height: 1600 },
+    gallery: [
+      { src: `${PSFT}/aloro-celebrates.jpg`, alt: "Aloro on the pitch after the final whistle", width: 1200, height: 1600 },
+      { src: `${PSFT}/second-half.jpg`, alt: "Players spread across the pitch in the second half", width: 1600, height: 1200 },
+      { src: `${PSFT}/goalmouth.jpg`, alt: "Players gather in the goalmouth", width: 1200, height: 1600 },
+      { src: `${PSFT}/goalmouth-2.jpg`, alt: "Players crowd the penalty area", width: 1200, height: 1600 },
+      { src: `${PSFT}/touchline.jpg`, alt: "A player watches from the touchline", width: 1200, height: 1600 },
+      { src: `${PSFT}/play-resumes.jpg`, alt: "Players take their positions as play resumes", width: 1200, height: 1600 },
+      { src: `${PSFT}/full-time.jpg`, alt: "Players leave the pitch at full-time", width: 1200, height: 1600 },
+      { src: `${PSFT}/walking-off.jpg`, alt: "Players walk off at the final whistle", width: 1200, height: 1600 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "87b9f992-8b3f-405a-b3d7-7586340f1cca",
+  },
   {
     id: "crystal-bams-political-science-goalless-half-time",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-17T11:35:00+01:00",
