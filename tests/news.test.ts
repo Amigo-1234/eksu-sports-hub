@@ -57,7 +57,8 @@ test("Sports Hub stories: only published ones are listed; each has an image, sum
   assert.ok(ids.includes("downfall-lead-school-gate-at-half-time"));
   for (const s of STORIES.filter((x) => !x.published)) assert.equal(getStory(s.id), null);
   for (const s of publishedStories()) {
-    assert.ok(s.headline && s.summary && s.body.length && s.image.src.startsWith("/news/") && s.image.alt);
+    // Stories published in code always carry a lead photo (dashboard stories may not).
+    assert.ok(s.headline && s.summary && s.body.length && s.image && s.image.src.startsWith("/news/") && s.image.alt);
     assert.ok(!/amigo\s*world|amigoworld/i.test(JSON.stringify(s)), "no Amigo World links until it launches");
   }
   assert.equal(getStory("does-not-exist"), null);

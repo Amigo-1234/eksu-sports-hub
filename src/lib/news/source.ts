@@ -1,6 +1,7 @@
 import "server-only";
 import { parseNewsFeed, type NewsItem, type NewsPage } from "./feed";
-import { publishedStories, type Story } from "./stories";
+import { allStories } from "./dashboard";
+import type { Story } from "./stories";
 
 /**
  * Server-side, read-only fetch of published Sports News previews from Amigo
@@ -16,8 +17,9 @@ export const NEWS_PAGE_SIZE = 12;
 export async function getNews({ page = 1, limit = NEWS_PAGE_SIZE }: { page?: number; limit?: number } = {}): Promise<NewsPage> {
   const feed = process.env.AMIGO_NEWS_FEED_URL;
   if (!feed) {
-    // Amigo World not launched yet: stories published on EKSU Sports Hub itself.
-    const all = publishedStories().map(storyItem);
+    // Amigo World not launched yet: stories published on EKSU Sports Hub itself
+    // (in code, plus those published from the admin dashboard).
+    const all = (await allStories()).map(storyItem);
     const start = (Math.max(1, Math.floor(page)) - 1) * limit;
     return { status: "ok", items: all.slice(start, start + limit), hasMore: all.length > start + limit };
   }
@@ -50,8 +52,8 @@ export function storyItem(s: Story): NewsItem {
     kind: s.kind,
     publishedAt: s.publishedAt,
     url: `/news/${s.id}`,
-    imageUrl: s.image.src,
-    imageAlt: s.image.alt,
+    imageUrl: s.image?.src ?? null,
+    imageAlt: s.image?.alt ?? "",
     imageCredit: s.imageCredit,
     featured: s.featured,
     matchId: s.matchId,

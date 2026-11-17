@@ -9,13 +9,14 @@ import { BackLink } from "@/components/ui/BackLink";
 import { DownloadIcon } from "@/components/ui/icons";
 import { formatLongDate } from "@/lib/format";
 import { matchHref } from "@/lib/match";
-import { publishedStories, getStory } from "@/lib/news/stories";
+import { allStories, findStory } from "@/lib/news/dashboard";
 import { storyItem } from "@/lib/news/source";
 import { siteOrigin } from "@/lib/site-url";
 
 export async function generateMetadata({ params }: PageProps<"/news/[id]">): Promise<Metadata> {
-  const s = getStory((await params).id);
+  const s = await findStory((await params).id);
   if (!s) return { title: "Story not found" };
+  const img = s.image;
   return {
     title: s.headline,
     description: s.summary,
@@ -24,9 +25,9 @@ export async function generateMetadata({ params }: PageProps<"/news/[id]">): Pro
       title: s.headline,
       description: s.summary,
       publishedTime: s.publishedAt,
-      images: [{ url: s.image.src, width: s.image.width, height: s.image.height, alt: s.image.alt }],
+      ...(img ? { images: [{ url: img.src, width: img.width, height: img.height, alt: img.alt }] } : {}),
     },
-    twitter: { card: "summary_large_image", title: s.headline, description: s.summary, images: [s.image.src] },
+    twitter: { card: img ? "summary_large_image" : "summary", title: s.headline, description: s.summary, ...(img ? { images: [img.src] } : {}) },
   };
 }
 
@@ -68,13 +69,14 @@ const timeOf = (iso: string) =>
 /** A Sports News story published on EKSU Sports Hub. */
 export default async function StoryPage({ params }: PageProps<"/news/[id]">) {
   const { id } = await params;
-  const s = getStory(id);
+  const s = await findStory(id);
   if (!s) notFound();
+  const img = s.image;
 
   const url = `${await siteOrigin()}/news/${s.id}`;
   const words = s.body.join(" ").split(/\s+/).length;
   const minutes = Math.max(1, Math.round(words / 200));
-  const related = publishedStories()
+  const related = (await allStories())
     .filter((r) => r.id !== s.id)
     .sort((a, b) => Number(b.matchId === s.matchId && !!s.matchId) - Number(a.matchId === s.matchId && !!s.matchId))
     .slice(0, 3)
@@ -83,11 +85,13 @@ export default async function StoryPage({ params }: PageProps<"/news/[id]">) {
   return (
     <div className="sm:pt-4">
       <article aria-labelledby="story-title">
+        {img ? (
+          <>
         {/* Hero: the full photo edge to edge (never cropped), with the headline set on it. */}
         <header className="relative isolate -mx-3 overflow-hidden bg-ink text-white sm:mx-0 sm:rounded-card">
           {/* Wide screens: a blurred copy fills the sides around a tall photo. */}
           <Image
-            src={s.image.src}
+            src={img.src}
             alt=""
             aria-hidden="true"
             fill
@@ -95,10 +99,10 @@ export default async function StoryPage({ params }: PageProps<"/news/[id]">) {
             className="-z-10 hidden scale-110 object-cover opacity-60 blur-2xl sm:block"
           />
           <Image
-            src={s.image.src}
-            alt={s.image.alt}
-            width={s.image.width}
-            height={s.image.height}
+            src={img.src}
+            alt={img.alt}
+            width={img.width}
+            height={img.height}
             priority
             sizes="(min-width: 768px) 48rem, 100vw"
             className="block h-auto w-full sm:mx-auto sm:max-h-[85vh] sm:w-auto"
@@ -107,7 +111,7 @@ export default async function StoryPage({ params }: PageProps<"/news/[id]">) {
           <div className="absolute top-2 left-3 sm:top-4 sm:left-5">
             <BackLink fallbackHref="/news" label="News" tone="onDark" className="mb-0" />
           </div>
-          <DownloadPhoto src={s.image.src} slug={s.id} className="absolute top-3 right-3 sm:top-5 sm:right-5" />
+          <DownloadPhoto src={img.src} slug={s.id} className="absolute top-3 right-3 sm:top-5 sm:right-5" />
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-3 pt-20 pb-4 sm:px-6 sm:pb-6">
             <div className="mx-auto max-w-3xl space-y-2">
               <CategoryTag category={s.category} tone="onImage" />
@@ -121,9 +125,25 @@ export default async function StoryPage({ params }: PageProps<"/news/[id]">) {
           </div>
         </header>
         <p className="mx-auto mt-2 max-w-3xl text-xs leading-snug text-ink-faint">
-          {s.image.alt}
+          {img.alt}
           {s.imageCredit && <span className="text-ink-muted"> · Photo: {s.imageCredit}</span>}
         </p>
+          </>
+        ) : (
+          <header className="relative isolate -mx-3 overflow-hidden bg-gradient-to-br from-brand-800 via-brand-700 to-brand-600 text-white sm:mx-0 sm:rounded-card">
+            {/* No photo (published from the dashboard): a branded header with the headline. */}
+            <Image src={crest} alt="" aria-hidden="true" width={260} height={260} className="absolute -right-10 -bottom-12 -z-10 opacity-15 sm:right-6" />
+            <div className="px-3 pt-3 sm:px-5 sm:pt-4">
+              <BackLink fallbackHref="/news" label="News" tone="onDark" className="mb-0" />
+            </div>
+            <div className="mx-auto max-w-3xl space-y-2 px-3 pt-8 pb-6 sm:px-6 sm:pt-12 sm:pb-8">
+              <CategoryTag category={s.category} tone="onImage" />
+              <h1 id="story-title" className="font-display text-[30px] leading-[1.02] font-extrabold tracking-[0.003em] text-balance sm:text-[46px]">
+                {s.headline}
+              </h1>
+            </div>
+          </header>
+        )}
         <p className="mx-auto mt-4 max-w-3xl text-[17px] leading-relaxed font-medium text-ink-muted">{s.summary}</p>
 
         <div className="mx-auto max-w-3xl">

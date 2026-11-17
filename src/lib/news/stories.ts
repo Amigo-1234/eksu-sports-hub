@@ -17,7 +17,8 @@ export interface Story {
   headline: string;
   summary: string;
   body: string[];
-  image: { src: string; alt: string; width: number; height: number };
+  /** Lead photo. Dashboard-published stories may have none (a branded header is shown). */
+  image: { src: string; alt: string; width: number; height: number } | null;
   gallery: { src: string; alt: string; width: number; height: number }[];
   imageCredit: string | null;
   matchId: string | null;
