@@ -22,7 +22,18 @@ export function NavigationTracker() {
  * plain link to `fallbackHref` (deep links from WhatsApp, shared URLs, new tabs).
  * 44px touch target; the label is visible and is also the accessible name.
  */
-export function BackLink({ fallbackHref = "/", label = "Back", className = "" }: { fallbackHref?: string; label?: string; className?: string }) {
+export function BackLink({
+  fallbackHref = "/",
+  label = "Back",
+  className = "",
+  tone = "default",
+}: {
+  fallbackHref?: string;
+  label?: string;
+  className?: string;
+  /** "onDark": white label over a photo. */
+  tone?: "default" | "onDark";
+}) {
   const router = useRouter();
   return (
     <Link
@@ -33,7 +44,9 @@ export function BackLink({ fallbackHref = "/", label = "Back", className = "" }:
           router.back();
         }
       }}
-      className={`group mb-2 -ml-1 inline-flex h-11 items-center gap-2 rounded-full pr-3 pl-1 text-sm font-semibold text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-brand-600 ${className}`}
+      className={`group mb-2 -ml-1 inline-flex h-11 items-center gap-2 rounded-full pr-3 pl-1 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-brand-600 ${
+        tone === "onDark" ? "text-white/90 hover:text-white" : "text-ink-muted hover:text-ink"
+      } ${className}`}
     >
       <span
         aria-hidden="true"
