@@ -83,50 +83,48 @@ export default async function StoryPage({ params }: PageProps<"/news/[id]">) {
   return (
     <div className="sm:pt-4">
       <article aria-labelledby="story-title">
-        {/* Hero: the whole photo, uncropped, over a blurred copy of itself that also backs the headline. */}
+        {/* Hero: the full photo edge to edge (never cropped), with the headline set on it. */}
         <header className="relative isolate -mx-3 overflow-hidden bg-ink text-white sm:mx-0 sm:rounded-card">
+          {/* Wide screens: a blurred copy fills the sides around a tall photo. */}
           <Image
             src={s.image.src}
             alt=""
             aria-hidden="true"
             fill
-            priority
             sizes="100vw"
-            className="-z-10 scale-110 object-cover opacity-70 blur-2xl"
+            className="-z-10 hidden scale-110 object-cover opacity-60 blur-2xl sm:block"
           />
-          <span className="absolute inset-0 -z-10 bg-gradient-to-b from-black/35 via-black/45 to-black/85" aria-hidden="true" />
-          <div className="mx-auto max-w-3xl px-3 pt-2 pb-6 sm:px-6 sm:pt-4 sm:pb-8">
-            <BackLink fallbackHref="/news" label="News" tone="onDark" />
-            <figure>
-              <div className="relative mx-auto w-fit max-w-full">
-                <Image
-                  src={s.image.src}
-                  alt={s.image.alt}
-                  width={s.image.width}
-                  height={s.image.height}
-                  priority
-                  sizes="(min-width: 768px) 48rem, 100vw"
-                  className="mx-auto h-auto max-h-[64svh] w-auto max-w-full rounded-xl shadow-[0_18px_40px_-12px_rgb(0_0_0/0.6)]"
-                />
-                <DownloadPhoto src={s.image.src} slug={s.id} className="absolute right-2.5 bottom-2.5" />
-              </div>
-              <figcaption className="mt-2 text-center text-xs leading-snug text-white/70">
-                {s.image.alt}
-                {s.imageCredit && <span> · Photo: {s.imageCredit}</span>}
-              </figcaption>
-            </figure>
-            <div className="mt-6 space-y-3">
+          <Image
+            src={s.image.src}
+            alt={s.image.alt}
+            width={s.image.width}
+            height={s.image.height}
+            priority
+            sizes="(min-width: 768px) 48rem, 100vw"
+            className="block h-auto w-full sm:mx-auto sm:max-h-[85vh] sm:w-auto"
+          />
+          <span className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/55 to-transparent" aria-hidden="true" />
+          <div className="absolute top-2 left-3 sm:top-4 sm:left-5">
+            <BackLink fallbackHref="/news" label="News" tone="onDark" className="mb-0" />
+          </div>
+          <DownloadPhoto src={s.image.src} slug={s.id} className="absolute top-3 right-3 sm:top-5 sm:right-5" />
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-3 pt-20 pb-4 sm:px-6 sm:pb-6">
+            <div className="mx-auto max-w-3xl space-y-2">
               <CategoryTag category={s.category} tone="onImage" />
               <h1
                 id="story-title"
-                className="font-display text-[32px] leading-[1.02] font-extrabold tracking-[0.003em] text-balance sm:text-[46px]"
+                className="font-display text-[30px] leading-[1.02] font-extrabold tracking-[0.003em] text-balance drop-shadow-[0_2px_8px_rgb(0_0_0/0.5)] sm:text-[46px]"
               >
                 {s.headline}
               </h1>
-              <p className="text-[17px] leading-relaxed font-medium text-white/85">{s.summary}</p>
             </div>
           </div>
         </header>
+        <p className="mx-auto mt-2 max-w-3xl text-xs leading-snug text-ink-faint">
+          {s.image.alt}
+          {s.imageCredit && <span className="text-ink-muted"> · Photo: {s.imageCredit}</span>}
+        </p>
+        <p className="mx-auto mt-4 max-w-3xl text-[17px] leading-relaxed font-medium text-ink-muted">{s.summary}</p>
 
         <div className="mx-auto max-w-3xl">
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
