@@ -35,11 +35,37 @@ const ENG = "/news/2026-11-17-engineering-training";
 
 const MARK = "/news/2026-11-17-mark-ready";
 
+const CBPS = "/news/2026-11-17-crystal-bams-political-science";
+
 export const STORIES: Story[] = [
+  {
+    id: "crystal-bams-political-science-goalless-half-time",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-17T11:35:00+01:00",
+    headline: "Crystal Bams and Political Science level at 0–0 at half-time",
+    summary: "Nothing to separate the sides after the first half of Tuesday morning's Sports Directorate friendly.",
+    body: [
+      "Crystal Bams and Political Science go into the break level at 0–0 in Tuesday morning's Sports Directorate friendly.",
+      "Neither side found the net in the first half, and no cards or substitutions were recorded.",
+      "Both teams lined up in a 4-3-3. Crystal Bams have Matic available on the bench for the second half.",
+      "Everything is still to play for. Follow the second half live on EKSU Sports Hub.",
+    ],
+    image: { src: `${CBPS}/lead.jpg`, alt: "Players from both teams take their positions on the pitch", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${CBPS}/midfield.jpg`, alt: "Players spread across the pitch during the first half", width: 1600, height: 1200 },
+      { src: `${CBPS}/in-position.jpg`, alt: "Players hold their positions on the red-earth pitch", width: 1600, height: 1200 },
+      { src: `${CBPS}/waiting-for-play.jpg`, alt: "Players wait for play to restart", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "87b9f992-8b3f-405a-b3d7-7586340f1cca",
+  },
   {
     id: "mark-fit-for-downfall-v-khe",
     published: true,
-    featured: true,
+    featured: false,
     category: "PLAYER_SPOTLIGHT",
     kind: "report",
     publishedAt: "2026-11-17T09:10:00+01:00",
