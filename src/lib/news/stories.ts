@@ -41,11 +41,47 @@ const PSFT = "/news/2026-11-17-political-science-beat-crystal-bams";
 
 const KDHT = "/news/2026-11-17-khe-downfall-half-time";
 
+const DFKFT = "/news/2026-11-17-downfall-beat-khe";
+
 export const STORIES: Story[] = [
+  {
+    id: "downfall-beat-khe-4-3-jamal-mbappe-hat-trick",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-17T15:00:00+01:00",
+    headline: "Jamal Mbappé hat-trick fires Downfall FC past KHE in seven-goal thriller",
+    summary:
+      "Jamal Mbappé struck three times in the second half, including a penalty, as Downfall FC beat KHE 4–3 in Tuesday's Sports Directorate friendly.",
+    body: [
+      "Downfall FC beat KHE 4–3 in a seven-goal thriller in Tuesday's Sports Directorate friendly, with Jamal Mbappé the hero after a second-half hat-trick.",
+      "Mark gave Downfall the lead in the 14th minute before Damola equalised for KHE ten minutes later, and the sides went in level at 1–1. Muba was booked for KHE in the 30th minute.",
+      "KHE edged in front for the first time when Classified scored in the 55th minute, but Jamal Mbappé took over. He levelled in the 59th minute, converted a penalty in the 68th after Downfall were awarded a spot kick a minute earlier, and completed his hat-trick in the 85th minute.",
+      "KHE pulled one back from the spot through Damola in the 88th minute, but Downfall held on for the win.",
+      "Downfall made four substitutions: Mr Money for Al Ameen (30'), Sammy for Beejay (33'), Zico for Tife (46') and Seeygo for Mark (89'). KHE brought on Foden for Gabriel (52').",
+      "The result follows Downfall's 3–0 win over School Gate United on Sunday — two wins from two in this week's friendlies.",
+    ],
+    image: { src: `${DFKFT}/jamal-mbappe.jpg`, alt: "Hat-trick hero Jamal Mbappé of Downfall FC with the match ball", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${DFKFT}/shot-on-goal.jpg`, alt: "A Downfall FC player shoots at goal", width: 1600, height: 1200 },
+      { src: `${DFKFT}/aerial-duel.jpg`, alt: "Players challenge for a header in the box", width: 1600, height: 1200 },
+      { src: `${DFKFT}/penalty-area.jpg`, alt: "Downfall FC attack the KHE penalty area", width: 1600, height: 1200 },
+      { src: `${DFKFT}/comrade-challenge.jpg`, alt: "KHE's Comrade (19) challenges a Downfall FC player", width: 1600, height: 1200 },
+      { src: `${DFKFT}/on-the-ball.jpg`, alt: "Players battle for the ball in midfield", width: 1600, height: 1200 },
+      { src: `${DFKFT}/damola-embrace.jpg`, alt: "KHE's Damola (8) and a Downfall FC player embrace", width: 1600, height: 1200 },
+      { src: `${DFKFT}/khe-pair.jpg`, alt: "Two KHE players on the pitch", width: 1600, height: 1200 },
+      { src: `${DFKFT}/restart.jpg`, alt: "Players wait for the restart", width: 1600, height: 1200 },
+      { src: `${DFKFT}/full-time-huddle.jpg`, alt: "Both teams gather at full-time", width: 1600, height: 1200 },
+      { src: `${DFKFT}/handshakes.jpg`, alt: "Players shake hands after the final whistle", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4705804f-a7c5-40df-bfd2-184bbb3d62df",
+  },
   {
     id: "khe-downfall-level-at-half-time",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-17T13:10:00+01:00",
