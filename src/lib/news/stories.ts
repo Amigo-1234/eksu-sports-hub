@@ -39,11 +39,39 @@ const CBPS = "/news/2026-11-17-crystal-bams-political-science";
 
 const PSFT = "/news/2026-11-17-political-science-beat-crystal-bams";
 
+const KDHT = "/news/2026-11-17-khe-downfall-half-time";
+
 export const STORIES: Story[] = [
+  {
+    id: "khe-downfall-level-at-half-time",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-17T13:10:00+01:00",
+    headline: "\"Mr Talk and Do\" Mark delivers, but KHE level with Downfall at the break",
+    summary: "Mark put Downfall FC ahead on 14 minutes before Damola equalised for KHE, leaving the Sports Directorate friendly 1–1 at half-time.",
+    body: [
+      "KHE and Downfall FC go into half-time level at 1–1 in Tuesday's Sports Directorate friendly.",
+      "Mark — Mr Talk and Do — backed up his pre-match promise to deliver, putting Downfall in front in the 14th minute.",
+      "KHE hit back ten minutes later, Damola levelling the score in the 24th minute.",
+      "KHE's Muba was booked in the 30th minute. Downfall made two changes before the break: Mr Money replaced Al Ameen on 30 minutes and Sammy came on for Beejay three minutes later.",
+      "All to play for in the second half. Follow it live on EKSU Sports Hub.",
+    ],
+    image: { src: `${KDHT}/mark.jpg`, alt: "Downfall FC goalscorer Mark smiles on the pitch", width: 1200, height: 1600 },
+    gallery: [
+      { src: `${KDHT}/goalmouth.jpg`, alt: "Action in front of goal", width: 1600, height: 1200 },
+      { src: `${KDHT}/midfield.jpg`, alt: "Downfall FC and KHE players in midfield", width: 1600, height: 1200 },
+      { src: `${KDHT}/chase.jpg`, alt: "Players chase the ball across the pitch", width: 1200, height: 1600 },
+      { src: `${KDHT}/break.jpg`, alt: "Players during a break in play", width: 1200, height: 1600 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4705804f-a7c5-40df-bfd2-184bbb3d62df",
+  },
   {
     id: "political-science-beat-crystal-bams-4-0",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-17T12:25:00+01:00",
