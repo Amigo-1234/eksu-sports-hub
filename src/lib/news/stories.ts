@@ -52,11 +52,36 @@ const C4CB = "/news/2026-11-18-civil-400l-comeback";
 
 const SVU = "/news/2026-11-18-saviola-beat-unstoppable";
 
+const MSSN = "/news/2026-11-19-mssn-league-kicks-off";
+
 export const STORIES: Story[] = [
+  {
+    id: "mssn-eksu-football-league-kicks-off-tomorrow",
+    published: true,
+    featured: true,
+    category: "COMPETITION",
+    kind: "report",
+    publishedAt: "2026-11-18T18:36:00+01:00",
+    headline: "MSSN EKSU Football League kicks off tomorrow",
+    summary:
+      "Ten teams, 45 matches, one trophy: the MSSN EKSU Football League 2026/2027 starts on Thursday with Darul Saadah against Darul Hudah.",
+    body: [
+      "The wait is over. The MSSN EKSU Football League 2026/2027 kicks off tomorrow, Thursday 19 November, with ten teams chasing the title.",
+      "The league is a single round robin: every team plays every other team once, making 45 matches over nine weeks, with the final round on Saturday 16 January 2027. A win is worth three points and a draw one.",
+      "The ten teams are Darul Haq, Darul Hikmah, Darul Hudah, Darul Saadah, Darul Salam, Darul Sunah, Iworoko Humah, Satellite Humah, School Gate Humah and Shonibare.",
+      "Darul Saadah and Darul Hudah open the season at 10:00 on Thursday, followed by Shonibare against Satellite Humah at 12:00.",
+      "Week 1 continues on Friday with Darul Haq against Iworoko Humah at 10:00, and ends on Saturday with School Gate Humah against Darul Sunah at 10:00 and Darul Salam against Darul Hikmah at 12:00.",
+      "Follow every match live on EKSU Sports Hub, with live scores, line-ups and the league table updated after every game.",
+    ],
+    image: { src: `${MSSN}/lead.jpg`, alt: "Gold trophy graphic: MSSN EKSU Football League kicks off Thursday 19 November", width: 1600, height: 1200 },
+    gallery: [],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4c24c4ca-fe1b-4ad3-9d8b-6355e7a3182c",
+  },
   {
     id: "saviola-beat-unstoppable-3-0",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-18T14:39:00+01:00",
