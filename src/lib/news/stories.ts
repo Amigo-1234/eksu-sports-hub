@@ -50,11 +50,34 @@ const C5R = "/news/2026-11-18-civil-500l-ready";
 
 const C4CB = "/news/2026-11-18-civil-400l-comeback";
 
+const SVU = "/news/2026-11-18-saviola-beat-unstoppable";
+
 export const STORIES: Story[] = [
+  {
+    id: "saviola-beat-unstoppable-3-0",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-18T14:39:00+01:00",
+    headline: "Taiwo double fires Saviola past Unstoppable 3–0",
+    summary:
+      "Taiwo scored twice and Holy-sinner added the other as Saviola beat Unstoppable 3–0 in Wednesday's Sports Directorate friendly.",
+    body: [
+      "Saviola kept a clean sheet and beat Unstoppable 3–0 in Wednesday morning's Sports Directorate friendly.",
+      "Taiwo was the star of the show with two goals, and Holy-sinner got the other to complete a comfortable win.",
+      "Unstoppable could not find a way past the Saviola defence and finished the game without a goal.",
+      "Full details are on the match page on EKSU Sports Hub.",
+    ],
+    image: { src: `${SVU}/lead.jpg`, alt: "Full-time graphic: Saviola 3–0 Unstoppable, scorers Taiwo (2) and Holy-sinner", width: 1600, height: 1200 },
+    gallery: [],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "3d6b6c13-469f-44ac-ae2b-9e4f6876b6fa",
+  },
   {
     id: "civil-400l-comeback-beat-civil-500l-3-2",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-18T11:50:00+01:00",
