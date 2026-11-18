@@ -53,7 +53,7 @@ export const STORIES: Story[] = [
     featured: true,
     category: "TEAM_UPDATE",
     kind: "report",
-    publishedAt: "2026-11-18T10:00:00+01:00",
+    publishedAt: "2026-11-18T09:50:00+01:00",
     headline: "Civil Engineering 400L sharpen up ahead of 500L showdown",
     summary: "Civil 400L were spotted going through their paces on the pitch ahead of today's Sports Directorate friendly against Civil 500L.",
     body: [
