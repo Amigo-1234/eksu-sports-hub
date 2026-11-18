@@ -46,11 +46,36 @@ const DFKFT = "/news/2026-11-17-downfall-beat-khe";
 
 const C4T = "/news/2026-11-18-civil-400l-training";
 
+const C5R = "/news/2026-11-18-civil-500l-ready";
+
 export const STORIES: Story[] = [
+  {
+    id: "civil-500l-gather-ahead-of-civil-400l-clash",
+    published: true,
+    featured: true,
+    category: "TEAM_UPDATE",
+    kind: "report",
+    publishedAt: "2026-11-18T09:55:00+01:00",
+    headline: "Civil Engineering 500L squad gathers, ready for 400L showdown",
+    summary: "The 500L side came together on the pitch ahead of today's Sports Directorate friendly against Civil 400L, with 17 players named in their squad.",
+    body: [
+      "Civil Engineering 500 Level gathered on the pitch ahead of today's Sports Directorate friendly against Civil 400L.",
+      "The squad came together for a team talk before kick-off, with plenty of smiles in the group as they got ready for the departmental derby.",
+      "Teacha starts in goal for 500L, with Robbo, Black Sam, Rudiger and Oro in defence, Aluko, Lexi and Mentoli in midfield, and Otto, Jeff and Prince leading the attack. Dave, Manny, Imole, Active, Henry and Martins are on the bench.",
+      "With 400L also out warming up, the stage is set for a battle of the levels. Follow it live on EKSU Sports Hub.",
+    ],
+    image: { src: `${C5R}/lead.jpg`, alt: "Civil Engineering 500L players gathered on the pitch before kick-off", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${C5R}/team-talk.jpg`, alt: "Civil 500L players during their pre-match team talk", width: 1600, height: 1200 },
+      { src: `${C5R}/gathered.jpg`, alt: "The Civil 500L squad together before the match", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "bb6df3ea-ccb9-4351-9aaa-84fd10e91768",
+  },
   {
     id: "civil-400l-train-ahead-of-civil-500l-clash",
     published: true,
-    featured: true,
+    featured: false,
     category: "TEAM_UPDATE",
     kind: "report",
     publishedAt: "2026-11-18T09:50:00+01:00",
