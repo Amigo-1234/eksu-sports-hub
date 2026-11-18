@@ -69,7 +69,7 @@ export const STORIES: Story[] = [
       "The wait is over. The MSSN EKSU Football League 2026/2027 kicks off tomorrow, Thursday 19 November, with ten teams chasing the title.",
       "The league is a single round robin: every team plays every other team once, making 45 matches over nine weeks, with the final round on Saturday 16 January 2027. A win is worth three points and a draw one.",
       "The ten teams are Darul Haq, Darul Hikmah, Darul Hudah, Darul Saadah, Darul Salam, Darul Sunah, Iworoko Humah, Satellite Humah, School Gate Humah and Shonibare.",
-      "Darul Saadah and Darul Hudah open the season at 10:00 on Thursday, followed by Shonibare against Satellite Humah at 12:00.",
+      "Darul Saadah and Darul Hudah open the season at 7:00 AM on Thursday, followed by Shonibare against Darul Hikmah at 9:00 AM.",
       "Week 1 continues on Friday with Darul Haq against Iworoko Humah at 10:00, and ends on Saturday with School Gate Humah against Darul Sunah at 10:00 and Darul Salam against Darul Hikmah at 12:00.",
       "Follow every match live on EKSU Sports Hub, with live scores, line-ups and the league table updated after every game.",
     ],
