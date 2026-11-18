@@ -48,11 +48,35 @@ const C4T = "/news/2026-11-18-civil-400l-training";
 
 const C5R = "/news/2026-11-18-civil-500l-ready";
 
+const C4CB = "/news/2026-11-18-civil-400l-comeback";
+
 export const STORIES: Story[] = [
+  {
+    id: "civil-400l-comeback-beat-civil-500l-3-2",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-18T11:50:00+01:00",
+    headline: "Civil 400L stage stunning comeback to beat 500L 3–2",
+    summary:
+      "Two goals down, Civil Engineering 400L hit back through Surprise, Femight and substitute Qd to win the departmental derby 3–2 in Wednesday's Sports Directorate friendly.",
+    body: [
+      "Civil Engineering 400 Level came from two goals down to beat Civil 500L 3–2 in a dramatic departmental derby on Wednesday morning.",
+      "500L looked in control early on. Mentoli opened the scoring in the 8th minute and Lexi doubled the lead in the 24th to give the seniors a 2–0 cushion.",
+      "But 400L refused to give up. Surprise pulled one back and Femight levelled the score, before substitute Qd, brought on for Alamite, completed the turnaround with the winner.",
+      "It was a morning to remember for 400L, who were seen sharpening up before kick-off, while 500L will be left wondering how they let a two-goal lead slip.",
+      "Bragging rights in Civil Engineering belong to 400L — for now.",
+    ],
+    image: { src: `${C4CB}/lead.jpg`, alt: "Civil Engineering 400L players on the pitch", width: 1600, height: 1200 },
+    gallery: [{ src: `${C4CB}/squad.jpg`, alt: "Civil 400L players before kick-off", width: 1600, height: 1200 }],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "bb6df3ea-ccb9-4351-9aaa-84fd10e91768",
+  },
   {
     id: "civil-500l-gather-ahead-of-civil-400l-clash",
     published: true,
-    featured: true,
+    featured: false,
     category: "TEAM_UPDATE",
     kind: "report",
     publishedAt: "2026-11-18T09:55:00+01:00",
