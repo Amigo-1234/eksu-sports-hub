@@ -44,11 +44,36 @@ const KDHT = "/news/2026-11-17-khe-downfall-half-time";
 
 const DFKFT = "/news/2026-11-17-downfall-beat-khe";
 
+const C4T = "/news/2026-11-18-civil-400l-training";
+
 export const STORIES: Story[] = [
+  {
+    id: "civil-400l-train-ahead-of-civil-500l-clash",
+    published: true,
+    featured: true,
+    category: "TEAM_UPDATE",
+    kind: "report",
+    publishedAt: "2026-11-18T10:00:00+01:00",
+    headline: "Civil Engineering 400L sharpen up ahead of 500L showdown",
+    summary: "Civil 400L were spotted going through their paces on the pitch ahead of today's Sports Directorate friendly against Civil 500L.",
+    body: [
+      "Civil Engineering 400 Level were out on the pitch getting ready ahead of today's Sports Directorate friendly against Civil 500L.",
+      "The players were seen passing the ball around, loosening up and talking through their shape as they prepared for the departmental clash.",
+      "Bragging rights within Civil Engineering are on the line, with the two levels going head to head.",
+      "Follow the match live on EKSU Sports Hub.",
+    ],
+    image: { src: `${C4T}/lead.jpg`, alt: "Civil Engineering 400L players on the pitch before the match", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${C4T}/passing.jpg`, alt: "Civil 400L players passing the ball during their warm-up", width: 1600, height: 1200 },
+      { src: `${C4T}/warm-up.jpg`, alt: "Civil 400L players talking on the pitch ahead of kick-off", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "bb6df3ea-ccb9-4351-9aaa-84fd10e91768",
+  },
   {
     id: "downfall-beat-khe-4-3-jamal-mbappe-hat-trick",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-17T15:00:00+01:00",
