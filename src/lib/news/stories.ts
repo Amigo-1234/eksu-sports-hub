@@ -64,7 +64,7 @@ export const STORIES: Story[] = [
     body: [
       "Civil Engineering 400 Level came from two goals down to beat Civil 500L 3–2 in a dramatic departmental derby on Wednesday morning.",
       "500L looked in control early on. Mentoli opened the scoring in the 8th minute and Lexi doubled the lead in the 24th to give the seniors a 2–0 cushion.",
-      "But 400L refused to give up. Surprise pulled one back and Femight levelled the score, before substitute Qd, brought on for Alamite, completed the turnaround with the winner.",
+      "But 400L refused to give up. Surprise pulled one back in the 78th minute and Femight levelled in the 85th, before substitute Qd, brought on for Alamite, completed the turnaround with the winner in the 92nd minute (90+2).",
       "It was a morning to remember for 400L, who were seen sharpening up before kick-off, while 500L will be left wondering how they let a two-goal lead slip.",
       "Bragging rights in Civil Engineering belong to 400L — for now.",
     ],
