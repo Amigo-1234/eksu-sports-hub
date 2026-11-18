@@ -16,6 +16,7 @@ export function SiteFooter() {
         <nav aria-label="Footer" className="flex items-center gap-4">
           <Link href="/competitions" className="hover:text-ink">Competitions</Link>
           <Link href="/register" className="hover:text-ink">Register</Link>
+          <Link href="/apply/operator" className="hover:text-ink">Become an operator</Link>
           <OpenOnboardingButton className="hover:text-ink">Install app &amp; alerts</OpenOnboardingButton>
           <span>All times are West Africa Time (WAT).</span>
         </nav>

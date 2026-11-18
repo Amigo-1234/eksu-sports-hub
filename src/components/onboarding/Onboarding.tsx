@@ -22,7 +22,7 @@ import { gateStatus, subscribeGate } from "@/components/visitor/visitor-store";
 type Step = "intro" | "install" | "alerts" | "welcome";
 
 /** Pages where a first-visit overlay would get in the way of a task. */
-const SKIP_PATHS = [/^\/register(\/|$)/, /^\/notifications(\/|$)/, /^\/teams\/[^/]+\/welcome\/?$/];
+const SKIP_PATHS = [/^\/register(\/|$)/, /^\/apply(\/|$)/, /^\/notifications(\/|$)/, /^\/teams\/[^/]+\/welcome\/?$/];
 
 /**
  * First-visit onboarding for the public site: logo intro → install the app →

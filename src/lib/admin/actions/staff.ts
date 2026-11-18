@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { createInviteLink, createRecoveryLink, setSignInBlocked } from "../authAdmin";
+import { confirmUrl, siteOriginForLinks as origin } from "../links";
 import { STAFF_ROLES, type ActionState } from "../types";
 import { adminAction, check, fail, id, Invalid, ok, oneOf, text } from "./util";
 
@@ -11,23 +11,6 @@ const done = (msg: string, data?: Record<string, string>) => {
   return ok(msg, data);
 };
 
-/** Absolute origin of this deployment, for one-time links. */
-async function origin(): Promise<string> {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "");
-  if (configured) return configured;
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  if (!host) throw new Invalid("Could not determine this site's address for the link.");
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
-  return `${proto}://${host}`;
-}
-
-function confirmUrl(base: string, tokenHash: string, type: "invite" | "recovery") {
-  const u = new URL("/auth/confirm", base);
-  u.searchParams.set("token_hash", tokenHash);
-  u.searchParams.set("type", type);
-  return u.toString();
-}
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

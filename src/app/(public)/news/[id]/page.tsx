@@ -132,7 +132,7 @@ export default async function StoryPage({ params }: PageProps<"/news/[id]">) {
         ) : (
           <header className="relative isolate -mx-3 overflow-hidden bg-gradient-to-br from-brand-800 via-brand-700 to-brand-600 text-white sm:mx-0 sm:rounded-card">
             {/* No photo (published from the dashboard): a branded header with the headline. */}
-            <Image src={crest} alt="" aria-hidden="true" width={260} height={260} className="absolute -right-10 -bottom-12 -z-10 opacity-15 sm:right-6" />
+            <Image src={crest} alt="" aria-hidden="true" width={260} height={260} className="absolute -right-10 -bottom-12 -z-10 opacity-30 mix-blend-multiply sm:right-6" />
             <div className="px-3 pt-3 sm:px-5 sm:pt-4">
               <BackLink fallbackHref="/news" label="News" tone="onDark" className="mb-0" />
             </div>

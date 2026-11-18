@@ -6,7 +6,7 @@ import type { ActionState } from "@/lib/admin/types";
 import { ActionForm, FormMessage, Submit } from "./ActionForm";
 import { btn, Field, inputCls, selectCls } from "./ui";
 
-function OneTimeLink({ link }: { link: string }) {
+export function OneTimeLink({ link }: { link: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <div className="mt-3 rounded-lg border border-warn/40 bg-warn-soft p-3 text-sm">
