@@ -306,3 +306,17 @@ export const UsersIcon = (p: IconProps) => (
     <path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5" />
   </svg>
 );
+
+export const LinkIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" />
+    <path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" />
+  </svg>
+);
+
+export const ReturnIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M9 14 4 9l5-5" />
+    <path d="M4 9h11a5 5 0 0 1 0 10h-3" />
+  </svg>
+);

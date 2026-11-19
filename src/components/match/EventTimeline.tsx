@@ -5,6 +5,7 @@ import {
   GloveIcon,
   MedicalIcon,
   PenaltySpotIcon,
+  ReturnIcon,
   SecondYellowIcon,
   SwapIcon,
   WhistleIcon,
@@ -66,7 +67,7 @@ function EventIcon({ type }: { type: MatchEventType }) {
     case "INJURY":
       return <MedicalIcon size={18} className="text-loss" />;
     case "SUSPENSION_RETURN":
-      return <span className="text-base font-black text-win">↩</span>;
+      return <ReturnIcon size={18} className="text-win" />;
   }
 }
 
