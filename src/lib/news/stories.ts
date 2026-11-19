@@ -56,11 +56,38 @@ const MSSN = "/news/2026-11-19-mssn-league-kicks-off";
 
 const DSWU = "/news/2026-11-19-darul-saadah-warm-up";
 
+const MKO = "/news/2026-11-19-mssn-kick-off";
+
 export const STORIES: Story[] = [
+  {
+    id: "mssn-league-kicks-off-darul-saadah-v-darul-hudah",
+    published: true,
+    featured: true,
+    category: "COMPETITION",
+    kind: "report",
+    publishedAt: "2026-11-19T08:26:00+01:00",
+    headline: "MSSN League is under way: Darul Saadah v Darul Hudah kicks off",
+    summary:
+      "The MSSN EKSU Football League 2026/2027 has started. Darul Saadah and Darul Hudah lined up together before the opening match kicked off on Thursday morning.",
+    body: [
+      "The MSSN EKSU Football League 2026/2027 is officially under way. Darul Saadah and Darul Hudah kicked off the opening match of the season on Thursday morning.",
+      "Before the start, both teams walked out with the match officials and lined up side by side on the pitch: Darul Saadah in pink, Darul Hudah in blue.",
+      "Darul Saadah, captained by Olaleye Habeeb, set up in a 4-3-3 with Abdulwasiu Ayomipo leading the line. Darul Hudah also lined up in a 4-3-3, with Satar up front and Abdulsalam in goal.",
+      "It is the first of 45 matches in the league, with ten teams competing for the title over the next nine weeks.",
+      "Follow the match live on EKSU Sports Hub for the score, line-ups and every key moment.",
+    ],
+    image: { src: `${MKO}/lead.jpg`, alt: "Darul Hudah in blue and Darul Saadah in pink line up with the match officials before kick-off", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${MKO}/walk-out.jpg`, alt: "Players from both teams walk out with a match official before the opening match", width: 1600, height: 1200 },
+      { src: `${MKO}/line-up-side.jpg`, alt: "The two teams line up on the pitch before kick-off", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4c24c4ca-fe1b-4ad3-9d8b-6355e7a3182c",
+  },
   {
     id: "darul-saadah-warm-up-for-mssn-opener",
     published: true,
-    featured: true,
+    featured: false,
     category: "TEAM_UPDATE",
     kind: "report",
     publishedAt: "2026-11-19T08:10:00+01:00",
