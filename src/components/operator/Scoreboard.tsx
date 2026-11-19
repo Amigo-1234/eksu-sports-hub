@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePractice } from "./practice-context";
 import { TeamCrest } from "@/components/team/TeamCrest";
 import { displayClock } from "@/lib/operator/clock";
 import { formatCountdown, halftimeRemaining } from "@/lib/rules/special";
@@ -17,6 +18,7 @@ import { PAUSE_LABEL } from "./labels";
 export function Scoreboard({ seed, state, now }: { seed: AssignmentSeed; state: OpMatchState; now: number }) {
   const { homeTeam, awayTeam } = seed.match;
   const score = computeScore(state);
+  const practice = usePractice();
   const running = state.phase === "FIRST_HALF" || state.phase === "SECOND_HALF";
   const clock = running && now ? displayClock(state.clock, now) : null;
   const pauseReason = [...state.log].reverse().find((l) => l.kind === "PAUSED")?.detail as PauseReason | undefined;
@@ -28,6 +30,9 @@ export function Scoreboard({ seed, state, now }: { seed: AssignmentSeed; state: 
   return (
     <section aria-label="Match state" className="sticky top-0 z-30 -mx-3 border-b-2 border-ink bg-surface px-3 pt-2 pb-2.5">
       <div className="flex items-center justify-between gap-2">
+        {practice ? (
+          <span className="inline-flex h-8 shrink-0 items-center rounded-full bg-accent-400 px-2.5 text-xs font-extrabold tracking-wide text-ink uppercase">Practice</span>
+        ) : (
         <Link
           href="/op"
           className="inline-flex h-11 min-w-11 shrink-0 items-center gap-1 rounded-lg pr-1 text-sm font-bold whitespace-nowrap text-ink-muted"
@@ -36,6 +41,7 @@ export function Scoreboard({ seed, state, now }: { seed: AssignmentSeed; state: 
           <span aria-hidden="true" className="text-lg">←</span>
           <span className="hidden min-[420px]:inline" aria-hidden="true">Matches</span>
         </Link>
+        )}
         <div className="flex min-w-0 items-center gap-1.5">
           {live && (
             <span className="inline-flex h-8 items-center gap-1.5 rounded-full bg-live px-2.5 text-xs font-extrabold tracking-wide text-white uppercase">

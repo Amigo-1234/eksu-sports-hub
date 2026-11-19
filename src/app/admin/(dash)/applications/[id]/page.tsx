@@ -4,8 +4,10 @@ import { ActionForm, Submit } from "@/components/admin/ActionForm";
 import { InviteApplicantForm } from "@/components/admin/InviteApplicantForm";
 import { Badge, btn, Card, Field, inputCls, PageTitle } from "@/components/admin/ui";
 import { reviewApplication, saveApplicationNotes } from "@/lib/admin/actions/applications";
-import { getApplication } from "@/lib/admin/data/applications";
-import { formatWatDateTime } from "@/lib/admin/time";
+import { getApplication, listPracticeLinks } from "@/lib/admin/data/applications";
+import { PracticeLinks } from "@/components/admin/PracticeLinks";
+import { siteOriginForLinks } from "@/lib/admin/links";
+import { formatWatDateTime, serverNow } from "@/lib/admin/time";
 import Link from "next/link";
 import { dayLabel, periodLabel, QUESTIONS, STATUS_LABEL, STATUS_TONE as TONE } from "@/lib/operator-applications/shared";
 
@@ -23,6 +25,7 @@ function Answer({ q, a }: { q: string; a: string }) {
 export default async function ApplicationPage({ params }: PageProps<"/admin/applications/[id]">) {
   const a = await getApplication((await params).id);
   if (!a) notFound();
+  const [practice, origin] = await Promise.all([listPracticeLinks(a.id), siteOriginForLinks().catch(() => "")]);
   const decisions = [
     { status: "SHORTLISTED", label: "Shortlist", cls: btn.secondary },
     { status: "APPROVED", label: "Approve", cls: btn.primary },
@@ -67,6 +70,13 @@ export default async function ApplicationPage({ params }: PageProps<"/admin/appl
         </div>
 
         <div className="space-y-4">
+          <Card
+            title="Practice test"
+            description="Send a private link: the applicant officiates a mock match in the real console (nothing reaches real matches) and submits a score out of 100. Grants nothing."
+          >
+            <PracticeLinks applicationId={a.id} firstName={a.full_name.trim().split(/\s+/)[0]} phone={a.phone} origin={origin} links={practice} now={serverNow()} />
+          </Card>
+
           {a.status !== "INVITED" && (
             <Card title="Decision" description="Reviewing never grants any access.">
               <div className="flex flex-wrap gap-2">

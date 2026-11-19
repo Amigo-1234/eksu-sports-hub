@@ -62,3 +62,32 @@ export async function getApplication(id: string): Promise<OperatorApplication | 
   const { db } = await adminDb();
   return must(await db.from("operator_applications").select(COLS).eq("id", id).maybeSingle(), "application") as OperatorApplication | null;
 }
+
+export interface PracticeLink {
+  id: string;
+  token: string;
+  created_at: string;
+  expires_at: string;
+  opened_at: string | null;
+  submitted_at: string | null;
+  submitted_name: string | null;
+  score: number | null;
+  result: {
+    items?: { id: string; label: string; points: number; max: number; note?: string }[];
+    finalScore?: { home: number; away: number } | null;
+    strayEvents?: number;
+    avgDelaySeconds?: number | null;
+  } | null;
+  revoked_at: string | null;
+}
+
+/** Practice (skills test) links for an application, newest first. Empty if the feature is not installed yet. */
+export async function listPracticeLinks(applicationId: string): Promise<PracticeLink[]> {
+  const { db } = await adminDb();
+  const res = await db
+    .from("operator_practice_links")
+    .select("id, token, created_at, expires_at, opened_at, submitted_at, submitted_name, score, result, revoked_at")
+    .eq("application_id", applicationId)
+    .order("created_at", { ascending: false });
+  return res.error ? [] : ((res.data ?? []) as PracticeLink[]);
+}

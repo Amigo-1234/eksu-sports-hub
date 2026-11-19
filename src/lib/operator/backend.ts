@@ -15,7 +15,21 @@ export type BackendConfig =
   | { ok: true; kind: "supabase"; url: string; publishableKey: string }
   | { ok: false; error: string };
 
+/**
+ * Practice mode (applicant skills test) forces the in-browser backend. Only
+ * ever set in the browser by the practice page, so server rendering of the
+ * real console can never be affected.
+ */
+let forcedMock = false;
+export function enablePracticeBackend() {
+  if (typeof window !== "undefined") forcedMock = true;
+}
+export function isPracticeBackend() {
+  return forcedMock;
+}
+
 export function operatorBackendConfig(): BackendConfig {
+  if (forcedMock) return { ok: true, kind: "mock" };
   const raw = process.env.NEXT_PUBLIC_OPERATOR_BACKEND;
   const kind = raw ?? (process.env.NODE_ENV === "production" ? undefined : "mock");
   if (kind === "mock") return { ok: true, kind: "mock" };

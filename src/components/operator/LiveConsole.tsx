@@ -13,6 +13,7 @@ import type { AssignmentSeed, OpEvent, Side } from "@/lib/operator/types";
 import { OpAudience } from "@/components/audience/OpAudience";
 import { ActionPad, type SheetKind } from "./ActionPad";
 import { DemoControls } from "./DemoControls";
+import { usePractice } from "./practice-context";
 import { useFeedback } from "./Feedback";
 import { CardFlow } from "./flows/CardFlow";
 import { GoalFlow } from "./flows/GoalFlow";
@@ -41,6 +42,7 @@ const TITLES: Record<SheetKind, string> = {
 };
 
 export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
+  const practice = usePractice();
   const snap = useOperatorSnapshot();
   const state = useOpMatch(seed);
   const now = useNow();
@@ -102,7 +104,9 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
       {!completed && !inControl && <TakeOverBanner matchId={matchId} />}
       {!completed && <SuspensionsPanel seed={seed} state={state} now={now} inControl={inControl} />}
 
-      {completed ? (
+      {completed && practice ? (
+        practice.done
+      ) : completed ? (
         <section className="mt-4 rounded-2xl border-[3px] border-ink p-4 text-center" aria-live="polite">
           <p className="text-3xl" aria-hidden="true">{state.phase === "FULL_TIME" ? "✓" : "■"}</p>
           <p className="font-display text-3xl font-extrabold uppercase">
@@ -135,7 +139,7 @@ export function LiveConsole({ seed }: { seed: AssignmentSeed }) {
         <OpTimeline seed={seed} state={state} intents={snap.intents} />
       </section>
 
-      <DemoControls matchId={matchId} />
+      {!practice && <DemoControls matchId={matchId} />}
 
       <Sheet open={sheet !== null} onClose={close} title={sheet ? TITLES[sheet] : ""}>
         {sheet === "goal" && (

@@ -1,5 +1,6 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createInviteLink } from "../authAdmin";
 import { confirmUrl, siteOriginForLinks } from "../links";
@@ -76,5 +77,29 @@ export async function inviteApplicant(_: ActionState, fd: FormData): Promise<Act
     return done(`Invite created for ${row.email}. Share the link privately; it works once.`, {
       link: confirmUrl(await siteOriginForLinks(), link.tokenHash, "invite"),
     });
+  });
+}
+
+/** Private practice (skills test) link for an applicant. Grants nothing. */
+export async function createPracticeLink(_: ActionState, fd: FormData): Promise<ActionState> {
+  return adminAction(async ({ db, admin }) => {
+    const appId = id(fd, "id", "Application");
+    const row = await load(db, appId);
+    if (row.status === "REJECTED") throw new Invalid("This application was rejected. Move it back before sending a practice link.");
+    const token = randomBytes(24).toString("base64url");
+    check(await db.from("operator_practice_links").insert({ application_id: appId, token, created_by: admin.id }));
+    const link = `${await siteOriginForLinks()}/practice/${token}`;
+    return done("Practice link created. Send it to the applicant.", { link });
+  });
+}
+
+export async function revokePracticeLink(_: ActionState, fd: FormData): Promise<ActionState> {
+  return adminAction(async ({ db }) => {
+    const linkId = id(fd, "link_id", "Practice link");
+    const rows = check(
+      await db.from("operator_practice_links").update({ revoked_at: new Date().toISOString() }).eq("id", linkId).is("submitted_at", null).select("id"),
+    );
+    if (!rows?.length) throw new Invalid("That link was already used or not found.");
+    return done("Practice link revoked.");
   });
 }
