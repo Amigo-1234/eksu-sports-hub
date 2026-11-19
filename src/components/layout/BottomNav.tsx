@@ -16,8 +16,8 @@ export function BottomNav({ liveCount, latestNews }: { liveCount: number; latest
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-chrome/95 pb-safe backdrop-blur lg:hidden"
     >
       <ul className="mx-auto grid h-[var(--bottom-nav-h)] max-w-lg grid-cols-5">
-        {items.map(({ href, label, icon: Icon }) => {
-          const active = isActivePath(pathname, href);
+        {items.map(({ href, label, icon: Icon, alsoActive = [] }) => {
+          const active = [href, ...alsoActive].some((h) => isActivePath(pathname, h));
           const isLiveTab = href === "/live";
           return (
             <li key={href} className="flex">

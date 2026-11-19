@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { StandingsTable } from "@/components/standings/StandingsTable";
+import { LeagueTable } from "@/components/standings/LeagueTable";
+import { nextFixtures, splitTable } from "@/lib/standings-views";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { TableIcon } from "@/components/ui/icons";
 import { AutoRefresh } from "@/components/ui/AutoRefresh";
@@ -28,14 +29,22 @@ export default async function CompetitionTable({ params }: PageProps<"/competiti
     );
   }
 
-  const [rows, live] = await Promise.all([getStandings(id), getMatches({ scope: "live", competitionId: id })]);
+  const [rows, live, results, upcoming] = await Promise.all([
+    getStandings(id),
+    getMatches({ scope: "live", competitionId: id }),
+    getMatches({ scope: "results", competitionId: id }).catch(() => []),
+    getMatches({ scope: "upcoming", competitionId: id }).catch(() => []),
+  ]);
   const promotion = promotionFor(competition);
   return rows.length > 0 ? (
     <>
       {/* Live table: refresh only while this competition has a match in play. */}
       {live.length > 0 && <AutoRefresh seconds={20} />}
-      <StandingsTable
+      <LeagueTable
         rows={rows}
+        home={splitTable(rows, results, "home")}
+        away={splitTable(rows, results, "away")}
+        next={nextFixtures(upcoming)}
         caption={`${competition.name} standings`}
         promotionSpots={promotion?.spots}
         promotionLabel={promotion?.label}

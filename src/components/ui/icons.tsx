@@ -262,3 +262,47 @@ export const SecondYellowIcon = (p: IconProps) => (
     <rect x="9.5" y="5" width="10" height="15" rx="1.6" transform="rotate(8 14.5 12.5)" className="fill-live" />
   </svg>
 );
+
+export const CommentIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12Z" />
+  </svg>
+);
+
+export const ReplyIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="m9 14-5-5 5-5" />
+    <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+  </svg>
+);
+
+export const FlagIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M5 21V4" />
+    <path d="M5 4h11l-2 4 2 4H5" />
+  </svg>
+);
+
+export const TrashIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M4 7h16" />
+    <path d="M10 11v6M14 11v6" />
+    <path d="M6 7l1 13h10l1-13" />
+    <path d="M9 7V4h6v3" />
+  </svg>
+);
+
+export const SendIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M4 12 20 4l-4 16-4-7-8-1Z" />
+    <path d="m12 13 8-9" />
+  </svg>
+);
+
+export const UsersIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <circle cx="9" cy="8" r="3.5" />
+    <path d="M2.5 20a6.5 6.5 0 0 1 13 0" />
+    <path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5" />
+  </svg>
+);

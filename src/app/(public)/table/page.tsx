@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { StandingsTable } from "@/components/standings/StandingsTable";
+import { LeagueTable } from "@/components/standings/LeagueTable";
+import { nextFixtures, splitTable } from "@/lib/standings-views";
 import { TopScorersCard } from "@/components/standings/TopScorersCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterChips } from "@/components/ui/FilterChips";
@@ -26,10 +27,12 @@ export default async function TablePage({ searchParams }: PageProps<"/table">) {
     );
   }
 
-  const [rows, live, scorers] = await Promise.all([
+  const [rows, live, scorers, results, upcoming] = await Promise.all([
     getStandings(selected.id),
     getMatches({ scope: "live", competitionId: selected.id }),
     getTopScorers(selected.id).catch(() => []),
+    getMatches({ scope: "results", competitionId: selected.id }).catch(() => []),
+    getMatches({ scope: "upcoming", competitionId: selected.id }).catch(() => []),
   ]);
   const promotion = promotionFor(selected);
 
@@ -48,8 +51,11 @@ export default async function TablePage({ searchParams }: PageProps<"/table">) {
       />
       <div className="mt-3">
         {rows.length > 0 ? (
-          <StandingsTable
+          <LeagueTable
             rows={rows}
+            home={splitTable(rows, results, "home")}
+            away={splitTable(rows, results, "away")}
+            next={nextFixtures(upcoming)}
             caption={`${selected.name} standings`}
             promotionSpots={promotion?.spots}
             promotionLabel={promotion?.label}

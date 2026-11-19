@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { TrophyIcon } from "@/components/ui/icons";
 import { getCompetitions, getSports } from "@/lib/data";
 
-export const metadata: Metadata = { title: "Competitions" };
+export const metadata: Metadata = { title: "Leagues" };
 
 export default async function CompetitionsPage() {
   const [sports, competitions] = await Promise.all([getSports(), getCompetitions()]);
@@ -14,7 +14,7 @@ export default async function CompetitionsPage() {
 
   return (
     <>
-      <PageHeader title="Competitions" subtitle="EKSU leagues and cups" />
+      <PageHeader title="Leagues" subtitle="Every EKSU league and cup: tables, fixtures, results and top scorers" />
       <div className="max-w-3xl space-y-5">
         {sports.filter((s) => s.status === "active").map((sport) => {
           const list = competitions.filter((c) => c.sportId === sport.id);

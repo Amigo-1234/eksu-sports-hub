@@ -3,6 +3,7 @@ import { MatchesByCompetition, MatchesByDate } from "@/components/match/MatchLis
 import { LiveDot } from "@/components/match/MatchStatusLabel";
 import { StandingsTable } from "@/components/standings/StandingsTable";
 import { CompetitionLinkList } from "@/components/competition/CompetitionLinkList";
+import { LeagueStrip } from "@/components/competition/LeagueStrip";
 import { OpenOnboardingButton } from "@/components/onboarding/Onboarding";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { cookies } from "next/headers";
@@ -52,6 +53,7 @@ export default async function HomePage() {
         <span aria-hidden="true">·</span>
         <span>WAT</span>
       </p>
+      <LeagueStrip competitions={competitions} />
 
       {nothingAtAll ? (
         <EmptyState

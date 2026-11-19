@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import crest from "../../../../../public/brand/eksu-crest-192.png";
+import { FanZone } from "@/components/fan/FanZone";
 import { NewsShare } from "@/components/news/NewsShare";
 import { CategoryTag, NewsTile } from "@/components/news/NewsTiles";
 import { BackLink } from "@/components/ui/BackLink";
@@ -202,6 +203,9 @@ export default async function StoryPage({ params }: PageProps<"/news/[id]">) {
               {s.imageCredit && <p className="mt-2 text-xs text-ink-faint">Photos: {s.imageCredit}</p>}
             </section>
           )}
+          <div className="mt-8 border-t border-line pt-6">
+            <FanZone kind="news" id={s.id} />
+          </div>
         </div>
       </article>
 

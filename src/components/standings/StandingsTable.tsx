@@ -1,20 +1,19 @@
 import Link from "next/link";
 import { TeamCrest } from "@/components/team/TeamCrest";
-import { FormGuide } from "@/components/team/FormGuide";
 import { matchHref } from "@/lib/match";
-import type { StandingRow } from "@/lib/types";
+import type { NextFixture } from "@/lib/standings-views";
+import type { FormResult, StandingRow } from "@/lib/types";
 
 /*
- * Column visibility by breakpoint — narrow phones keep #, team, P, GD, PTS.
- *   base: P GD PTS   ≥370px: + W D L   md: + GF GA   lg: + form
+ * Flashscore-style columns. Narrow phones keep #, team, MP, GD, PTS.
+ *   base: MP GD PTS   ≥370px: + W D L   sm: + G (scored:conceded)   md: + form
  */
 const COLS = [
-  { key: "played", abbr: "P", title: "Played", cls: "", colCls: "" },
+  { key: "played", abbr: "MP", title: "Matches played", cls: "", colCls: "" },
   { key: "won", abbr: "W", title: "Won", cls: "hidden min-[370px]:table-cell", colCls: "hidden min-[370px]:table-column" },
   { key: "drawn", abbr: "D", title: "Drawn", cls: "hidden min-[370px]:table-cell", colCls: "hidden min-[370px]:table-column" },
   { key: "lost", abbr: "L", title: "Lost", cls: "hidden min-[370px]:table-cell", colCls: "hidden min-[370px]:table-column" },
-  { key: "goalsFor", abbr: "GF", title: "Goals for", cls: "hidden md:table-cell", colCls: "hidden md:table-column" },
-  { key: "goalsAgainst", abbr: "GA", title: "Goals against", cls: "hidden md:table-cell", colCls: "hidden md:table-column" },
+  { key: "goals", abbr: "G", title: "Goals scored : conceded", cls: "hidden sm:table-cell", colCls: "hidden sm:table-column" },
   { key: "goalDifference", abbr: "GD", title: "Goal difference", cls: "", colCls: "" },
 ] as const;
 
@@ -27,8 +26,11 @@ export function StandingsTable({
   compact = false,
   showForm = true,
   title,
+  next,
 }: {
   rows: StandingRow[];
+  /** Each team's next match, shown as "?" ahead of the form pills. */
+  next?: Record<string, NextFixture>;
   caption: string;
   highlightTeamIds?: string[];
   /** Number of top positions to mark (e.g. final qualification). */
@@ -41,6 +43,7 @@ export function StandingsTable({
   title?: string;
 }) {
   const cols = compact ? COLS.filter((c) => c.key === "played" || c.key === "goalDifference") : COLS;
+  const width = (k: string) => (k === "goalDifference" ? "w-11" : k === "goals" ? "w-14" : "w-9");
   const isLiveTable = rows.some((r) => r.live);
 
   return (
@@ -68,10 +71,10 @@ export function StandingsTable({
           <col className="w-10" />
           <col />
           {cols.map((c) => (
-            <col key={c.key} className={`${c.key === "goalDifference" ? "w-11" : "w-9"} ${c.colCls}`} />
+            <col key={c.key} className={`${width(c.key)} ${c.colCls}`} />
           ))}
           <col className="w-12" />
-          {showForm && !compact && <col className="hidden w-36 lg:table-column" />}
+          {showForm && !compact && <col className="hidden w-40 md:table-column" />}
         </colgroup>
         <thead>
           <tr className="border-b border-line text-[11px] font-bold tracking-wide text-ink-faint uppercase">
@@ -88,7 +91,7 @@ export function StandingsTable({
               <abbr title="Points" className="no-underline">Pts</abbr>
             </th>
             {showForm && !compact && (
-              <th scope="col" className="hidden py-2 pr-3 text-left lg:table-cell">Form</th>
+              <th scope="col" className="hidden py-2 pr-3 text-left md:table-cell">Form</th>
             )}
           </tr>
         </thead>
@@ -127,6 +130,12 @@ export function StandingsTable({
                   {r.live && <LiveChip live={r.live} />}
                 </th>
                 {cols.map((c) => {
+                  if (c.key === "goals")
+                    return (
+                      <td key={c.key} className={`py-2 text-center tabular-nums text-ink-muted ${c.cls}`}>
+                        {r.goalsFor}:{r.goalsAgainst}
+                      </td>
+                    );
                   const v = r[c.key];
                   return (
                     <td key={c.key} className={`py-2 text-center tabular-nums text-ink-muted ${c.cls}`}>
@@ -138,8 +147,8 @@ export function StandingsTable({
                   {r.points}
                 </td>
                 {showForm && !compact && (
-                  <td className="hidden py-2 pr-3 lg:table-cell">
-                    <FormGuide form={r.form} size="sm" />
+                  <td className="hidden py-2 pr-3 md:table-cell">
+                    <FormPills form={r.form} next={next?.[r.teamId]} />
                   </td>
                 )}
               </tr>
@@ -191,5 +200,37 @@ function LiveChip({ live }: { live: NonNullable<StandingRow["live"]> }) {
       LIVE {live.goalsFor}–{live.goalsAgainst}
       <span className="sr-only">, currently {o.label}</span>
     </Link>
+  );
+}
+
+const PILL = { W: "bg-win", D: "bg-draw", L: "bg-loss" } as const;
+const PILL_LABEL = { W: "Win", D: "Draw", L: "Loss" } as const;
+
+/** Flashscore form: next match "?" first, then the last five, newest first. */
+function FormPills({ form, next }: { form: FormResult[]; next?: NextFixture }) {
+  const recent = [...form].reverse().slice(0, 5);
+  return (
+    <span className="flex items-center gap-1">
+      {next && (
+        <Link
+          href={matchHref(next.matchId)}
+          title={`Next: ${next.home ? "v" : "@"} ${next.opponent}`}
+          className="grid size-5 place-items-center rounded border border-line text-[10px] font-bold text-ink-muted hover:border-brand-400 hover:text-brand-fg"
+        >
+          ?<span className="sr-only">Next match: {next.home ? "home to" : "away at"} {next.opponent}</span>
+        </Link>
+      )}
+      {recent.map((f) => (
+        <Link
+          key={f.matchId}
+          href={matchHref(f.matchId)}
+          className={`grid size-5 place-items-center rounded text-[10px] font-bold text-canvas ${PILL[f.outcome]}`}
+        >
+          <span aria-hidden="true">{f.outcome}</span>
+          <span className="sr-only">{PILL_LABEL[f.outcome]}</span>
+        </Link>
+      ))}
+      {recent.length === 0 && !next && <span className="text-xs text-ink-faint">–</span>}
+    </span>
   );
 }

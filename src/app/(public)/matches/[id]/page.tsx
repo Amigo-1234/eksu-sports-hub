@@ -4,13 +4,14 @@ import { HeadToHeadPanel, type PreMatchTeam } from "@/components/match/MatchPane
 import { LiveLineupsPanel, LiveMatchHero, LiveMatchProvider, LiveStatsPanel, LiveSummaryPanel } from "@/components/realtime/LiveMatch";
 import { LiveMatchAlerts, LiveSoundControls } from "@/components/realtime/LiveAlerts";
 import { MatchTabs } from "@/components/match/MatchTabs";
+import { FanZone } from "@/components/fan/FanZone";
 import { MatchAlertsButton } from "@/components/notifications/MatchAlertsButton";
 import { AudienceTracker } from "@/components/audience/AudienceTracker";
 import { BackLink } from "@/components/ui/BackLink";
 import { DemoNotice } from "@/components/ui/DemoNotice";
 import { DATA_SOURCE_KIND, getHeadToHead, getMatch, getMatches, getNow, getStandings } from "@/lib/data";
 import { outcomeFor } from "@/lib/match";
-import { showsScore } from "@/lib/status";
+import { isLive, showsScore } from "@/lib/status";
 import type { FormResult, StandingRow, Team } from "@/lib/types";
 
 export async function generateMetadata({ params }: PageProps<"/matches/[id]">): Promise<Metadata> {
@@ -71,6 +72,19 @@ export default async function MatchPage({ params }: PageProps<"/matches/[id]">) 
               label: "Summary",
               content: (
                 <LiveSummaryPanel preMatch={{ home: pre(match.homeTeam, homeForm), away: pre(match.awayTeam, awayForm) }} />
+              ),
+            },
+            {
+              id: "fans",
+              label: "Fans",
+              content: (
+                <FanZone
+                  kind="match"
+                  id={match.id}
+                  teams={{ home: match.homeTeam, away: match.awayTeam }}
+                  voteOpen={match.status === "SCHEDULED"}
+                  live={isLive(match.status)}
+                />
               ),
             },
             { id: "lineups", label: "Line-ups", content: <LiveLineupsPanel /> },

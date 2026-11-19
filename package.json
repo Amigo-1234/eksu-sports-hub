@@ -19,7 +19,8 @@
     "test:applications": "node --experimental-strip-types --no-warnings --test tests/operator-applications.test.ts",
     "test:audience": "node --experimental-strip-types --no-warnings --test tests/audience.test.ts",
     "test:news": "node --experimental-strip-types --no-warnings --test tests/news.test.ts",
-    "test:live": "node --experimental-strip-types --no-warnings --test tests/live-alerts.test.ts tests/live-table.test.ts"
+    "test:live": "node --experimental-strip-types --no-warnings --test tests/live-alerts.test.ts tests/live-table.test.ts",
+    "test:fan": "node --experimental-strip-types --no-warnings --test tests/fan-zone.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

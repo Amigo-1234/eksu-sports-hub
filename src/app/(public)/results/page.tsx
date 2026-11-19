@@ -3,6 +3,7 @@ import { MatchesByDate } from "@/components/match/MatchList";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterChips } from "@/components/ui/FilterChips";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { LinkTabs } from "@/components/ui/LinkTabs";
 import { ResultsIcon } from "@/components/ui/icons";
 import { getCompetitions, getMatches, getNow } from "@/lib/data";
 import { competitionChips, param } from "@/lib/filters";
@@ -19,6 +20,9 @@ export default async function ResultsPage({ searchParams }: PageProps<"/results"
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Results" subtitle="Completed matches, most recent first" />
+      <div className="mb-3">
+        <LinkTabs label="Matches" tabs={[{ href: "/fixtures", label: "Fixtures" }, { href: "/results", label: "Results" }]} />
+      </div>
       <FilterChips label="Filter by competition" options={competitionChips("/results", competitions, selected?.id)} />
       <div className="mt-3">
         {results.length > 0 ? (

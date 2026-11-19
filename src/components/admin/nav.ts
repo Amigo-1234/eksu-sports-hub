@@ -40,6 +40,7 @@ export const NAV: { heading?: string; items: NavItem[] }[] = [
       { href: "/admin/staff", label: "Staff & Operators", icon: "users" },
       { href: "/admin/applications", label: "Operator Applications", icon: "inbox" },
       { href: "/admin/visitors", label: "Site Visitors", icon: "users" },
+      { href: "/admin/fan-zone", label: "Fan Zone", icon: "inbox" },
       { href: "/admin/audit", label: "Audit Log", icon: "log" },
       { href: "/admin/settings", label: "Settings", icon: "settings" },
     ],
