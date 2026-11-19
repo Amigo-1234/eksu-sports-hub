@@ -4,7 +4,7 @@ import { applyLiveMatches } from "../live-standings";
 import { publicDataConfig } from "./config";
 import { mockDataSource } from "./mock";
 import type { SportsDataSource } from "./source";
-import { supabaseDataSource } from "./supabase";
+import { registeredTeamIds, searchPlayers as searchPlayersLive, supabaseDataSource, type PlayerHit } from "./supabase";
 
 export type { MatchQuery, MatchScope, SportsDataSource } from "./source";
 
@@ -100,3 +100,16 @@ export async function getHeadToHead(
 
 /** Which backend is serving data — the UI shows a notice while this is "mock". */
 export const DATA_SOURCE_KIND: "mock" | "live" = config.kind === "mock" ? "mock" : "live";
+
+/** Registered teams (current squads); empty for the mock source. */
+export async function getRegisteredTeamIds(): Promise<string[]> {
+  return config.kind === "supabase" ? registeredTeamIds() : [];
+}
+
+export type { PlayerHit };
+/** Player name search (public squad data only); empty for the mock source. */
+export async function searchPlayers(q: string): Promise<PlayerHit[]> {
+  const term = q.trim();
+  if (term.length < 2 || config.kind !== "supabase") return [];
+  return searchPlayersLive(term.slice(0, 60));
+}

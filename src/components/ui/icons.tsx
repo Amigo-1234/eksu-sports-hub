@@ -329,3 +329,10 @@ export const StarIcon = ({ filled, ...p }: IconProps & { filled?: boolean }) => 
     />
   </svg>
 );
+
+export const SearchIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
+);

@@ -16,7 +16,7 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { CalendarIcon, ChevronRightIcon, ClockIcon, TrophyIcon } from "@/components/ui/icons";
 import { LiveScoresProvider } from "@/components/realtime/LiveScores";
 import { NewsSection } from "@/components/news/NewsSection";
-import { DATA_SOURCE_KIND, getCompetitions, getMatches, getNow, getStandings } from "@/lib/data";
+import { DATA_SOURCE_KIND, getCompetitions, getMatches, getNow, getRegisteredTeamIds, getStandings, getTeams } from "@/lib/data";
 import { dateKey, formatKickoff, formatLongDate } from "@/lib/format";
 import { matchHref } from "@/lib/match";
 import { isLive } from "@/lib/status";
@@ -55,6 +55,15 @@ export default async function HomePage() {
       groupMap.set(m.competition.name, g);
     }
   }
+  // Registered teams (current squads) without a public fixture yet can be followed too.
+  const [allTeams, registered] = await Promise.all([getTeams(), getRegisteredTeamIds().catch((): string[] => [])]);
+  const registeredOnly = new Set<string>();
+  for (const t of allTeams) {
+    if (!registered.includes(t.id) || pickerTeams.has(t.id) || /\(test\)/i.test(t.name)) continue;
+    pickerTeams.set(t.id, { id: t.id, name: t.name, shortName: t.shortName, code: t.code, colors: t.colors });
+    registeredOnly.add(t.id);
+  }
+  if (registeredOnly.size) groupMap.set("Registered teams", registeredOnly);
   const pickerGroups = [...groupMap].map(([name, ids]) => ({
     name,
     teamIds: [...ids].sort((a, b) => pickerTeams.get(a)!.name.localeCompare(pickerTeams.get(b)!.name)),

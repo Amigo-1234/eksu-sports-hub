@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TeamCrest } from "@/components/team/TeamCrest";
 import { CommentIcon, FlagIcon, HeartIcon, ReplyIcon, SendIcon, TrashIcon } from "@/components/ui/icons";
-import type { FanAction, FanComment, FanFeed, FanTargetKind } from "@/lib/fan/types";
+import { BURST_CHAR, BURSTS, type BurstEmoji, type FanAction, type FanComment, type FanFeed, type FanTargetKind } from "@/lib/fan/types";
+import { subscribeFan, type ChannelState } from "@/lib/realtime/client";
 import type { Team } from "@/lib/types";
 import { FanGames } from "./FanGames";
 import { NameForm } from "./NameForm";
@@ -61,6 +62,19 @@ export function FanZone({ kind, id, teams, voteOpen = false, live = false }: Pro
   const [sort, setSort] = useState<"new" | "top">("new");
   const [replyTo, setReplyTo] = useState<FanComment | null>(null);
   const [now, setNow] = useState(0);
+  const [channel, setChannel] = useState<ChannelState>("connecting");
+  const [gamesTick, setGamesTick] = useState(0);
+  const [floaters, setFloaters] = useState<{ key: number; char: string; x: number }[]>([]);
+  const ownEcho = useRef<Record<string, number>>({});
+  const floatKey = useRef(0);
+
+  const float = useCallback((emoji: string) => {
+    const char = BURST_CHAR[emoji as BurstEmoji];
+    if (!char) return;
+    const key = ++floatKey.current;
+    setFloaters((f) => [...f.slice(-24), { key, char, x: Math.round(Math.random() * 60) }]);
+    setTimeout(() => setFloaters((f) => f.filter((x) => x.key !== key)), 2400);
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -74,9 +88,36 @@ export function FanZone({ kind, id, teams, voteOpen = false, live = false }: Pro
     }
   }, [kind, id]);
 
+  // Live: the database broadcasts a hint on every Fan Zone change; we refetch
+  // (debounced). Polling stays as a slow safety net, faster if the channel drops.
+  useEffect(() => {
+    let debounce: ReturnType<typeof setTimeout> | undefined;
+    const unsubscribe = subscribeFan(`fan:${kind}:${id}`, {
+      onChange: (what) => {
+        if (what === "games") setGamesTick((t) => t + 1);
+        clearTimeout(debounce);
+        debounce = setTimeout(load, 700);
+      },
+      onBurst: (emoji) => {
+        // Our own taps already floated locally: skip their echo once.
+        if ((ownEcho.current[emoji] ?? 0) > 0) ownEcho.current[emoji]--;
+        else float(emoji);
+        setFeed((f) => (f ? { ...f, bursts: { ...f.bursts, [emoji]: (f.bursts?.[emoji as BurstEmoji] ?? 0) + 1 } } : f));
+      },
+      onState: (state, resubscribed) => {
+        setChannel(state);
+        if (resubscribed) load();
+      },
+    });
+    return () => {
+      clearTimeout(debounce);
+      unsubscribe();
+    };
+  }, [kind, id, load, float]);
+
   useEffect(() => {
     const first = setTimeout(load, 0);
-    const every = live ? 15_000 : 60_000;
+    const every = channel === "live" ? 120_000 : live ? 15_000 : 60_000;
     const t = setInterval(() => {
       if (document.visibilityState === "visible") load();
     }, every);
@@ -84,7 +125,27 @@ export function FanZone({ kind, id, teams, voteOpen = false, live = false }: Pro
       clearTimeout(first);
       clearInterval(t);
     };
-  }, [load, live]);
+  }, [load, live, channel]);
+
+  const burst = async (emoji: BurstEmoji) => {
+    float(emoji);
+    ownEcho.current[emoji] = (ownEcho.current[emoji] ?? 0) + 1;
+    setFeed((f) => (f ? { ...f, bursts: { ...f.bursts, [emoji]: (f.bursts?.[emoji] ?? 0) + 1 } } : f));
+    try {
+      const res = await fetch("/api/fan", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ kind, id, action: "burst", emoji }),
+      });
+      if (!res.ok) {
+        ownEcho.current[emoji] = Math.max(0, (ownEcho.current[emoji] ?? 1) - 1);
+        const d = await res.json().catch(() => ({}));
+        if (res.status === 429) setError(d.error ?? "Easy! Too many reactions.");
+      }
+    } catch {
+      /* offline: the float already showed */
+    }
+  };
 
   const act = useCallback(
     async (body: FanAction, optimistic?: (f: FanFeed) => FanFeed) => {
@@ -120,8 +181,14 @@ export function FanZone({ kind, id, teams, voteOpen = false, live = false }: Pro
   return (
     <section id="comments" aria-labelledby={`fan-${id}`} className="scroll-mt-28 space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <h2 id={`fan-${id}`} className="font-display text-xl font-extrabold tracking-wide uppercase">
+        <h2 id={`fan-${id}`} className="flex items-center gap-2 font-display text-xl font-extrabold tracking-wide uppercase">
           Fan Zone
+          {channel === "live" && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-win/12 px-2 py-0.5 font-sans text-[10px] font-bold tracking-wide text-win normal-case">
+              <span className="size-1.5 rounded-full bg-win motion-safe:animate-pulse" aria-hidden="true" />
+              Live
+            </span>
+          )}
         </h2>
         <div className="flex items-center gap-2">
           <button
@@ -145,7 +212,24 @@ export function FanZone({ kind, id, teams, voteOpen = false, live = false }: Pro
         </div>
       </div>
 
-      {kind === "match" && teams && <FanGames matchId={id} teams={teams} name={feed?.name ?? null} onSignedIn={load} live={live} />}
+      {feed && (
+        <div role="group" aria-label="React" className="scrollbar-none -mx-3 flex gap-1.5 overflow-x-auto px-3 sm:mx-0 sm:px-0">
+          {BURSTS.map((e) => (
+            <button
+              key={e}
+              type="button"
+              onClick={() => burst(e)}
+              aria-label={`React ${e}`}
+              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface px-3 text-lg leading-none transition-transform select-none active:scale-90 hover:bg-subtle"
+            >
+              <span aria-hidden="true">{BURST_CHAR[e]}</span>
+              {(feed.bursts?.[e] ?? 0) > 0 && <span className="text-xs font-bold text-ink-muted tabular-nums">{compact(feed.bursts?.[e] ?? 0)}</span>}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {kind === "match" && teams && <FanGames matchId={id} teams={teams} name={feed?.name ?? null} onSignedIn={load} live={live} tick={gamesTick} />}
 
       {kind === "match" && teams && feed?.vote && (
         <VoteCard teams={teams} vote={feed.vote} open={voteOpen} onVote={(pick) => act({ action: "vote", pick })} />
@@ -214,9 +298,18 @@ export function FanZone({ kind, id, teams, voteOpen = false, live = false }: Pro
         </p>
       )}
       {!feed && <div className="h-28 animate-pulse rounded-card bg-subtle" aria-hidden="true" />}
+      <div aria-hidden="true" className="pointer-events-none fixed right-3 bottom-[calc(var(--bottom-nav-h)+1.5rem)] z-50 h-72 w-24 lg:bottom-8">
+        {floaters.map((f) => (
+          <span key={f.key} className="animate-float-up absolute bottom-0 text-4xl" style={{ left: f.x }}>
+            {f.char}
+          </span>
+        ))}
+      </div>
     </section>
   );
 }
+
+const compact = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10_000 ? 0 : 1)}k` : String(n));
 
 export function Avatar({ name, small }: { name: string; small?: boolean }) {
   return (

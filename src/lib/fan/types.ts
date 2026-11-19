@@ -21,13 +21,20 @@ export interface FanFeed {
   name: string | null;
   vote: { home: number; draw: number; away: number; mine: "HOME" | "DRAW" | "AWAY" | null } | null;
   comments: FanComment[];
+  /** Emoji reaction totals (live Fan Zone). */
+  bursts?: Partial<Record<BurstEmoji, number>>;
 }
+
+export const BURSTS = ["fire", "goal", "laugh", "clap", "shock", "cry"] as const;
+export type BurstEmoji = (typeof BURSTS)[number];
+export const BURST_CHAR: Record<BurstEmoji, string> = { fire: "🔥", goal: "⚽", laugh: "😂", clap: "👏", shock: "😱", cry: "😭" };
 
 export type FanAction =
   | { action: "like" | "unlike" }
   | { action: "vote"; pick: "HOME" | "DRAW" | "AWAY" }
   | { action: "comment"; body: string; parent_id?: string | null }
-  | { action: "like_comment" | "unlike_comment" | "report" | "delete"; comment_id: string };
+  | { action: "like_comment" | "unlike_comment" | "report" | "delete"; comment_id: string }
+  | { action: "burst"; emoji: BurstEmoji };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -55,6 +62,8 @@ export function parseAction(raw: unknown): { action: string; payload: Record<str
       const parent = typeof r.parent_id === "string" && UUID.test(r.parent_id) ? r.parent_id : "";
       return { action: "comment", payload: { body, parent_id: parent } };
     }
+    case "burst":
+      return typeof r.emoji === "string" && (BURSTS as readonly string[]).includes(r.emoji) ? { action: "burst", payload: { emoji: r.emoji } } : null;
     case "like_comment":
     case "unlike_comment":
     case "report":

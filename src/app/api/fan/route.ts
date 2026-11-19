@@ -34,9 +34,12 @@ export async function GET(request: Request) {
   const db = DATA_SOURCE_KIND === "live" ? serviceClient() : null;
   if (!db) return NextResponse.json({ error: UNAVAILABLE }, { status: 503 });
   if (!(await targetExists(target.kind, target.id))) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const { data, error } = await db.rpc("service_fan_feed", { p_kind: target.kind, p_id: target.id, p_token: await deviceToken(), p_limit: 50 });
+  const [{ data, error }, bursts] = await Promise.all([
+    db.rpc("service_fan_feed", { p_kind: target.kind, p_id: target.id, p_token: await deviceToken(), p_limit: 50 }),
+    db.rpc("service_fan_bursts", { p_kind: target.kind, p_id: target.id }),
+  ]);
   if (error) return NextResponse.json({ error: publicMessage(error, UNAVAILABLE) }, { status: STATUS[error.code ?? ""] ?? 503 });
-  return NextResponse.json(data, { headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json({ ...(data as object), bursts: bursts.error ? {} : bursts.data }, { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function POST(request: Request) {
@@ -65,6 +68,11 @@ export async function POST(request: Request) {
     if (reg.error) return NextResponse.json({ error: publicMessage(reg.error, UNAVAILABLE) }, { status: reg.error.code === "EK429" ? 429 : 503 });
     token = (reg.data as { token: string }).token;
     await setDeviceCookie(token);
+  }
+  if (act.action === "burst") {
+    const r = await db.rpc("service_fan_burst", { p_token: token, p_kind: target.kind, p_id: target.id, p_emoji: act.payload.emoji });
+    if (r.error) return NextResponse.json({ error: publicMessage(r.error, UNAVAILABLE) }, { status: STATUS[r.error.code ?? ""] ?? 503 });
+    return NextResponse.json({ bursts: r.data }, { headers: { "Cache-Control": "no-store" } });
   }
   const { data, error } = await db.rpc("service_fan_act", { p_token: token, p_kind: target.kind, p_id: target.id, p_action: act.action, p: act.payload });
   if (error) return NextResponse.json({ error: publicMessage(error, UNAVAILABLE) }, { status: STATUS[error.code ?? ""] ?? 503 });

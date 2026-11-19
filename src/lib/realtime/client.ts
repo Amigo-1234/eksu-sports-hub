@@ -81,3 +81,41 @@ export function onResume(fn: () => void): () => void {
     window.removeEventListener("online", fn);
   };
 }
+
+/**
+ * Fan Zone channel (fan:{match|news}:{id}): "changed" hints (what = feed | games)
+ * and emoji bursts from other fans. Listen-only; callers refetch on hints.
+ */
+export function subscribeFan(
+  topic: string,
+  handlers: { onChange: (what: "feed" | "games") => void; onBurst: (emoji: string) => void; onState: (state: ChannelState, resubscribed: boolean) => void },
+): () => void {
+  const c = publicClient();
+  if (!c) {
+    handlers.onState("offline", false);
+    return () => {};
+  }
+  let subscribedBefore = false;
+  handlers.onState("connecting", false);
+  const channel = c
+    .channel(topic, { config: { private: true } })
+    .on("broadcast", { event: "fan_changed" }, (msg) => {
+      const what = (msg.payload as { what?: string } | undefined)?.what;
+      handlers.onChange(what === "games" ? "games" : "feed");
+    })
+    .on("broadcast", { event: "fan_burst" }, (msg) => {
+      const emoji = (msg.payload as { emoji?: string } | undefined)?.emoji;
+      if (typeof emoji === "string") handlers.onBurst(emoji);
+    })
+    .subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        handlers.onState("live", subscribedBefore);
+        subscribedBefore = true;
+      } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+        handlers.onState("offline", false);
+      }
+    });
+  return () => {
+    void c.removeChannel(channel);
+  };
+}

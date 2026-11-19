@@ -2,7 +2,7 @@ import Link from "next/link";
 import { DesktopNav } from "./DesktopNav";
 import { EksuLogo } from "./EksuLogo";
 import { HeaderAlertsLink } from "@/components/notifications/HeaderAlertsLink";
-import { ShirtIcon, TrophyIcon } from "@/components/ui/icons";
+import { SearchIcon, ShirtIcon } from "@/components/ui/icons";
 import type { SiteTheme } from "@/lib/theme";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -58,12 +58,12 @@ export function AppHeader({ liveCount, theme, latestNews }: { liveCount: number;
             <ShirtIcon size={20} />
           </Link>
           <Link
-            href="/competitions"
-            aria-label="Competitions"
+            href="/search"
+            aria-label="Search teams, players and leagues"
             // 320px phones: make room for the live pill while matches are on.
-            className={`${iconBtn} lg:hidden ${liveCount > 0 ? "max-[359px]:hidden" : ""}`}
+            className={`${iconBtn} ${liveCount > 0 ? "max-[359px]:hidden" : ""}`}
           >
-            <TrophyIcon size={20} />
+            <SearchIcon size={20} />
           </Link>
           <Link
             href="/register"

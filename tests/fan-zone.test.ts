@@ -68,3 +68,9 @@ test("prediction and Player of the Match requests are validated", () => {
   assert.equal(parseGamesAction({ action: "potm", player_id: "x" }), null);
   assert.equal(parseGamesAction({ action: "vote" }), null);
 });
+
+test("emoji reactions accept only the known set", () => {
+  assert.deepEqual(parseAction({ action: "burst", emoji: "fire" }), { action: "burst", payload: { emoji: "fire" } });
+  assert.equal(parseAction({ action: "burst", emoji: "poop" }), null);
+  assert.equal(parseAction({ action: "burst" }), null);
+});

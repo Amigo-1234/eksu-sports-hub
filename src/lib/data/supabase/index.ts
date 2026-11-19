@@ -329,3 +329,27 @@ export const supabaseDataSource: SportsDataSource = {
       .filter((m): m is MatchSummary => m !== null);
   },
 };
+
+/** Teams registered for the current season (active squad), so fans can follow them before their first fixture. */
+export async function registeredTeamIds(): Promise<string[]> {
+  const res = await client(LIST_TTL).rpc("public_registered_teams");
+  if (res.error) return []; // older database without the function: no extra teams
+  return ((res.data ?? []) as unknown[]).map((r) => (typeof r === "string" ? r : String((r as Record<string, unknown>).public_registered_teams)));
+}
+
+export interface PlayerHit {
+  name: string;
+  shirt: number;
+  teamId: string;
+}
+
+/** Players by name: only what team pages already show (current squads, cleared players). */
+export async function searchPlayers(q: string): Promise<PlayerHit[]> {
+  const res = await client(LIST_TTL).rpc("public_search_players", { p_q: q, p_limit: 20 });
+  if (res.error) return [];
+  return ((res.data ?? []) as { player_name: string; shirt_number: number; team_id: string }[]).map((r) => ({
+    name: r.player_name,
+    shirt: r.shirt_number,
+    teamId: r.team_id,
+  }));
+}

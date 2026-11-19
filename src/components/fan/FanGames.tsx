@@ -28,7 +28,10 @@ export function FanGames({
   name,
   onSignedIn,
   live,
+  tick = 0,
 }: {
+  /** Bumped when the live channel says predictions or votes changed. */
+  tick?: number;
   matchId: string;
   teams: { home: GameTeam; away: GameTeam };
   name: string | null;
@@ -48,6 +51,12 @@ export function FanGames({
       /* offline */
     }
   }, [matchId]);
+
+  useEffect(() => {
+    if (tick === 0) return;
+    const t = setTimeout(load, 700);
+    return () => clearTimeout(t);
+  }, [tick, load]);
 
   useEffect(() => {
     const first = setTimeout(load, 0);
