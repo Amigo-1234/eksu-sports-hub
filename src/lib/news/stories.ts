@@ -62,11 +62,38 @@ const OKP = "/news/2026-11-19-okikiola-penalty";
 
 const OLFK = "/news/2026-11-19-olaleye-free-kick";
 
+const DSHT = "/news/2026-11-19-darul-saadah-darul-hudah-ht";
+
 export const STORIES: Story[] = [
+  {
+    id: "darul-saadah-lead-darul-hudah-2-1-at-half-time",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-19T09:07:00+01:00",
+    headline: "Satar strikes before the break as Darul Saadah lead Darul Hudah 2–1",
+    summary:
+      "Darul Saadah lead 2–1 at half-time in the MSSN League opener, but Satar's goal five minutes before the break has given Darul Hudah hope.",
+    body: [
+      "Darul Saadah lead Darul Hudah 2–1 at half-time in the opening match of the MSSN EKSU Football League, but the game is far from over.",
+      "Shamsudeen Okikiola opened the scoring from the penalty spot in the 12th minute, and captain Olaleye Habeeb doubled the lead with a free kick eight minutes later.",
+      "Darul Saadah's defence was then shown two yellow cards: centre backs Akanbi Abdulsobur in the 36th minute and Abdulmalik Aro in the 40th.",
+      "Darul Hudah made them pay. In the 40th minute, five minutes before the break, striker Satar found the net to cut the gap to one goal.",
+      "With two of their centre backs on a booking, Darul Saadah will need to be careful in the second half. Follow it live on EKSU Sports Hub.",
+    ],
+    image: { src: `${DSHT}/lead.jpg`, alt: "A Darul Hudah player in blue and a Darul Saadah player in pink challenge for the ball", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${DSHT}/darul-hudah-ball.jpg`, alt: "A Darul Hudah player holds the match ball", width: 1600, height: 1200 },
+      { src: `${DSHT}/player-down.jpg`, alt: "A Darul Hudah player is helped up after going down in the first half", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4c24c4ca-fe1b-4ad3-9d8b-6355e7a3182c",
+  },
   {
     id: "captain-olaleye-free-kick-doubles-darul-saadah-lead",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-19T08:47:00+01:00",
