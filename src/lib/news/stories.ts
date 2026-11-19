@@ -64,11 +64,41 @@ const OLFK = "/news/2026-11-19-olaleye-free-kick";
 
 const DSHT = "/news/2026-11-19-darul-saadah-darul-hudah-ht";
 
+const OL2 = "/news/2026-11-19-olaleye-second-free-kick";
+
 export const STORIES: Story[] = [
+  {
+    id: "olaleye-second-free-kick-darul-saadah-3-1",
+    published: true,
+    featured: true,
+    category: "PLAYER_SPOTLIGHT",
+    kind: "report",
+    publishedAt: "2026-11-19T09:35:00+01:00",
+    headline: "Olaleye does it again: second free kick puts Darul Saadah 3–1 up",
+    summary:
+      "Darul Saadah captain Olaleye Habeeb scored his second direct free kick of the game in the 58th minute to make it 3–1 against Darul Hudah.",
+    body: [
+      "Olaleye Habeeb is having a morning to remember. The Darul Saadah captain scored his second direct free kick of the match in the 58th minute to make it 3–1 against Darul Hudah in the MSSN EKSU Football League opener.",
+      "Darul Hudah set up their wall and packed the goalmouth, but Olaleye struck the ball over the defenders and into the net, just as he had in the first half.",
+      "The goal came three minutes after Darul Hudah's Abdulafeez was shown a yellow card.",
+      "Olaleye now has two goals in the game, adding to Shamsudeen Okikiola's first-half penalty. Satar scored Darul Hudah's goal before the break.",
+      "On the live MSSN League table, Darul Saadah sit top while the match goes on. Follow the rest of the game live on EKSU Sports Hub.",
+    ],
+    image: { src: `${OL2}/lead.jpg`, alt: "Darul Saadah captain Olaleye Habeeb strikes the free kick towards the Darul Hudah goal", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${OL2}/lining-up.jpg`, alt: "A Darul Saadah player stands over the ball before the free kick", width: 1600, height: 1200 },
+      { src: `${OL2}/wall-set.jpg`, alt: "Darul Hudah set up to defend the free kick", width: 1600, height: 1200 },
+      { src: `${OL2}/ball-in-flight.jpg`, alt: "The ball flies towards the Darul Hudah goal", width: 1600, height: 1200 },
+      { src: `${OL2}/goalmouth.jpg`, alt: "Players from both teams in the Darul Hudah goalmouth", width: 1600, height: 1200 },
+      { src: `${OL2}/after.jpg`, alt: "Darul Hudah players react in front of their goal", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4c24c4ca-fe1b-4ad3-9d8b-6355e7a3182c",
+  },
   {
     id: "darul-saadah-lead-darul-hudah-2-1-at-half-time",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-19T09:07:00+01:00",
