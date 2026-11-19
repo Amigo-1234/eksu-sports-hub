@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import crest from "../../../../../public/brand/eksu-crest-192.png";
 import { FanZone } from "@/components/fan/FanZone";
 import { NewsShare } from "@/components/news/NewsShare";
+import { StoryBody } from "@/components/news/StoryBody";
 import { CategoryTag, NewsTile } from "@/components/news/NewsTiles";
 import { BackLink } from "@/components/ui/BackLink";
 import { DownloadIcon } from "@/components/ui/icons";
@@ -166,10 +167,10 @@ export default async function StoryPage({ params }: PageProps<"/news/[id]">) {
             <NewsShare url={url} title={s.headline} />
           </div>
 
-          <div className="mt-5 space-y-5 text-[17px] leading-[1.75] text-ink">
-            {s.body.map((p) => (
-              <p key={p}>{p}</p>
-            ))}
+          <StoryBody paragraphs={s.body} />
+
+          <div className="mt-6 border-t border-line pt-5">
+            <FanZone kind="news" id={s.id} />
           </div>
 
           {s.matchId && (
@@ -203,9 +204,6 @@ export default async function StoryPage({ params }: PageProps<"/news/[id]">) {
               {s.imageCredit && <p className="mt-2 text-xs text-ink-faint">Photos: {s.imageCredit}</p>}
             </section>
           )}
-          <div className="mt-8 border-t border-line pt-6">
-            <FanZone kind="news" id={s.id} />
-          </div>
         </div>
       </article>
 

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { FanBar } from "@/components/fan/FanBar";
 import { formatLongDate } from "@/lib/format";
 import { NEWS_CATEGORIES, type NewsItem } from "@/lib/news/feed";
 
@@ -48,10 +49,20 @@ function StoryLink({ item, className, children }: { item: NewsItem; className: s
 
 /** Lead story: full-width image with the headline set over a dark gradient. */
 export function NewsHero({ item }: { item: NewsItem }) {
+  if (!isLocal(item)) return <HeroLink item={item} className="rounded-card shadow-card" />;
+  return (
+    <article className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
+      <HeroLink item={item} />
+      <FanBar id={item.id} href={item.url} />
+    </article>
+  );
+}
+
+function HeroLink({ item, className = "" }: { item: NewsItem; className?: string }) {
   return (
     <StoryLink
       item={item}
-      className="group relative block aspect-[4/3] overflow-hidden rounded-card bg-ink shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 sm:aspect-[16/8]"
+      className={`group relative block aspect-[4/3] overflow-hidden bg-ink focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-600 sm:aspect-[16/8] ${className}`}
     >
       <Media item={item} sizes="(min-width: 1280px) 80rem, 100vw" priority />
       <span className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" aria-hidden="true" />
@@ -96,17 +107,20 @@ export function NewsRow({ item }: { item: NewsItem }) {
 /** Card for grids (related news): image on top, category, headline, date. */
 export function NewsTile({ item }: { item: NewsItem }) {
   return (
-    <StoryLink item={item} className="group flex min-w-0 flex-col overflow-hidden rounded-card border border-line bg-surface shadow-card">
-      <span className="relative aspect-[16/10] bg-subtle">
-        <Media item={item} sizes="(min-width: 640px) 33vw, 100vw" />
-      </span>
-      <span className="flex flex-1 flex-col gap-1.5 p-3">
-        <CategoryTag category={item.category} />
-        <span className="line-clamp-3 font-display text-[18px] leading-[1.1] font-bold group-hover:text-brand-fg">{item.headline}</span>
-        <time dateTime={item.publishedAt} className="mt-auto pt-1 text-xs text-ink-faint">
-          {formatLongDate(item.publishedAt)}
-        </time>
-      </span>
-    </StoryLink>
+    <article className="flex min-w-0 flex-col overflow-hidden rounded-card border border-line bg-surface shadow-card">
+      <StoryLink item={item} className="group flex flex-1 flex-col">
+        <span className="relative aspect-[16/10] bg-subtle">
+          <Media item={item} sizes="(min-width: 640px) 33vw, 100vw" />
+        </span>
+        <span className="flex flex-1 flex-col gap-1.5 p-3">
+          <CategoryTag category={item.category} />
+          <span className="line-clamp-3 font-display text-[18px] leading-[1.1] font-bold group-hover:text-brand-fg">{item.headline}</span>
+          <time dateTime={item.publishedAt} className="mt-auto pt-1 text-xs text-ink-faint">
+            {formatLongDate(item.publishedAt)}
+          </time>
+        </span>
+      </StoryLink>
+      {isLocal(item) && <FanBar id={item.id} href={item.url} />}
+    </article>
   );
 }

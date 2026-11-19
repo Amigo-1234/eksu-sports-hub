@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { TeamCrest } from "@/components/team/TeamCrest";
 import { setGateStatus, writeVisitor, todayWat } from "@/components/visitor/visitor-store";
 import { CommentIcon, FlagIcon, HeartIcon, ReplyIcon, SendIcon, TrashIcon } from "@/components/ui/icons";
@@ -37,7 +37,7 @@ function ago(iso: string, now: number) {
   return new Intl.DateTimeFormat("en-NG", { day: "numeric", month: "short", timeZone: "Africa/Lagos" }).format(new Date(iso));
 }
 
-async function call(kind: FanTargetKind, id: string, body?: FanAction): Promise<{ ok: boolean; status: number; data: FanFeed & { error?: string } }> {
+export async function call(kind: FanTargetKind, id: string, body?: FanAction): Promise<{ ok: boolean; status: number; data: FanFeed & { error?: string } }> {
   const res = body
     ? await fetch("/api/fan", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind, id, ...body }) })
     : await fetch(`/api/fan?kind=${kind}&id=${encodeURIComponent(id)}`, { cache: "no-store" });
@@ -115,7 +115,7 @@ export function FanZone({ kind, id, teams, voteOpen = false, live = false }: Pro
   if (sort === "top") comments.sort((a, b) => b.likes + (b.replies?.length ?? 0) - (a.likes + (a.replies?.length ?? 0)));
 
   return (
-    <section aria-labelledby={`fan-${id}`} className="space-y-3">
+    <section id="comments" aria-labelledby={`fan-${id}`} className="scroll-mt-28 space-y-3">
       <div className="flex items-center justify-between gap-3">
         <h2 id={`fan-${id}`} className="font-display text-xl font-extrabold tracking-wide uppercase">
           Fan Zone
@@ -213,7 +213,7 @@ export function FanZone({ kind, id, teams, voteOpen = false, live = false }: Pro
   );
 }
 
-function Avatar({ name, small }: { name: string; small?: boolean }) {
+export function Avatar({ name, small }: { name: string; small?: boolean }) {
   return (
     <span
       aria-hidden="true"
@@ -297,13 +297,15 @@ function CommentRow({
   );
 }
 
-function Composer({
+/** Comment box (asks for a name first). `bare`: no card chrome, for news cards. */
+export function Composer({
   name,
   replyTo,
   onCancelReply,
   busy,
   onSubmit,
   onSignedIn,
+  bare = false,
 }: {
   name: string | null;
   replyTo: FanComment | null;
@@ -311,7 +313,10 @@ function Composer({
   busy: boolean;
   onSubmit: (body: string) => Promise<boolean>;
   onSignedIn: () => void;
+  bare?: boolean;
 }) {
+  const nameId = useId();
+  const shell = bare ? "" : "rounded-card border border-line bg-surface p-3";
   const [body, setBody] = useState("");
   const [askName, setAskName] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);
@@ -347,13 +352,13 @@ function Composer({
 
   if (!name) {
     return (
-      <form onSubmit={join} className="rounded-card border border-line bg-surface p-3">
-        <label htmlFor="fan-name" className="text-sm font-bold">
+      <form onSubmit={join} className={shell}>
+        <label htmlFor={nameId} className="text-sm font-bold">
           Join the banter. What should we call you?
         </label>
         <div className="mt-2 flex gap-2">
           <input
-            id="fan-name"
+            id={nameId}
             value={askName}
             onChange={(e) => setAskName(e.target.value)}
             maxLength={40}
@@ -377,7 +382,7 @@ function Composer({
         if (!body.trim() || busy) return;
         if (await onSubmit(body)) setBody("");
       }}
-      className="rounded-card border border-line bg-surface p-3 focus-within:border-brand-400"
+      className={bare ? "" : `${shell} focus-within:border-brand-400`}
     >
       {replyTo && (
         <div className="mb-2 flex items-center justify-between gap-2 rounded-lg bg-subtle px-2.5 py-1.5 text-xs">
@@ -415,8 +420,8 @@ function Composer({
           <SendIcon size={18} />
         </button>
       </div>
-      <p className="mt-1.5 flex justify-between text-[11px] text-ink-faint">
-        <span>Keep it banter, not abuse. No links.</span>
+      <p className={`mt-1.5 flex justify-between text-[11px] text-ink-faint ${bare && body.length < BODY_MAX - 80 ? "hidden" : ""}`}>
+        <span>{bare ? "" : "Keep it banter, not abuse. No links."}</span>
         {body.length > BODY_MAX - 80 && <span className="tabular-nums">{BODY_MAX - body.length}</span>}
       </p>
     </form>
