@@ -41,15 +41,19 @@ async function fileDataUri(publicPath: string, type: string) {
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-/** The team's official crest, or the site's shield in its colours with its code. */
-async function crestUri(team: Team) {
+/**
+ * The team's official crest, or the site's shield in its colours. The shield
+ * carries no text: the server has no system fonts, so the team code is drawn
+ * on top by Satori with the card's own font (see teamBlock).
+ */
+async function crestUri(team: Team): Promise<{ uri: string; official: boolean }> {
   const file = crestFor(team.id);
   if (file) {
     const uri = await fileDataUri(file, "image/png");
-    if (uri) return uri;
+    if (uri) return { uri, official: true };
   }
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 112"><path d="M50 3 92 16v38c0 28-19 46-42 55C27 100 8 82 8 54V16Z" fill="${esc(team.colors.primary)}" stroke="${esc(team.colors.secondary)}" stroke-width="5"/><text x="50" y="66" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="${team.code.length > 3 ? 22 : 28}" fill="#fff">${esc(team.code)}</text></svg>`;
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 112"><path d="M50 3 92 16v38c0 28-19 46-42 55C27 100 8 82 8 54V16Z" fill="${esc(team.colors.primary)}" stroke="${esc(team.colors.secondary)}" stroke-width="5"/></svg>`;
+  return { uri: `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`, official: false };
 }
 
 function headline(m: MatchDetail): { label: string; tone: "live" | "ft" | "pre" | "off" } {
@@ -71,10 +75,17 @@ export async function MatchCard({ match: m, format }: { match: MatchDetail; form
   const nameSize = tall ? 58 : 40;
   const scoreSize = tall ? 230 : 150;
 
-  const teamBlock = (t: Team, uri: string) => (
+  const teamBlock = (t: Team, c: { uri: string; official: boolean }) => (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: tall ? 380 : 330 }}>
-      {/* eslint-disable-next-line @next/next/no-img-element -- Satori renders plain img */}
-      <img src={uri} width={crest} height={crest} style={{ objectFit: "contain" }} alt="" />
+      <div style={{ display: "flex", position: "relative", width: crest, height: crest, alignItems: "center", justifyContent: "center" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- Satori renders plain img */}
+        <img src={c.uri} width={crest} height={crest} style={{ position: "absolute", top: 0, left: 0, objectFit: "contain" }} alt="" />
+        {!c.official && (
+          <div style={{ display: "flex", marginTop: -crest * 0.08, fontFamily: "Barlow", fontSize: crest * (t.code.length > 3 ? 0.22 : 0.3), color: "#fff", letterSpacing: 1 }}>
+            {t.code}
+          </div>
+        )}
+      </div>
       <div style={{ marginTop: tall ? 28 : 14, fontFamily: "Barlow", fontSize: nameSize, lineHeight: 1, color: "#fff", textAlign: "center", textTransform: "uppercase" }}>
         {t.shortName}
       </div>
