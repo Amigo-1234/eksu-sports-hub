@@ -63,7 +63,7 @@ language sql stable security definer set search_path = '' as $$
     select ls.player_id, coalesce(nullif(btrim(ls.display_name), ''), 'No. ' || ls.shirt_number) as name, ml.team_id, ls.shirt_number as shirt
     from public.match_lineups ml
     cross join lateral private.lineup_player_states(ml.id) ls
-    where ml.match_id = p_match and ml.status = 'CONFIRMED' and (ls.role = 'STARTER' or ls.subbed_on)
+    where ml.match_id = p_match and ml.status = 'CONFIRMED' and (ls.role = 'STARTER' or ls.subbed_on or ls.entries > 0)
   ),
   ev as (
     select distinct on (pid) pid as player_id, p.display_name as name, e.team_id, null::smallint as shirt
