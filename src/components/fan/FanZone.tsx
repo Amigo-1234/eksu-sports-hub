@@ -117,7 +117,7 @@ export function FanZone({ kind, id, teams, voteOpen = false, live = false }: Pro
 
   useEffect(() => {
     const first = setTimeout(load, 0);
-    const every = channel === "live" ? 120_000 : live ? 15_000 : 60_000;
+    const every = channel === "live" ? 300_000 : live ? 20_000 : 90_000;
     const t = setInterval(() => {
       if (document.visibilityState === "visible") load();
     }, every);

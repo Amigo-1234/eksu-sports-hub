@@ -60,7 +60,7 @@ export function FanGames({
 
   useEffect(() => {
     const first = setTimeout(load, 0);
-    const t = setInterval(() => document.visibilityState === "visible" && load(), live ? 30_000 : 90_000);
+    const t = setInterval(() => document.visibilityState === "visible" && load(), live ? 60_000 : 300_000); // live channel pushes changes; this is a safety net
     return () => {
       clearTimeout(first);
       clearInterval(t);
