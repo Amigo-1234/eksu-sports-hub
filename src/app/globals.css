@@ -169,11 +169,13 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Visible, consistent keyboard focus everywhere. */
-:focus-visible {
-  outline: 2px solid var(--color-accent-500);
-  outline-offset: 2px;
-  border-radius: 4px;
+/* Visible, consistent keyboard focus everywhere (in the base layer so a
+   component's own focus style, e.g. a text box's ring, can replace it). */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-accent-500);
+    outline-offset: 2px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

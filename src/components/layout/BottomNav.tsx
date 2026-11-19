@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { NewsDot } from "@/components/news/NewsDot";
 import { NAV_ITEMS, isActivePath } from "./navigation";
 
@@ -9,10 +10,12 @@ import { NAV_ITEMS, isActivePath } from "./navigation";
 export function BottomNav({ liveCount, latestNews }: { liveCount: number; latestNews: number | null }) {
   const pathname = usePathname();
   const items = NAV_ITEMS.filter((i) => i.inBottomBar);
+  const typing = useTyping();
 
   return (
     <nav
       aria-label="Primary"
+      hidden={typing}
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-chrome/95 pb-safe backdrop-blur lg:hidden"
     >
       <ul className="mx-auto grid h-[var(--bottom-nav-h)] max-w-lg grid-cols-5">
@@ -59,4 +62,29 @@ export function BottomNav({ liveCount, latestNews }: { liveCount: number; latest
       </ul>
     </nav>
   );
+}
+
+const TEXT_ENTRY = 'textarea, select, [contenteditable="true"], input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="file"])';
+
+/**
+ * True while a text field has focus. Phones show the on-screen keyboard then,
+ * and iOS would pin this fixed bar mid-screen above it, so we hide it.
+ */
+function useTyping() {
+  const [typing, setTyping] = useState(false);
+  useEffect(() => {
+    const check = () => {
+      const el = document.activeElement;
+      setTyping(!!el && el instanceof HTMLElement && el.matches(TEXT_ENTRY));
+    };
+    // focusout fires before the next element is focused: check on the next tick.
+    const later = () => setTimeout(check, 0);
+    document.addEventListener("focusin", check);
+    document.addEventListener("focusout", later);
+    return () => {
+      document.removeEventListener("focusin", check);
+      document.removeEventListener("focusout", later);
+    };
+  }, []);
+  return typing;
 }

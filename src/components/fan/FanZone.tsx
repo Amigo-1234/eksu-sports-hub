@@ -364,7 +364,7 @@ export function Composer({
             maxLength={40}
             autoComplete="nickname"
             placeholder="Your name or nickname"
-            className="h-11 min-w-0 flex-1 rounded-lg border border-line bg-canvas px-3 text-[16px] outline-none focus:border-brand-500"
+            className="h-11 min-w-0 flex-1 rounded-lg border border-line bg-canvas px-3 text-[16px] outline-none ring-brand-500/30 focus:border-brand-500 focus:ring-2"
           />
           <button type="submit" disabled={!askName.trim()} className="h-11 rounded-lg bg-brand-600 px-4 text-sm font-bold text-white disabled:opacity-50">
             Continue
@@ -409,7 +409,7 @@ export function Composer({
           rows={1}
           placeholder={replyTo ? `Reply to ${replyTo.name}…` : `Say something, ${name}…`}
           aria-label="Write a comment"
-          className="max-h-40 min-h-11 min-w-0 flex-1 resize-none rounded-2xl bg-subtle px-3.5 py-2.5 text-[16px] leading-snug outline-none [field-sizing:content]"
+          className="max-h-40 min-h-11 min-w-0 flex-1 resize-none rounded-2xl bg-subtle px-3.5 py-2.5 text-[16px] leading-snug outline-none ring-brand-500/50 transition-shadow focus:ring-2 [field-sizing:content]"
         />
         <button
           type="submit"
