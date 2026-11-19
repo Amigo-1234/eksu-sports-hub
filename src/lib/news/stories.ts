@@ -54,11 +54,39 @@ const SVU = "/news/2026-11-18-saviola-beat-unstoppable";
 
 const MSSN = "/news/2026-11-19-mssn-league-kicks-off";
 
+const DSWU = "/news/2026-11-19-darul-saadah-warm-up";
+
 export const STORIES: Story[] = [
+  {
+    id: "darul-saadah-warm-up-for-mssn-opener",
+    published: true,
+    featured: true,
+    category: "TEAM_UPDATE",
+    kind: "report",
+    publishedAt: "2026-11-19T08:10:00+01:00",
+    headline: "Darul Saadah warm up for MSSN League opener",
+    summary:
+      "Darul Saadah are warming up in their pink kit ahead of the first match of the MSSN EKSU Football League against Darul Hudah.",
+    body: [
+      "Darul Saadah are on the pitch and getting ready for the opening match of the MSSN EKSU Football League 2026/2027 against Darul Hudah.",
+      "Dressed in their pink and purple kit, the players gathered on the track for a team talk before heading out to loosen up with the ball.",
+      "Captain Olaleye Habeeb leads the side, and Darul Saadah's line-up has been confirmed on EKSU Sports Hub in a 4-3-3 formation, with Abdulwasiu Ayomipo leading the attack.",
+      "This is the first of 45 matches in the league. Follow it live on EKSU Sports Hub for the score, line-ups and every key moment.",
+    ],
+    image: { src: `${DSWU}/lead.jpg`, alt: "Darul Saadah players in pink kit gather on the track before the match", width: 1600, height: 901 },
+    gallery: [
+      { src: `${DSWU}/squad-huddle.jpg`, alt: "Darul Saadah players talk beside the pitch before warm-up", width: 1600, height: 901 },
+      { src: `${DSWU}/gathered.jpg`, alt: "Darul Saadah players gathered on the track", width: 1600, height: 901 },
+      { src: `${DSWU}/ball-work.jpg`, alt: "Darul Saadah players warming up with the ball", width: 1600, height: 1200 },
+      { src: `${DSWU}/passing.jpg`, alt: "A Darul Saadah player kicks the ball during warm-up", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4c24c4ca-fe1b-4ad3-9d8b-6355e7a3182c",
+  },
   {
     id: "mssn-eksu-football-league-kicks-off-tomorrow",
     published: true,
-    featured: true,
+    featured: false,
     category: "COMPETITION",
     kind: "report",
     publishedAt: "2026-11-18T18:36:00+01:00",
