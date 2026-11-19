@@ -60,11 +60,38 @@ const MKO = "/news/2026-11-19-mssn-kick-off";
 
 const OKP = "/news/2026-11-19-okikiola-penalty";
 
+const OLFK = "/news/2026-11-19-olaleye-free-kick";
+
 export const STORIES: Story[] = [
+  {
+    id: "captain-olaleye-free-kick-doubles-darul-saadah-lead",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-19T08:47:00+01:00",
+    headline: "Captain Olaleye's free kick puts Darul Saadah 2–0 up",
+    summary:
+      "Darul Saadah captain Olaleye Habeeb scored from a free kick in the 20th minute to double his side's lead over Darul Hudah in the MSSN League opener.",
+    body: [
+      "Darul Saadah have doubled their lead in the opening match of the MSSN EKSU Football League. Captain Olaleye Habeeb scored from a free kick in the 20th minute to make it 2–0 against Darul Hudah.",
+      "It came eight minutes after Shamsudeen Okikiola had opened the scoring from the penalty spot.",
+      "Darul Hudah, in blue, packed the area to defend the set piece, but Olaleye, wearing the number 1 shirt in midfield, found the net to lead from the front.",
+      "Follow the rest of the match live on EKSU Sports Hub.",
+    ],
+    image: { src: `${OLFK}/lead.jpg`, alt: "The ball flies towards goal as Darul Saadah attack from a free kick against Darul Hudah", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${OLFK}/box.jpg`, alt: "Players from both teams in the Darul Hudah penalty area", width: 1600, height: 1200 },
+      { src: `${OLFK}/wall.jpg`, alt: "Darul Hudah players defend a set piece near their goal", width: 1600, height: 1200 },
+      { src: `${OLFK}/set-piece.jpg`, alt: "Darul Saadah and Darul Hudah players wait for the free kick", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4c24c4ca-fe1b-4ad3-9d8b-6355e7a3182c",
+  },
   {
     id: "okikiola-scores-first-mssn-league-goal-from-the-spot",
     published: true,
-    featured: true,
+    featured: false,
     category: "PLAYER_SPOTLIGHT",
     kind: "report",
     publishedAt: "2026-11-19T08:38:00+01:00",
