@@ -58,11 +58,36 @@ const DSWU = "/news/2026-11-19-darul-saadah-warm-up";
 
 const MKO = "/news/2026-11-19-mssn-kick-off";
 
+const OKP = "/news/2026-11-19-okikiola-penalty";
+
 export const STORIES: Story[] = [
+  {
+    id: "okikiola-scores-first-mssn-league-goal-from-the-spot",
+    published: true,
+    featured: true,
+    category: "PLAYER_SPOTLIGHT",
+    kind: "report",
+    publishedAt: "2026-11-19T08:38:00+01:00",
+    headline: "Okikiola scores the MSSN League's first goal from the spot",
+    summary:
+      "Shamsudeen Okikiola converted a 12th-minute penalty to put Darul Saadah 1–0 up against Darul Hudah and score the first goal of the MSSN EKSU Football League.",
+    body: [
+      "Shamsudeen Okikiola has written his name into the record books as the scorer of the first goal of the MSSN EKSU Football League 2026/2027.",
+      "Darul Saadah were awarded a penalty in the 12th minute of the opening match against Darul Hudah, and Okikiola, wearing the number 10 shirt, stepped up to take it.",
+      "He sent the goalkeeper the wrong way and rolled the ball into the net to give Darul Saadah a 1–0 lead.",
+      "Okikiola started on the left wing in Darul Saadah's 4-3-3. Follow the rest of the match live on EKSU Sports Hub.",
+    ],
+    image: { src: `${OKP}/lead.jpg`, alt: "The goalkeeper dives the wrong way as Shamsudeen Okikiola's penalty goes in for Darul Saadah", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${OKP}/run-up.jpg`, alt: "Shamsudeen Okikiola steps up to take the penalty for Darul Saadah", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4c24c4ca-fe1b-4ad3-9d8b-6355e7a3182c",
+  },
   {
     id: "mssn-league-kicks-off-darul-saadah-v-darul-hudah",
     published: true,
-    featured: true,
+    featured: false,
     category: "COMPETITION",
     kind: "report",
     publishedAt: "2026-11-19T08:26:00+01:00",
