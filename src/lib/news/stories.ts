@@ -68,11 +68,44 @@ const OL2 = "/news/2026-11-19-olaleye-second-free-kick";
 
 const AKR = "/news/2026-11-19-akanbi-sent-off";
 
+const DSFT = "/news/2026-11-19-darul-saadah-beat-darul-hudah-ft";
+
 export const STORIES: Story[] = [
+  {
+    id: "darul-saadah-beat-darul-hudah-4-1-mssn-league-opener",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-19T10:02:00+01:00",
+    headline: "Darul Saadah beat Darul Hudah 4–1 to top the MSSN League",
+    summary:
+      "Captain Olaleye Habeeb scored twice from free kicks as Darul Saadah won the MSSN EKSU Football League opener 4–1, despite finishing with ten men.",
+    body: [
+      "Darul Saadah are the first leaders of the MSSN EKSU Football League 2026/2027 after beating Darul Hudah 4–1 in Thursday morning's opening match.",
+      "Shamsudeen Okikiola scored the league's first goal from the penalty spot in the 12th minute, and captain Olaleye Habeeb doubled the lead with a direct free kick in the 20th.",
+      "Darul Hudah hit back five minutes before half-time through Satar, leaving it 2–1 at the break.",
+      "Darul Hudah brought on Abdul Salam for Abdulrasaq at the start of the second half, but Olaleye struck again from a free kick in the 58th minute. Ayaniyi Muhammed added the fourth in the 75th.",
+      "Darul Saadah finished with ten men after centre back Akanbi Abdulsobur was shown a second yellow card in the 77th minute. Abdulmalik Aro and Shamsudeen Okikiola were also booked for Darul Saadah, and Abdulafeez for Darul Hudah.",
+      "The win puts Darul Saadah top of the table on three points with a goal difference of +3, and Olaleye leads the scoring chart with two goals. At the end, players from both sides shook hands and embraced on the pitch.",
+      "Next up in Week 1: Shonibare play Darul Hikmah. Follow every match live on EKSU Sports Hub.",
+    ],
+    image: { src: `${DSFT}/lead.jpg`, alt: "Darul Hudah players shake hands and embrace with match staff at full-time", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${DSFT}/saadah-smiles.jpg`, alt: "Darul Saadah players on the pitch after the win", width: 1600, height: 1200 },
+      { src: `${DSFT}/handshakes.jpg`, alt: "Handshakes on the pitch after the final whistle", width: 1600, height: 1200 },
+      { src: `${DSFT}/laughs.jpg`, alt: "Smiles among the players and match crew at full-time", width: 1600, height: 1200 },
+      { src: `${DSFT}/saadah-run.jpg`, alt: "A Darul Saadah player during the second half", width: 1600, height: 1200 },
+      { src: `${DSFT}/player-down.jpg`, alt: "A Darul Hudah player down on the pitch during the second half", width: 1600, height: 1200 },
+      { src: `${DSFT}/referee.jpg`, alt: "The referee during the second half of Darul Saadah against Darul Hudah", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4c24c4ca-fe1b-4ad3-9d8b-6355e7a3182c",
+  },
   {
     id: "akanbi-sent-off-darul-saadah-down-to-ten",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-19T09:50:00+01:00",
