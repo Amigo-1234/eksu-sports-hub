@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { TeamCrest } from "@/components/team/TeamCrest";
 import { FormGuide } from "@/components/team/FormGuide";
+import { matchHref } from "@/lib/match";
 import type { StandingRow } from "@/lib/types";
 
 /*
@@ -40,9 +41,22 @@ export function StandingsTable({
   title?: string;
 }) {
   const cols = compact ? COLS.filter((c) => c.key === "played" || c.key === "goalDifference") : COLS;
+  const isLiveTable = rows.some((r) => r.live);
 
   return (
     <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
+      {isLiveTable && (
+        <p className="border-b border-line bg-live/8 px-3 py-2 text-[12px] leading-snug text-ink-muted">
+          <span className="mr-1.5 inline-flex items-center gap-1.5 font-bold text-ink">
+            <span className="relative flex size-2" aria-hidden="true">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-live opacity-75 motion-reduce:animate-none" />
+              <span className="relative inline-flex size-2 rounded-full bg-live" />
+            </span>
+            Live table
+          </span>
+          Matches in progress count at the current score.
+        </p>
+      )}
       {title && (
         <p className="truncate border-b border-line bg-subtle/70 px-3 py-2 text-[12px] font-bold tracking-[0.02em] text-ink uppercase" aria-hidden="true">
           {title}
@@ -93,6 +107,7 @@ export function StandingsTable({
                     {r.position}
                   </span>
                   {promoted && promotionLabel && <span className="sr-only">, {promotionLabel}</span>}
+                  {r.movement ? <Movement places={r.movement} /> : null}
                 </td>
                 <th scope="row" className="py-1.5 pl-1 text-left font-normal">
                   <Link
@@ -109,6 +124,7 @@ export function StandingsTable({
                       )}
                     </span>
                   </Link>
+                  {r.live && <LiveChip live={r.live} />}
                 </th>
                 {cols.map((c) => {
                   const v = r[c.key];
@@ -138,5 +154,42 @@ export function StandingsTable({
         </p>
       )}
     </div>
+  );
+}
+
+/** Places gained (green, up) or lost (red, down) on the live table. */
+function Movement({ places }: { places: number }) {
+  const up = places > 0;
+  return (
+    <span
+      className={`absolute top-1/2 right-0 -translate-y-1/2 text-[9px] leading-none font-black ${up ? "text-win" : "text-loss"}`}
+      title={`${up ? "Up" : "Down"} ${Math.abs(places)} on the live table`}
+    >
+      <span aria-hidden="true">{up ? "▲" : "▼"}</span>
+      <span className="sr-only">
+        , {up ? "up" : "down"} {Math.abs(places)} {Math.abs(places) === 1 ? "place" : "places"} live
+      </span>
+    </span>
+  );
+}
+
+const OUTCOME = {
+  W: { label: "winning", cls: "bg-win text-canvas" },
+  D: { label: "drawing", cls: "bg-ink-muted text-canvas" },
+  L: { label: "losing", cls: "bg-loss text-canvas" },
+} as const;
+
+/** "LIVE 2–1" under the team name: the match it is playing now and the current score. */
+function LiveChip({ live }: { live: NonNullable<StandingRow["live"]> }) {
+  const o = OUTCOME[live.outcome];
+  return (
+    <Link
+      href={matchHref(live.matchId)}
+      className={`ml-8 inline-flex items-center gap-1 rounded px-1.5 py-px text-[10px] font-bold tracking-wide whitespace-nowrap tabular-nums ${o.cls}`}
+    >
+      <span className="size-1.5 rounded-full bg-canvas motion-safe:animate-pulse" aria-hidden="true" />
+      LIVE {live.goalsFor}–{live.goalsAgainst}
+      <span className="sr-only">, currently {o.label}</span>
+    </Link>
   );
 }

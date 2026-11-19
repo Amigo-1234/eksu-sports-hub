@@ -1,5 +1,6 @@
 import "server-only";
 import { connection } from "next/server";
+import { applyLiveMatches } from "../live-standings";
 import { publicDataConfig } from "./config";
 import { mockDataSource } from "./mock";
 import type { SportsDataSource } from "./source";
@@ -77,9 +78,17 @@ export async function getTopScorers(competitionId: string) {
   return source.getTopScorers(competitionId);
 }
 
+/**
+ * League table, live: completed matches plus any match in progress counted at
+ * its current score, so the team winning right now climbs the table.
+ */
 export async function getStandings(competitionId: string) {
   await connection();
-  return source.getStandings(competitionId);
+  const [rows, live] = await Promise.all([
+    source.getStandings(competitionId),
+    source.getMatches({ scope: "live", competitionId }).catch(() => []),
+  ]);
+  return applyLiveMatches(rows, live);
 }
 
 export async function getHeadToHead(

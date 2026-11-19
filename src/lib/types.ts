@@ -313,4 +313,8 @@ export interface TopScorer {
 
 export interface StandingRow extends Standing {
   team: Team;
+  /** Set on the live table for a team playing now: its match counted at the current score. */
+  live?: { matchId: ID; outcome: FormResult["outcome"]; goalsFor: number; goalsAgainst: number };
+  /** Live table only: places gained (positive) or lost (negative) against the full-time table. */
+  movement?: number;
 }

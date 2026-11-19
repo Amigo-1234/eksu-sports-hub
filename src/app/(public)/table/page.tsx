@@ -31,8 +31,8 @@ export default async function TablePage({ searchParams }: PageProps<"/table">) {
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Tables" subtitle={`${selected.name} · ${selected.season}`} />
-      {/* Standings change at full-time: refresh only while this league has a match in play. */}
-      {live.length > 0 && <AutoRefresh seconds={60} />}
+      {/* Live table: refresh only while this league has a match in play. */}
+      {live.length > 0 && <AutoRefresh seconds={20} />}
       <FilterChips
         label="Choose competition"
         options={leagues.map((c) => ({
@@ -53,7 +53,9 @@ export default async function TablePage({ searchParams }: PageProps<"/table">) {
           <EmptyState icon={<TableIcon size={18} />} title="Table not available" description="Standings will appear after the first matches are played." />
         )}
         <p className="mt-3 px-1 text-xs text-ink-faint">
-          Only completed matches count. Abandoned, postponed and cancelled fixtures are excluded.
+          {live.length > 0
+          ? "Live: matches in progress count at their current score until full-time. Abandoned, postponed and cancelled fixtures are excluded."
+          : "Only completed matches count. Abandoned, postponed and cancelled fixtures are excluded."}
         </p>
       </div>
     </div>

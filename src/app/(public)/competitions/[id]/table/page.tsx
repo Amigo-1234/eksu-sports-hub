@@ -32,8 +32,8 @@ export default async function CompetitionTable({ params }: PageProps<"/competiti
   const promotion = promotionFor(competition);
   return rows.length > 0 ? (
     <>
-      {/* Standings change at full-time: refresh only while this competition has a match in play. */}
-      {live.length > 0 && <AutoRefresh seconds={60} />}
+      {/* Live table: refresh only while this competition has a match in play. */}
+      {live.length > 0 && <AutoRefresh seconds={20} />}
       <StandingsTable
         rows={rows}
         caption={`${competition.name} standings`}
@@ -41,7 +41,9 @@ export default async function CompetitionTable({ params }: PageProps<"/competiti
         promotionLabel={promotion?.label}
       />
       <p className="mt-3 px-1 text-xs text-ink-faint">
-        Only completed matches count. Abandoned, postponed and cancelled fixtures are excluded.
+        {live.length > 0
+          ? "Live: matches in progress count at their current score until full-time. Abandoned, postponed and cancelled fixtures are excluded."
+          : "Only completed matches count. Abandoned, postponed and cancelled fixtures are excluded."}
       </p>
     </>
   ) : (
