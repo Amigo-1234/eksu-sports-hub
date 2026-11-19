@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { StandingsTable } from "@/components/standings/StandingsTable";
+import { TopScorersCard } from "@/components/standings/TopScorersCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterChips } from "@/components/ui/FilterChips";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { TableIcon } from "@/components/ui/icons";
 import { AutoRefresh } from "@/components/ui/AutoRefresh";
-import { getCompetitions, getMatches, getStandings } from "@/lib/data";
+import { getCompetitions, getMatches, getStandings, getTopScorers } from "@/lib/data";
 import { param } from "@/lib/filters";
 import { promotionFor } from "@/lib/competition";
 
@@ -25,7 +26,11 @@ export default async function TablePage({ searchParams }: PageProps<"/table">) {
     );
   }
 
-  const [rows, live] = await Promise.all([getStandings(selected.id), getMatches({ scope: "live", competitionId: selected.id })]);
+  const [rows, live, scorers] = await Promise.all([
+    getStandings(selected.id),
+    getMatches({ scope: "live", competitionId: selected.id }),
+    getTopScorers(selected.id).catch(() => []),
+  ]);
   const promotion = promotionFor(selected);
 
   return (
@@ -57,6 +62,11 @@ export default async function TablePage({ searchParams }: PageProps<"/table">) {
           ? "Live: matches in progress count at their current score until full-time. Abandoned, postponed and cancelled fixtures are excluded."
           : "Only completed matches count. Abandoned, postponed and cancelled fixtures are excluded."}
         </p>
+        {scorers.length > 0 && (
+          <div className="mt-5">
+            <TopScorersCard rows={scorers} competitionId={selected.id} competitionName={selected.name} />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MatchCardList, MatchesByDate } from "@/components/match/MatchList";
 import { StandingsTable } from "@/components/standings/StandingsTable";
+import { TopScorersCard } from "@/components/standings/TopScorersCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { getCompetition, getMatches, getNow, getStandings } from "@/lib/data";
+import { getCompetition, getMatches, getNow, getStandings, getTopScorers } from "@/lib/data";
 import { promotionFor } from "@/lib/competition";
 
 export async function generateMetadata({ params }: PageProps<"/competitions/[id]">): Promise<Metadata> {
@@ -18,12 +19,13 @@ export default async function CompetitionOverview({ params }: PageProps<"/compet
   if (!competition) notFound();
 
   const now = await getNow();
-  const [live, upcoming, results, all, standings] = await Promise.all([
+  const [live, upcoming, results, all, standings, scorers] = await Promise.all([
     getMatches({ scope: "live", competitionId: id }),
     getMatches({ scope: "upcoming", competitionId: id, limit: 4 }),
     getMatches({ scope: "results", competitionId: id }),
     getMatches({ competitionId: id }),
     getStandings(id),
+    competition.format === "league" || competition.regulations ? getTopScorers(id).catch(() => []) : Promise.resolve([]),
   ]);
 
   const completed = results.filter((m) => m.status === "FULL_TIME");
@@ -93,15 +95,20 @@ export default async function CompetitionOverview({ params }: PageProps<"/compet
         )}
       </div>
 
-      {standings.length > 0 && (
-        <aside aria-labelledby="c-table" className="min-w-0">
-          <SectionHeader id="c-table" title="Table" href={`${base}/table`} linkLabel="Full table" />
-          <StandingsTable
-            rows={standings}
-            caption={`${competition.name} standings`}
-            compact
-            promotionSpots={promotionFor(competition)?.spots}
-          />
+      {(standings.length > 0 || scorers.length > 0) && (
+        <aside aria-labelledby={standings.length > 0 ? "c-table" : undefined} aria-label={standings.length > 0 ? undefined : "Top scorers"} className="min-w-0 space-y-5">
+          {standings.length > 0 && (
+            <div>
+              <SectionHeader id="c-table" title="Table" href={`${base}/table`} linkLabel="Full table" />
+              <StandingsTable
+                rows={standings}
+                caption={`${competition.name} standings`}
+                compact
+                promotionSpots={promotionFor(competition)?.spots}
+              />
+            </div>
+          )}
+          <TopScorersCard rows={scorers} competitionId={id} competitionName={competition.name} />
         </aside>
       )}
     </div>

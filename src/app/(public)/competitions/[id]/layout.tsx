@@ -15,9 +15,10 @@ export default async function CompetitionLayout({ children, params }: LayoutProp
     { href: `${base}/fixtures`, label: "Fixtures" },
     { href: `${base}/results`, label: "Results" },
     ...(competition.format === "league" ? [{ href: `${base}/table`, label: "Table" }] : []),
+    // Top scorers: every league, plus special-rules competitions.
+    ...(competition.format === "league" || competition.regulations ? [{ href: `${base}/scorers`, label: "Scorers" }] : []),
     // Special-rules competitions only: their official Rules & Regulations.
-    // Special-rules competitions (MARKAZUL) get the Scorers and Rules tabs; other competitions are unchanged.
-    ...(competition.regulations ? [{ href: `${base}/scorers`, label: "Scorers" }, { href: `${base}/rules`, label: "Rules" }] : []),
+    ...(competition.regulations ? [{ href: `${base}/rules`, label: "Rules" }] : []),
   ];
 
   return (
