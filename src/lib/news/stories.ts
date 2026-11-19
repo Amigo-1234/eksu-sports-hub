@@ -66,11 +66,36 @@ const DSHT = "/news/2026-11-19-darul-saadah-darul-hudah-ht";
 
 const OL2 = "/news/2026-11-19-olaleye-second-free-kick";
 
+const AKR = "/news/2026-11-19-akanbi-sent-off";
+
 export const STORIES: Story[] = [
+  {
+    id: "akanbi-sent-off-darul-saadah-down-to-ten",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-19T09:50:00+01:00",
+    headline: "Akanbi sent off as Darul Saadah go down to ten men at 4–1",
+    summary:
+      "Darul Saadah centre back Akanbi Abdulsobur was sent off for a second yellow card in the 77th minute, two minutes after Ayaniyi Muhammed made it 4–1 against Darul Hudah.",
+    body: [
+      "Darul Saadah will finish the MSSN League opener with ten men. Centre back Akanbi Abdulsobur was shown a second yellow card in the 77th minute and sent off.",
+      "Akanbi, wearing number 4, had first been booked in the 36th minute, one of two Darul Saadah centre backs cautioned in the first half.",
+      "The red card came just two minutes after Darul Saadah had extended their lead. Ayaniyi Muhammed scored in the 75th minute to make it 4–1, following Shamsudeen Okikiola's penalty and two free kicks from captain Olaleye Habeeb.",
+      "Even with a man down, Darul Saadah still hold a three-goal lead over Darul Hudah and sit top of the live MSSN League table. Follow the closing minutes live on EKSU Sports Hub.",
+    ],
+    image: { src: `${AKR}/lead.jpg`, alt: "Darul Saadah's Akanbi Abdulsobur walks off the pitch after his red card", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${AKR}/walking-off.jpg`, alt: "Akanbi Abdulsobur of Darul Saadah leaves the pitch", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "4c24c4ca-fe1b-4ad3-9d8b-6355e7a3182c",
+  },
   {
     id: "olaleye-second-free-kick-darul-saadah-3-1",
     published: true,
-    featured: true,
+    featured: false,
     category: "PLAYER_SPOTLIGHT",
     kind: "report",
     publishedAt: "2026-11-19T09:35:00+01:00",
