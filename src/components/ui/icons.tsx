@@ -320,3 +320,12 @@ export const ReturnIcon = (p: IconProps) => (
     <path d="M4 9h11a5 5 0 0 1 0 10h-3" />
   </svg>
 );
+
+export const StarIcon = ({ filled, ...p }: IconProps & { filled?: boolean }) => (
+  <svg {...base(p)}>
+    <path
+      d="m12 3.5 2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8Z"
+      fill={filled ? "currentColor" : "none"}
+    />
+  </svg>
+);

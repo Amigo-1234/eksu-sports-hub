@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { parseAction, parseTarget } from "../src/lib/fan/types.ts";
+import { parseAction, parseGamesAction, parseTarget } from "../src/lib/fan/types.ts";
 import { nextFixtures, splitTable } from "../src/lib/standings-views.ts";
 import type { StandingRow } from "../src/lib/types.ts";
 
@@ -55,4 +55,16 @@ test("next fixture per team is the earliest scheduled one", () => {
   assert.equal(n.A.home, false);
   assert.equal(n.B.matchId, "21");
   assert.equal(n.C.opponent, "A");
+});
+
+test("prediction and Player of the Match requests are validated", () => {
+  assert.deepEqual(parseGamesAction({ action: "predict", home: 2, away: 1, x: 1 }), { action: "predict", payload: { home: 2, away: 1 } });
+  assert.equal(parseGamesAction({ action: "predict", home: -1, away: 1 }), null);
+  assert.equal(parseGamesAction({ action: "predict", home: 31, away: 1 }), null);
+  assert.equal(parseGamesAction({ action: "predict", home: 1.5, away: 1 }), null);
+  assert.equal(parseGamesAction({ action: "predict", home: "2", away: 1 }), null);
+  assert.deepEqual(parseGamesAction({ action: "unpredict" }), { action: "unpredict", payload: {} });
+  assert.deepEqual(parseGamesAction({ action: "potm", player_id: UUID }), { action: "potm", payload: { player_id: UUID } });
+  assert.equal(parseGamesAction({ action: "potm", player_id: "x" }), null);
+  assert.equal(parseGamesAction({ action: "vote" }), null);
 });

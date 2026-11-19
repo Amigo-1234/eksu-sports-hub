@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MatchCardList } from "@/components/match/MatchList";
 import { TeamFollowButton } from "@/components/notifications/TeamFollowButton";
+import { MyTeamStar } from "@/components/myteams/MyTeamStar";
 import { StandingsTable } from "@/components/standings/StandingsTable";
 import { FormGuide } from "@/components/team/FormGuide";
 import { SquadList } from "@/components/team/SquadList";
@@ -72,7 +73,8 @@ export default async function TeamPage({ params }: PageProps<"/teams/[id]">) {
               </li>
             ))}
           </ul>
-          <div className="mt-3 empty:hidden">
+          <div className="mt-3 flex flex-wrap gap-2">
+            <MyTeamStar teamId={team.id} teamName={team.name} />
             <TeamFollowButton teamId={team.id} teamName={team.name} />
           </div>
         </div>

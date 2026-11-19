@@ -6,6 +6,10 @@ const CANONICAL = "https://eksusportshub.com.ng";
 const VERCEL_HOSTS = ["eksu-sports-hub-cn82.vercel.app", "eksu-sports-hub-foy2.vercel.app", "eksu-sports-hub.vercel.app"];
 
 const nextConfig: NextConfig = {
+  // Share cards read fonts and crests from disk at request time.
+  outputFileTracingIncludes: {
+    "/matches/[id]/card": ["./src/assets/fonts/**", "./public/crests/**", "./public/brand/eksu-crest-192.png"],
+  },
   async redirects() {
     // Pages only: /api/* stays reachable on these hosts (the push-notification dispatcher
     // posts to it), and Next's own assets are never redirected. Preview deployments

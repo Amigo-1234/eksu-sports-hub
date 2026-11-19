@@ -64,3 +64,49 @@ export function parseAction(raw: unknown): { action: string; payload: Record<str
       return null;
   }
 }
+
+/* ── Fan games: predictions and Player of the Match ─────────────────────── */
+
+export interface FanGames {
+  prediction: {
+    open: boolean;
+    count: number;
+    mine: { home: number; away: number; points: number | null } | null;
+    popular: { home: number; away: number; n: number }[];
+    exact: number | null;
+  };
+  potm: {
+    open: boolean;
+    closes_at: string;
+    total: number;
+    mine: string | null;
+    candidates: { id: string; name: string; team_id: string; shirt: number | null; votes: number }[];
+  } | null;
+}
+
+export type GamesAction = { action: "predict"; home: number; away: number } | { action: "unpredict" } | { action: "potm"; player_id: string };
+
+export function parseGamesAction(raw: unknown): { action: string; payload: Record<string, number | string> } | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const goal = (v: unknown) => typeof v === "number" && Number.isInteger(v) && v >= 0 && v <= 30;
+  if (r.action === "predict") return goal(r.home) && goal(r.away) ? { action: "predict", payload: { home: r.home as number, away: r.away as number } } : null;
+  if (r.action === "unpredict") return { action: "unpredict", payload: {} };
+  if (r.action === "potm") return typeof r.player_id === "string" && UUID.test(r.player_id) ? { action: "potm", payload: { player_id: r.player_id } } : null;
+  return null;
+}
+
+export interface LeaderRow {
+  rank: number;
+  name: string;
+  points: number;
+  exact: number;
+  played: number;
+  me?: boolean;
+}
+export interface Leaderboard {
+  period: "week" | "all";
+  rows: LeaderRow[];
+  me: Omit<LeaderRow, "me"> | null;
+  players: number;
+}

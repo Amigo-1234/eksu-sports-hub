@@ -1,11 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TeamCrest } from "@/components/team/TeamCrest";
-import { setGateStatus, writeVisitor, todayWat } from "@/components/visitor/visitor-store";
 import { CommentIcon, FlagIcon, HeartIcon, ReplyIcon, SendIcon, TrashIcon } from "@/components/ui/icons";
 import type { FanAction, FanComment, FanFeed, FanTargetKind } from "@/lib/fan/types";
 import type { Team } from "@/lib/types";
+import { FanGames } from "./FanGames";
+import { NameForm } from "./NameForm";
+
+export { NameForm };
 
 type VoteTeam = Pick<Team, "id" | "code" | "colors" | "name" | "shortName">;
 
@@ -141,6 +144,8 @@ export function FanZone({ kind, id, teams, voteOpen = false, live = false }: Pro
           </span>
         </div>
       </div>
+
+      {kind === "match" && teams && <FanGames matchId={id} teams={teams} name={feed?.name ?? null} onSignedIn={load} live={live} />}
 
       {kind === "match" && teams && feed?.vote && (
         <VoteCard teams={teams} vote={feed.vote} open={voteOpen} onVote={(pick) => act({ action: "vote", pick })} />
@@ -315,65 +320,15 @@ export function Composer({
   onSignedIn: () => void;
   bare?: boolean;
 }) {
-  const nameId = useId();
   const shell = bare ? "" : "rounded-card border border-line bg-surface p-3";
   const [body, setBody] = useState("");
-  const [askName, setAskName] = useState("");
-  const [nameError, setNameError] = useState<string | null>(null);
   const ref = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (replyTo) ref.current?.focus();
   }, [replyTo]);
 
-  async function join(e: FormEvent) {
-    e.preventDefault();
-    const n = askName.trim().replace(/\s+/g, " ");
-    if (!n) return;
-    setNameError(null);
-    try {
-      const res = await fetch("/api/visitor", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ t: "join", name: n, contact: null }),
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        setNameError(d.error ?? "Could not save your name. Try again.");
-        return;
-      }
-      writeVisitor({ name: n, seen: todayWat() });
-      setGateStatus("done");
-      onSignedIn();
-    } catch {
-      setNameError("You're offline. Try again when you're connected.");
-    }
-  }
-
-  if (!name) {
-    return (
-      <form onSubmit={join} className={shell}>
-        <label htmlFor={nameId} className="text-sm font-bold">
-          Join the banter. What should we call you?
-        </label>
-        <div className="mt-2 flex gap-2">
-          <input
-            id={nameId}
-            value={askName}
-            onChange={(e) => setAskName(e.target.value)}
-            maxLength={40}
-            autoComplete="nickname"
-            placeholder="Your name or nickname"
-            className="h-11 min-w-0 flex-1 rounded-lg border border-line bg-canvas px-3 text-[16px] outline-none ring-brand-500/30 focus:border-brand-500 focus:ring-2"
-          />
-          <button type="submit" disabled={!askName.trim()} className="h-11 rounded-lg bg-brand-600 px-4 text-sm font-bold text-white disabled:opacity-50">
-            Continue
-          </button>
-        </div>
-        {nameError && <p className="mt-2 text-sm text-live">{nameError}</p>}
-      </form>
-    );
-  }
+  if (!name) return <NameForm onSignedIn={onSignedIn} className={shell} />;
 
   return (
     <form
@@ -489,3 +444,4 @@ function VoteCard({
     </div>
   );
 }
+

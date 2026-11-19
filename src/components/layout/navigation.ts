@@ -1,6 +1,7 @@
 import type { ComponentType, SVGProps } from "react";
 import {
   CalendarIcon,
+  ChartIcon,
   HomeIcon,
   LiveIcon,
   NewsIcon,
@@ -28,6 +29,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/table", label: "Table", icon: TableIcon, inBottomBar: false },
   { href: "/competitions", label: "Leagues", icon: TrophyIcon, inBottomBar: true, alsoActive: ["/table"] },
   { href: "/news", label: "News", icon: NewsIcon, inBottomBar: true },
+  { href: "/predictions", label: "Predict", icon: ChartIcon, inBottomBar: false },
   { href: "/register", label: "Register", icon: ShirtIcon, inBottomBar: false },
 ];
 

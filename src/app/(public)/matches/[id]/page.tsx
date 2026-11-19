@@ -6,6 +6,7 @@ import { LiveMatchAlerts, LiveSoundControls } from "@/components/realtime/LiveAl
 import { MatchTabs } from "@/components/match/MatchTabs";
 import { FanZone } from "@/components/fan/FanZone";
 import { MatchAlertsButton } from "@/components/notifications/MatchAlertsButton";
+import { ShareMatchCard } from "@/components/share/ShareMatchCard";
 import { AudienceTracker } from "@/components/audience/AudienceTracker";
 import { BackLink } from "@/components/ui/BackLink";
 import { DemoNotice } from "@/components/ui/DemoNotice";
@@ -18,7 +19,14 @@ export async function generateMetadata({ params }: PageProps<"/matches/[id]">): 
   const m = await getMatch((await params).id);
   if (!m) return { title: "Match not found" };
   const mid = showsScore(m.status) && m.score ? `${m.score.home}–${m.score.away}` : "v";
-  return { title: `${m.homeTeam.shortName} ${mid} ${m.awayTeam.shortName}` };
+  const title = `${m.homeTeam.shortName} ${mid} ${m.awayTeam.shortName}`;
+  const image = { url: `/matches/${m.id}/card?format=wide`, width: 1200, height: 630, alt: title };
+  return {
+    title,
+    description: `${m.competition.name}: ${m.homeTeam.name} v ${m.awayTeam.name}. Live score, line-ups and fan banter on EKSU Sports Hub.`,
+    openGraph: { title, images: [image] },
+    twitter: { card: "summary_large_image", title, images: [image.url] },
+  };
 }
 
 async function recentForm(teamId: string): Promise<FormResult[]> {
@@ -57,6 +65,11 @@ export default async function MatchPage({ params }: PageProps<"/matches/[id]">) 
       <LiveMatchAlerts />
       <div className="mt-3 flex flex-wrap items-center justify-end gap-2 empty:hidden">
         <LiveSoundControls />
+        <ShareMatchCard
+          matchId={match.id}
+          title={`${match.homeTeam.shortName} v ${match.awayTeam.shortName}`}
+          finished={match.status === "FULL_TIME"}
+        />
         <MatchAlertsButton
           matchId={match.id}
           status={match.status}

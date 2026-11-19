@@ -4,6 +4,7 @@ import { LiveDot } from "@/components/match/MatchStatusLabel";
 import { StandingsTable } from "@/components/standings/StandingsTable";
 import { CompetitionLinkList } from "@/components/competition/CompetitionLinkList";
 import { LeagueStrip } from "@/components/competition/LeagueStrip";
+import { MyTeamsSection, type PickerTeam } from "@/components/myteams/MyTeamsSection";
 import { OpenOnboardingButton } from "@/components/onboarding/Onboarding";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { cookies } from "next/headers";
@@ -12,7 +13,7 @@ import { BellIcon, DownloadIcon } from "@/components/ui/icons";
 import { DemoNotice } from "@/components/ui/DemoNotice";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { CalendarIcon, ChevronRightIcon, ClockIcon } from "@/components/ui/icons";
+import { CalendarIcon, ChevronRightIcon, ClockIcon, TrophyIcon } from "@/components/ui/icons";
 import { LiveScoresProvider } from "@/components/realtime/LiveScores";
 import { NewsSection } from "@/components/news/NewsSection";
 import { DATA_SOURCE_KIND, getCompetitions, getMatches, getNow, getStandings } from "@/lib/data";
@@ -42,6 +43,23 @@ export default async function HomePage() {
   const featured = competitions.find((c) => c.format === "league");
   const table = featured ? (await getStandings(featured.id)).slice(0, PREVIEW_LIMIT) : [];
 
+  // My Teams: every team with a public match, grouped by competition for the picker.
+  const allMatches = [...live, ...upcoming, ...results];
+  const pickerTeams = new Map<string, PickerTeam>();
+  const groupMap = new Map<string, Set<string>>();
+  for (const m of allMatches) {
+    for (const t of [m.homeTeam, m.awayTeam]) {
+      pickerTeams.set(t.id, { id: t.id, name: t.name, shortName: t.shortName, code: t.code, colors: t.colors });
+      const g = groupMap.get(m.competition.name) ?? new Set<string>();
+      g.add(t.id);
+      groupMap.set(m.competition.name, g);
+    }
+  }
+  const pickerGroups = [...groupMap].map(([name, ids]) => ({
+    name,
+    teamIds: [...ids].sort((a, b) => pickerTeams.get(a)!.name.localeCompare(pickerTeams.get(b)!.name)),
+  }));
+
   const nothingAtAll = todays.length === 0 && upcoming.length === 0 && results.length === 0;
 
   return (
@@ -54,6 +72,9 @@ export default async function HomePage() {
         <span>WAT</span>
       </p>
       <LeagueStrip competitions={competitions} />
+      {pickerTeams.size > 0 && (
+        <MyTeamsSection teams={[...pickerTeams.values()]} groups={pickerGroups} matches={allMatches} serverNow={now} />
+      )}
 
       {nothingAtAll ? (
         <EmptyState
@@ -166,6 +187,19 @@ export default async function HomePage() {
                 />
               </section>
             )}
+            <Link
+              href="/predictions"
+              className="flex items-center gap-3 rounded-card border border-line bg-gradient-to-r from-accent-100 to-surface px-3 py-3 shadow-card transition-colors hover:border-accent-400"
+            >
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent-400 text-ink" aria-hidden="true">
+                <TrophyIcon size={18} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold">Prediction league</span>
+                <span className="block text-xs text-ink-muted">Predict scores, earn points, top the leaderboard</span>
+              </span>
+              <ChevronRightIcon size={16} className="shrink-0 text-ink-faint" />
+            </Link>
             <section aria-labelledby="competitions">
               <SectionHeader id="competitions" title="Competitions" href="/competitions" linkLabel="All" />
               <CompetitionLinkList competitions={competitions} />
