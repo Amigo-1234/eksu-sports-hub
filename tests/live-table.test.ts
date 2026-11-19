@@ -23,7 +23,8 @@ test("the team winning a live match goes top, the loser drops, with movement", (
   assert.equal(out[3].live?.outcome, "L");
   assert.equal(out[3].movement, -3);
   assert.equal(out[1].live, undefined);
-  assert.deepEqual(out.map((r) => r.position), [1, 2, 3, 4]);
+  assert.equal(out[1].movement, undefined);
+  assert.deepEqual(out.map((r) => r.position), [1, 2, 2, 4]);
 });
 
 test("a live draw adds one point each; half-time counts as in play", () => {
@@ -43,4 +44,13 @@ test("no live matches or group tables: rows unchanged", () => {
   assert.equal(applyLiveMatches(rows, []), rows);
   const groups = [row("A", 1), row("B", 2), row("C", 1), row("D", 2)];
   assert.equal(applyLiveMatches(groups, [match("B", "A", 3, 0)]), groups);
+});
+
+test("start of a season: every team on rank 1, the live winner goes top and the loser bottom", () => {
+  const rows = ["A", "B", "C", "D", "E"].map((id) => row(id, 1));
+  const out = applyLiveMatches(rows, [match("E", "B", 2, 1, "LIVE_SECOND_HALF")]);
+  assert.deepEqual(out.map((r) => [r.teamId, r.position]), [["E", 1], ["A", 2], ["C", 2], ["D", 2], ["B", 5]]);
+  assert.equal(out[0].live?.outcome, "W");
+  assert.equal(out[0].movement, 0);
+  assert.equal(out[4].movement, -4);
 });
