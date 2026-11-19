@@ -6,6 +6,14 @@ const CANONICAL = "https://eksusportshub.com.ng";
 const VERCEL_HOSTS = ["eksu-sports-hub-cn82.vercel.app", "eksu-sports-hub-foy2.vercel.app", "eksu-sports-hub.vercel.app"];
 
 const nextConfig: NextConfig = {
+  // Free (Hobby) hosting allows ~5,000 image transformations a month: keep each
+  // optimised photo for a month (default is 4 hours) and generate fewer widths.
+  images: {
+    minimumCacheTTL: 2678400,
+    deviceSizes: [640, 828, 1200, 1920],
+    imageSizes: [64, 128, 256],
+    formats: ["image/webp"],
+  },
   // Share cards read fonts and crests from disk at request time.
   outputFileTracingIncludes: {
     "/matches/[id]/card": ["./src/assets/fonts/**", "./public/crests/**", "./public/brand/eksu-crest-192.png"],
