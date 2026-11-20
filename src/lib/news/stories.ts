@@ -74,11 +74,38 @@ const MD2 = "/news/2026-11-20-mssn-day-2-kick-off";
 
 const DHIHT = "/news/2026-11-20-darul-haq-iworoko-ht";
 
+const DHG = "/news/2026-11-20-darul-haq-guests";
+
 export const STORIES: Story[] = [
+  {
+    id: "guests-in-attendance-at-darul-haq-v-iworoko-humah",
+    published: true,
+    featured: true,
+    category: "COMPETITION",
+    kind: "report",
+    publishedAt: "2026-11-20T10:11:00+01:00",
+    headline: "Guests turn out for Darul Haq v Iworoko Humah",
+    summary:
+      "Guests were in attendance at the pitch on Friday morning to watch Darul Haq take on Iworoko Humah in the MSSN EKSU Football League.",
+    body: [
+      "Darul Haq against Iworoko Humah drew guests to the pitch on Friday morning, as the MSSN EKSU Football League continued with its second day of action.",
+      "The guests sat together by the side of the pitch to watch the Week 1 match, with spectators gathered behind them and volunteers in orange bibs on hand.",
+      "Their presence added to the occasion as both teams chased their first points of the season.",
+      "Follow Darul Haq v Iworoko Humah live on EKSU Sports Hub.",
+    ],
+    image: { src: `${DHG}/lead.jpg`, alt: "Guests seated by the pitch at Darul Haq against Iworoko Humah", width: 1080, height: 810 },
+    gallery: [
+      { src: `${DHG}/guests-2.jpg`, alt: "Guests watching from the side of the pitch", width: 1080, height: 810 },
+      { src: `${DHG}/guests-3.jpg`, alt: "Guests seated together at the MSSN League match", width: 1080, height: 810 },
+      { src: `${DHG}/guests-4.jpg`, alt: "Guests in attendance at the match, with spectators behind", width: 1080, height: 810 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "cfbc483d-8201-4a2b-8084-f5d4950bad6d",
+  },
   {
     id: "darul-haq-iworoko-humah-goalless-at-half-time",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-20T09:54:00+01:00",
