@@ -16,21 +16,31 @@ type LiveMatch = Pick<Match, "id" | "competitionId" | "homeTeamId" | "awayTeamId
 /**
  * Live table: the stored standings (completed matches only) plus every match
  * in progress, counted as if it ended at its current score. Rows are re-ranked
- * by points, goal difference and goals scored; teams level on all three share
- * a position, as on the stored table (where every team starts on rank 1).
- * Each team playing now carries `live` (current outcome and score) and
+ * by points, goal difference and goals scored. Positions always run 1, 2, 3…
+ * (teams level on everything keep their stored order rather than sharing a
+ * rank). Each team playing now carries `live` (current outcome and score) and
  * `movement` (places gained, positive, or lost, negative).
  *
- * Group tables (the position restarts partway down the list) are returned
- * unchanged: the live re-rank is for single league tables only.
+ * Group tables (the position restarts partway down the list) are numbered
+ * 1, 2, 3… within each group but not re-ranked live.
  */
+export function numberSequentially(rows: StandingRow[]): StandingRow[] {
+  let n = 0;
+  return rows.map((r, i) => {
+    n = i > 0 && r.position < rows[i - 1].position ? 1 : n + 1;
+    return n === r.position ? r : { ...r, position: n };
+  });
+}
+
 export function applyLiveMatches(
   rows: StandingRow[],
   matches: LiveMatch[],
   points: LivePoints = DEFAULT_POINTS,
 ): StandingRow[] {
   if (rows.length === 0) return rows;
-  if (rows.some((r, i) => i > 0 && r.position < rows[i - 1].position)) return rows;
+  const grouped = rows.some((r, i) => i > 0 && r.position < rows[i - 1].position);
+  rows = numberSequentially(rows);
+  if (grouped) return rows;
 
   const byTeam = new Map<ID, StandingRow>(rows.map((r) => [r.teamId, { ...r, form: [...r.form], live: undefined, movement: undefined }]));
   const live = matches.filter(
@@ -72,9 +82,8 @@ export function applyLiveMatches(
   const level = (a: StandingRow, b: StandingRow) =>
     b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor;
   const table = [...byTeam.values()].sort((a, b) => level(a, b) || order.get(a.teamId)! - order.get(b.teamId)!);
-  let position = 0;
   return table.map((r, i) => {
-    if (i === 0 || level(table[i - 1], r) !== 0) position = i + 1;
+    const position = i + 1;
     // Arrows only for the teams playing now: they are the ones the live score moves.
     return { ...r, movement: r.live ? r.position - position : undefined, position };
   });
