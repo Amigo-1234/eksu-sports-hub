@@ -70,11 +70,44 @@ const AKR = "/news/2026-11-19-akanbi-sent-off";
 
 const DSFT = "/news/2026-11-19-darul-saadah-beat-darul-hudah-ft";
 
+const MD2 = "/news/2026-11-20-mssn-day-2-kick-off";
+
 export const STORIES: Story[] = [
+  {
+    id: "mssn-league-day-2-darul-haq-v-iworoko-humah-kicks-off",
+    published: true,
+    featured: true,
+    category: "COMPETITION",
+    kind: "report",
+    publishedAt: "2026-11-20T09:19:00+01:00",
+    headline: "MSSN League Day 2 under way: Darul Haq v Iworoko Humah kicks off",
+    summary:
+      "Day 2 of the MSSN EKSU Football League has started, with Darul Haq and Iworoko Humah shaking hands before their Week 1 meeting on Friday morning.",
+    body: [
+      "The MSSN EKSU Football League is back for Day 2. Darul Haq and Iworoko Humah kicked off their Week 1 match on Friday morning after the traditional line-up and handshakes in the middle of the pitch.",
+      "The captains met the referee for the coin toss before both teams walked out, then lined up side by side and greeted each other ahead of kick-off.",
+      "Both sides set up in a 4-2-3-1. Darul Haq have Olayiwola Abdulsamad in goal and Amuda Muhammed leading the attack, while Iworoko Humah start with Quadri in goal and Adewoye Malik up front.",
+      "The two teams are chasing their first points of the season. Darul Saadah lead the table after beating Darul Hudah 4–1 in Thursday's opener, while Shonibare against Darul Hikmah was postponed.",
+      "Follow Darul Haq v Iworoko Humah live on EKSU Sports Hub for the score, line-ups and every key moment.",
+    ],
+    image: { src: `${MD2}/lead.jpg`, alt: "Darul Haq and Iworoko Humah players shake hands before kick-off", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${MD2}/handshakes.jpg`, alt: "Players from both teams greet each other in the pre-match line", width: 1600, height: 1200 },
+      { src: `${MD2}/handshakes-2.jpg`, alt: "Handshakes along the line before the match", width: 1600, height: 1200 },
+      { src: `${MD2}/handshakes-3.jpg`, alt: "The two teams lined up side by side before kick-off", width: 1600, height: 1200 },
+      { src: `${MD2}/line-up.jpg`, alt: "Players lined up before the match with spectators watching", width: 1600, height: 1200 },
+      { src: `${MD2}/walk-out.jpg`, alt: "Players run past the line before kick-off", width: 1600, height: 1200 },
+      { src: `${MD2}/coin-toss.jpg`, alt: "The referee with the two captains at the coin toss", width: 1600, height: 1200 },
+      { src: `${MD2}/coin-toss-2.jpg`, alt: "The captains and referee in the centre circle", width: 1600, height: 1200 },
+      { src: `${MD2}/coin-toss-3.jpg`, alt: "The captains talk with the referee before kick-off", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "cfbc483d-8201-4a2b-8084-f5d4950bad6d",
+  },
   {
     id: "darul-saadah-beat-darul-hudah-4-1-mssn-league-opener",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-19T10:02:00+01:00",
