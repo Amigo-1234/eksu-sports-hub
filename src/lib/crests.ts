@@ -4,6 +4,7 @@ export const CRESTS: Record<string, string> = {
   "c58f765e-52a0-4d03-93fa-8e48cf94cdcf": "/crests/khe.png", // KHE
   "e439404f-fc81-4afb-8cd7-db16d8c76fa6": "/crests/ptsa-fc.png", // PTSA FC
   "75d6982a-1e7f-458d-bf31-9aa5769e5934": "/crests/gsf-eksu.png", // GSF EKSU
+  "5ac39bb1-3275-46d8-80e1-5eeded538dc9": "/crests/civil-500l.png", // Civil 500L
 };
 
 export const crestFor = (teamId: string | undefined): string | undefined => (teamId ? CRESTS[teamId] : undefined);
