@@ -84,11 +84,39 @@ const DHIFT = "/news/2026-11-20-darul-haq-iworoko-ft";
 
 const C52HT = "/news/2026-11-20-civil-500l-200l-ht";
 
+const BAYO = "/news/2026-11-20-bayo-civil-500l-goal";
+
 export const STORIES: Story[] = [
+  {
+    id: "bayo-breaks-deadlock-civil-500l-lead-civil-200l",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-20T12:29:00+01:00",
+    headline: "Bayo breaks the deadlock as Civil 500L lead Civil 200L",
+    summary:
+      "Bayo scored in the 53rd minute to put Civil 500L 1–0 up against Civil 200L in the NICESA Unity Cup, after a goalless first half.",
+    body: [
+      "Civil 500L have the lead. Bayo scored in the 53rd minute to break the deadlock against Civil 200L in the NICESA Unity Cup.",
+      "After a goalless first half, the seniors made the breakthrough eight minutes after the restart. Bayo, leading the line in his white singlet, found the net to make it 1–0.",
+      "The goal sparked celebrations among the 500L players in black and red, with team-mates and supporters by the touchline joining in.",
+      "Civil 200L now need a response. Follow the rest of the match live on EKSU Sports Hub.",
+    ],
+    image: { src: `${BAYO}/lead.jpg`, alt: "Civil 500L goalscorer Bayo, in a white singlet, jogs back after scoring", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${BAYO}/celebration.jpg`, alt: "Civil 500L players celebrate together after the goal", width: 1600, height: 1200 },
+      { src: `${BAYO}/teammates-clap.jpg`, alt: "Civil 500L players clap as Bayo walks back", width: 1600, height: 1200 },
+      { src: `${BAYO}/bench-celebrates.jpg`, alt: "Civil 500L team-mates and supporters celebrate by the touchline", width: 1600, height: 1200 },
+      { src: `${BAYO}/jog-back.jpg`, alt: "Civil 500L players jog back smiling for the restart", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "a1666ca1-5e05-430d-8f48-ab4dd5895ef7",
+  },
   {
     id: "civil-500l-civil-200l-goalless-at-half-time",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-20T12:12:00+01:00",
