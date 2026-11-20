@@ -80,11 +80,44 @@ const DOKU = "/news/2026-11-20-doku-super-sub";
 
 const DHEQ = "/news/2026-11-20-darul-haq-equaliser";
 
+const DHIFT = "/news/2026-11-20-darul-haq-iworoko-ft";
+
 export const STORIES: Story[] = [
+  {
+    id: "darul-haq-and-iworoko-humah-share-the-points-1-1",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-20T10:44:00+01:00",
+    headline: "Darul Haq and Iworoko Humah share the points in 1–1 draw",
+    summary:
+      "Super sub Doku put Iworoko Humah ahead before Oyadiji Temidayo Ismail equalised, as Darul Haq and Iworoko Humah drew 1–1 in the MSSN League.",
+    body: [
+      "Darul Haq and Iworoko Humah drew 1–1 in Friday's MSSN EKSU Football League match, with both teams picking up their first point of the season.",
+      "A tight first half ended goalless, with Kabir Wasiu of Iworoko Humah and Adebayo Faisol of Darul Haq both booked in the 24th minute.",
+      "Iworoko Humah used their bench well after the break, and it paid off. Doku came on for Lekan in the 64th minute and scored three minutes later to put them 1–0 up.",
+      "Darul Haq responded. They brought on Onajobi Fawas for Abdulmojeed Ajibola in the 76th minute, and three minutes later Oyadiji Temidayo Ismail found the equaliser.",
+      "Neither side could find a winner in the final ten minutes. The match finished with six yellow cards: Kabir Wasiu and Ajileye Abdullahi for Iworoko Humah, and Adebayo Faisol and Oyadiji Temidayo Ismail for Darul Haq.",
+      "The draw leaves both teams level on one point, behind leaders Darul Saadah, who beat Darul Hudah 4–1 on Thursday.",
+      "Up next in Week 1: School Gate Humah v Darul Sunah and Darul Salam v Darul Hikmah on Saturday. Follow every match live on EKSU Sports Hub.",
+    ],
+    image: { src: `${DHIFT}/lead.jpg`, alt: "Darul Haq and Iworoko Humah players walk off at full-time", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${DHIFT}/officials.jpg`, alt: "Match officials and organisers at Darul Haq against Iworoko Humah", width: 1200, height: 1600 },
+      { src: `${DHIFT}/darul-haq-walk.jpg`, alt: "Darul Haq players in green on the pitch", width: 1600, height: 1200 },
+      { src: `${DHIFT}/iworoko-player.jpg`, alt: "An Iworoko Humah player in blue at the end of the match", width: 1600, height: 1200 },
+      { src: `${DHIFT}/doku-celebration.jpg`, alt: "Iworoko Humah players celebrate Doku's goal", width: 1600, height: 1200 },
+      { src: `${DHIFT}/set-piece.jpg`, alt: "Players wait in the area for a set piece", width: 1600, height: 1200 },
+      { src: `${DHIFT}/goalmouth.jpg`, alt: "Players around the goalmouth late in the match", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "cfbc483d-8201-4a2b-8084-f5d4950bad6d",
+  },
   {
     id: "darul-haq-hit-back-oyadiji-equalises-against-iworoko-humah",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-20T10:33:00+01:00",
