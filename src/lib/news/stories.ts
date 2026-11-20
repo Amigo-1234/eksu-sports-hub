@@ -78,11 +78,37 @@ const DHG = "/news/2026-11-20-darul-haq-guests";
 
 const DOKU = "/news/2026-11-20-doku-super-sub";
 
+const DHEQ = "/news/2026-11-20-darul-haq-equaliser";
+
 export const STORIES: Story[] = [
+  {
+    id: "darul-haq-hit-back-oyadiji-equalises-against-iworoko-humah",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-20T10:33:00+01:00",
+    headline: "Darul Haq hit back: Oyadiji levels it 1–1 against Iworoko Humah",
+    summary:
+      "Oyadiji Temidayo Ismail scored in the 79th minute to cancel out Doku's strike and bring Darul Haq level at 1–1 with Iworoko Humah.",
+    body: [
+      "Darul Haq are back in it. Oyadiji Temidayo Ismail scored in the 79th minute to make it 1–1 against Iworoko Humah in the MSSN EKSU Football League.",
+      "Iworoko Humah had taken the lead twelve minutes earlier through substitute Doku, but Darul Haq refused to fold.",
+      "The equaliser came three minutes after Darul Haq made their first change, sending on Onajobi Fawas for Abdulmojeed Ajibola in the 76th minute.",
+      "It capped a big afternoon for Oyadiji, who had been booked early in the second half. The Darul Haq players in green celebrated wildly after the goal.",
+      "With around ten minutes to play, both teams are pushing for a winner and their first three points. Follow the finish live on EKSU Sports Hub.",
+    ],
+    image: { src: `${DHEQ}/lead.jpg`, alt: "A Darul Haq player in green celebrates the equaliser against Iworoko Humah", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${DHEQ}/celebration-run.jpg`, alt: "Darul Haq players run back smiling after levelling the score", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "cfbc483d-8201-4a2b-8084-f5d4950bad6d",
+  },
   {
     id: "super-sub-doku-puts-iworoko-humah-ahead-of-darul-haq",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-20T10:23:00+01:00",
