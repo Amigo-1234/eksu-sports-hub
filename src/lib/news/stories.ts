@@ -72,11 +72,41 @@ const DSFT = "/news/2026-11-19-darul-saadah-beat-darul-hudah-ft";
 
 const MD2 = "/news/2026-11-20-mssn-day-2-kick-off";
 
+const DHIHT = "/news/2026-11-20-darul-haq-iworoko-ht";
+
 export const STORIES: Story[] = [
+  {
+    id: "darul-haq-iworoko-humah-goalless-at-half-time",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-20T09:54:00+01:00",
+    headline: "Darul Haq and Iworoko Humah goalless at the break",
+    summary:
+      "Darul Haq and Iworoko Humah are level at 0–0 at half-time in their MSSN League Week 1 match, with one booking for each side.",
+    body: [
+      "Darul Haq and Iworoko Humah go into the break level at 0–0 in Friday's MSSN EKSU Football League match.",
+      "Both goals came under pressure in a busy first half, with players sliding in and the ball bouncing around the goalmouth, but neither side could find the finish.",
+      "The referee showed two yellow cards in the 24th minute, one for each team: Kabir Wasiu of Iworoko Humah and Adebayo Faisol of Darul Haq.",
+      "Both teams are chasing their first points of the season. Follow the second half live on EKSU Sports Hub.",
+    ],
+    image: { src: `${DHIHT}/lead.jpg`, alt: "Players slide in as the ball bounces in front of goal during the first half", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${DHIHT}/goalmouth-scramble.jpg`, alt: "A scramble in front of goal kicks up dust", width: 1600, height: 1200 },
+      { src: `${DHIHT}/shot.jpg`, alt: "A player shoots as the goalkeeper dives", width: 1600, height: 1200 },
+      { src: `${DHIHT}/on-the-ball.jpg`, alt: "A player in blue brings the ball under control", width: 1600, height: 1200 },
+      { src: `${DHIHT}/on-the-run.jpg`, alt: "A player in blue runs with the ball", width: 1600, height: 1200 },
+      { src: `${DHIHT}/player-look.jpg`, alt: "Players walk back into position", width: 1600, height: 1200 },
+      { src: `${DHIHT}/player-rest.jpg`, alt: "A player catches his breath during the first half", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "cfbc483d-8201-4a2b-8084-f5d4950bad6d",
+  },
   {
     id: "mssn-league-day-2-darul-haq-v-iworoko-humah-kicks-off",
     published: true,
-    featured: true,
+    featured: false,
     category: "COMPETITION",
     kind: "report",
     publishedAt: "2026-11-20T09:19:00+01:00",
