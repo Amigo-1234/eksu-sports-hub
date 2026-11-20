@@ -82,11 +82,40 @@ const DHEQ = "/news/2026-11-20-darul-haq-equaliser";
 
 const DHIFT = "/news/2026-11-20-darul-haq-iworoko-ft";
 
+const C52HT = "/news/2026-11-20-civil-500l-200l-ht";
+
 export const STORIES: Story[] = [
+  {
+    id: "civil-500l-civil-200l-goalless-at-half-time",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-20T12:12:00+01:00",
+    headline: "Civil 500L and Civil 200L goalless at the break",
+    summary:
+      "Civil 500L and Civil 200L are level at 0–0 at half-time in their NICESA Unity Cup match, with both goals surviving a busy first half.",
+    body: [
+      "Civil 500L and Civil 200L go into the break level at 0–0 in Friday afternoon's NICESA Unity Cup match.",
+      "The seniors in black and red and the 200L side in green both pushed forward in a lively first half, with set pieces and scrambles in front of goal, but neither team could find the net.",
+      "Civil 500L set up in a 4-3-3 with Teacha in goal and Bayo leading the line, while Civil 200L went with a 4-2-3-1, Afeez in goal and Jayeola up front.",
+      "500L come into the game after losing 3–2 to Civil 400L in Wednesday's friendly, while 200L are playing their first match on EKSU Sports Hub.",
+      "Follow the second half live on EKSU Sports Hub.",
+    ],
+    image: { src: `${C52HT}/lead.jpg`, alt: "A player rises at the far post as the ball comes in from a corner", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${C52HT}/oluwabusayomi.jpg`, alt: "Civil 200L's Oluwabusayomi, number 10, strikes the ball", width: 1600, height: 1200 },
+      { src: `${C52HT}/goalmouth-scramble.jpg`, alt: "Players from both teams battle in front of goal as the ball is in the air", width: 1600, height: 1200 },
+      { src: `${C52HT}/walk-off.jpg`, alt: "Civil 200L players in green walk off at half-time", width: 1600, height: 1200 },
+      { src: `${C52HT}/walk-off-2.jpg`, alt: "Players head off the pitch for the half-time break", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "a1666ca1-5e05-430d-8f48-ab4dd5895ef7",
+  },
   {
     id: "darul-haq-and-iworoko-humah-share-the-points-1-1",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-20T10:44:00+01:00",
