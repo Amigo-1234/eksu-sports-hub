@@ -86,11 +86,44 @@ const C52HT = "/news/2026-11-20-civil-500l-200l-ht";
 
 const BAYO = "/news/2026-11-20-bayo-civil-500l-goal";
 
+const C52FT = "/news/2026-11-20-civil-500l-beat-200l-ft";
+
 export const STORIES: Story[] = [
+  {
+    id: "civil-500l-beat-civil-200l-1-0-nicesa-unity-cup",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-20T12:54:00+01:00",
+    headline: "Bayo's goal gives Civil 500L a 1–0 win over Civil 200L",
+    summary:
+      "Bayo's 53rd-minute strike was enough for Civil 500L to beat Civil 200L 1–0 in the NICESA Unity Cup, two days after their defeat to Civil 400L.",
+    body: [
+      "Civil 500L beat Civil 200L 1–0 in Friday afternoon's NICESA Unity Cup match, thanks to a second-half goal from Bayo.",
+      "After a goalless first half, Bayo broke the deadlock in the 53rd minute and the seniors held on for the rest of the match.",
+      "Civil 200L pushed for an equaliser, sending on Eva for Vicky in the 56th minute and winning set pieces around the 500L box, but the defence stood firm.",
+      "Civil 500L made two changes of their own: Odunayo came on for Oro in the 62nd minute and Pelxy replaced Otto in the 70th.",
+      "It is a welcome bounce-back for 500L after Wednesday's 3–2 defeat to Civil 400L, while 200L can take positives from a close first outing on EKSU Sports Hub.",
+      "Follow the NICESA Unity Cup and every match live on EKSU Sports Hub.",
+    ],
+    image: { src: `${C52FT}/lead.jpg`, alt: "Civil 200L's number 10 applauds at full-time as players from both teams walk off", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${C52FT}/walk-off.jpg`, alt: "Players leave the pitch at the end of Civil 500L against Civil 200L", width: 1600, height: 1200 },
+      { src: `${C52FT}/500l-defender.jpg`, alt: "A Civil 500L player watches the play during the second half", width: 1600, height: 1200 },
+      { src: `${C52FT}/late-pressure.jpg`, alt: "Players from both teams wait in the box as Civil 200L push forward", width: 1600, height: 1200 },
+      { src: `${C52FT}/corner.jpg`, alt: "Players crowd the goalmouth for a set piece", width: 1600, height: 1200 },
+      { src: `${C52FT}/set-piece.jpg`, alt: "Civil 200L players in green line up for a set piece", width: 1600, height: 1200 },
+      { src: `${C52FT}/free-kick.jpg`, alt: "A Civil 500L player strikes a free kick towards the Civil 200L wall", width: 1600, height: 1200 },
+      { src: `${C52FT}/header.jpg`, alt: "The ball comes into the box as players challenge in front of goal", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "a1666ca1-5e05-430d-8f48-ab4dd5895ef7",
+  },
   {
     id: "bayo-breaks-deadlock-civil-500l-lead-civil-200l",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-20T12:29:00+01:00",
