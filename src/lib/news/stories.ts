@@ -76,11 +76,43 @@ const DHIHT = "/news/2026-11-20-darul-haq-iworoko-ht";
 
 const DHG = "/news/2026-11-20-darul-haq-guests";
 
+const DOKU = "/news/2026-11-20-doku-super-sub";
+
 export const STORIES: Story[] = [
+  {
+    id: "super-sub-doku-puts-iworoko-humah-ahead-of-darul-haq",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-20T10:23:00+01:00",
+    headline: "Super sub Doku puts Iworoko Humah ahead against Darul Haq",
+    summary:
+      "Three minutes after coming off the bench, Doku scored in the 67th minute to give Iworoko Humah a 1–0 lead over Darul Haq in the MSSN League.",
+    body: [
+      "Doku has made an instant impact for Iworoko Humah. The substitute came on for Lekan in the 64th minute and found the net just three minutes later to break the deadlock against Darul Haq.",
+      "The goal sparked wild celebrations among the Iworoko Humah players in blue, who ran back from the goalmouth together after a tight contest that was goalless at half-time.",
+      "Iworoko Humah had turned to their bench throughout the second half. Ajagbe Musa replaced Big Classic in the 53rd minute and Saliu Yusuf came on for Adewoye Malik a minute later, before Doku's arrival and Olayinka Abdullahi's introduction for Omobolaji Taiwo in the 66th.",
+      "It has been a physical game, with five yellow cards so far: Kabir Wasiu and Ajileye Abdullahi for Iworoko Humah, and Adebayo Faisol and Oyadiji Temidayo Ismail for Darul Haq.",
+      "Darul Haq now need a response. Follow the rest of the match live on EKSU Sports Hub.",
+    ],
+    image: { src: `${DOKU}/lead.jpg`, alt: "Iworoko Humah players celebrate Doku's goal against Darul Haq", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${DOKU}/run-off.jpg`, alt: "Iworoko Humah players run back smiling after the goal", width: 1600, height: 1200 },
+      { src: `${DOKU}/celebration.jpg`, alt: "Iworoko Humah players celebrate together", width: 1600, height: 1200 },
+      { src: `${DOKU}/dance.jpg`, alt: "Iworoko Humah players dance after taking the lead", width: 1600, height: 1200 },
+      { src: `${DOKU}/jog-back.jpg`, alt: "Iworoko Humah players jog back for the restart", width: 1600, height: 1200 },
+      { src: `${DOKU}/huddle.jpg`, alt: "Iworoko Humah players celebrate in a group", width: 1600, height: 1200 },
+      { src: `${DOKU}/darul-haq-dejected.jpg`, alt: "Darul Haq players in green react as Iworoko Humah celebrate", width: 1600, height: 1200 },
+      { src: `${DOKU}/restart.jpg`, alt: "The ball goes up as Iworoko Humah head back after the goal", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "cfbc483d-8201-4a2b-8084-f5d4950bad6d",
+  },
   {
     id: "guests-in-attendance-at-darul-haq-v-iworoko-humah",
     published: true,
-    featured: true,
+    featured: false,
     category: "COMPETITION",
     kind: "report",
     publishedAt: "2026-11-20T10:11:00+01:00",
