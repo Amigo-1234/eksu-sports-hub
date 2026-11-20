@@ -88,11 +88,35 @@ const BAYO = "/news/2026-11-20-bayo-civil-500l-goal";
 
 const C52FT = "/news/2026-11-20-civil-500l-beat-200l-ft";
 
+const C43WU = "/news/2026-11-20-civil-400l-warm-up";
+
 export const STORIES: Story[] = [
+  {
+    id: "civil-400l-warm-up-ahead-of-civil-300l",
+    published: true,
+    featured: true,
+    category: "TEAM_UPDATE",
+    kind: "report",
+    publishedAt: "2026-11-20T13:16:00+01:00",
+    headline: "Civil 400L warm up ahead of Civil 300L clash",
+    summary:
+      "Civil 400L are warming up ahead of their NICESA Unity Cup match against Civil 300L.",
+    body: [
+      "Civil 400L are preparing to face Civil 300L in the NICESA Unity Cup.",
+      "Players in orange shirts and black shorts are out on the pitch ahead of the contest.",
+      "Civil 400L come into the fixture after beating Civil 500L 3–2 in a friendly on 18 November.",
+      "Follow Civil 400L v Civil 300L live on EKSU Sports Hub.",
+    ],
+    image: { src: `${C43WU}/lead.jpg`, alt: "Players in orange shirts and black shorts walk across the pitch ahead of kick-off", width: 1536, height: 1152 },
+    gallery: [],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "0a56dae6-0c39-4a1c-8d74-75f02c2f2660",
+  },
+
   {
     id: "civil-500l-beat-civil-200l-1-0-nicesa-unity-cup",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-20T12:54:00+01:00",
