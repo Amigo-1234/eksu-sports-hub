@@ -98,11 +98,48 @@ const FAWAZTHIRD = "/news/2026-11-21-fawaz-satellite-third-goal";
 
 const STHDSLFT = "/news/2026-11-21-satellite-darul-salam-full-time";
 
+const SGDSKO = "/news/2026-11-21-school-gate-darul-sunah-kick-off";
+
 export const STORIES: Story[] = [
+{
+  "id": "school-gate-humah-darul-sunah-kick-off-mssn-league",
+  "published": true,
+  "featured": true,
+  "category": "MATCH_REPORT",
+  "kind": "report",
+  "publishedAt": "2026-11-21T11:02:39+01:00",
+  "headline": "School Gate Humah and Darul Sunah kick off MSSN clash",
+  "summary": "School Gate Humah and Darul Sunah are under way in the MSSN EKSU Football League 2026/2027. The match kicked off at 11:00 am WAT, with the score 0–0 in this opening update.",
+  "body": [
+    "School Gate Humah and Darul Sunah have kicked off their MSSN EKSU Football League 2026/2027 meeting on Saturday 21 November. Play began at 11:00 am WAT, with both starting line-ups confirmed before the match.",
+    "The pre-match photographs show players in dark blue and light blue shirts lined up on the red-earth pitch. Another image captures players and others gathered near the touchline, with spectators behind them.",
+    "School Gate Humah's submitted shape is 3-2-3-2, with Sodiq in goal. Uthman, Waris and Alameen are the named defenders; Jamal and Teslim are joined in midfield by Mumbarak, Mohamed and Hamid. Malik and Salam complete the starting side in attack. No substitutes are listed.",
+    "Darul Sunah have a confirmed 4-3-3 with Ganiu Roqeeb in goal. Abdulkarim Abdulmalik, Adejumo Sodiq, Aminu Fawaz and Sulaimon Mubarak form the defence. Anifowoshe Teslim, Ganiu Temitope and Tiamiyu Sodiq are in midfield, with Damilare Rasheed, Mustapha Khalid and Olatunde Ibrahim in attack. Abimbola Samad is the named substitute.",
+    "The sides remain level at 0–0 at the time of this kick-off update. No goals, cards or substitutions have been logged in the live event list. The match centre carries the confirmed line-ups and live score as the first half continues.",
+    "Follow School Gate Humah v Darul Sunah live on EKSU Sports Hub."
+  ],
+  "image": {
+    "src": `${SGDSKO}/lead.jpg`,
+    "alt": "Players in dark blue and light blue shirts line up on the red-earth pitch before kick-off",
+    "width": 1536,
+    "height": 1152
+  },
+  "gallery": [
+    {
+      "src": `${SGDSKO}/pre-match-gathering.jpg`,
+      "alt": "Players and others gather near the touchline with spectators behind them",
+      "width": 1536,
+      "height": 1152
+    }
+  ],
+  "imageCredit": "EKSU Sports Hub",
+  "matchId": "79930e0d-d07e-43a8-9695-8723314fa623"
+},
+
 {
   "id": "satellite-humah-beat-darul-salam-6-1-full-time",
   "published": true,
-  "featured": true,
+  "featured": false,
   "category": "MATCH_REPORT",
   "kind": "report",
   "publishedAt": "2026-11-21T10:47:14+01:00",
