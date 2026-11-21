@@ -90,11 +90,40 @@ const C52FT = "/news/2026-11-20-civil-500l-beat-200l-ft";
 
 const C43WU = "/news/2026-11-20-civil-400l-warm-up";
 
+const STHDSLKO = "/news/2026-11-21-satellite-darul-salam-kick-off";
+
 export const STORIES: Story[] = [
+  {
+    id: "satellite-humah-darul-salam-kick-off-mssn-league",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-21T09:49:07+01:00",
+    headline: "Satellite Humah and Darul Salam kick off MSSN League clash",
+    summary: "Satellite Humah and Darul Salam are under way in the MSSN EKSU Football League 2026/2027. The match began at 9:43 am WAT, with the sides level at 0–0 in this kick-off update.",
+    body: [
+      "Satellite Humah and Darul Salam have kicked off their MSSN EKSU Football League 2026/2027 meeting on Saturday 21 November. Play began at 9:43 am WAT, with the match set for two 45-minute halves.",
+      "The opening photographs show players in fluorescent yellow and blue shirts on the red-earth pitch. Before play, players gathered together and posed for photographs; the action shots show the ball being carried forward and players tracking a high ball near the goal.",
+      "Satellite Humah have named a 4-3-3, with Amroo in goal. Mikun, Toheeb, Mustapha and Khalid form the defence, with Noqeeb, Samad and Alhameen in midfield. Fawaz, Akeremokewu and Ridwan complete the attack, while Alamite is the named substitute.",
+      "Darul Salam's confirmed sheet lists ten starters, with Adewale in goal. Abudulsamad, Mustapha, Wasiu, Kehinde Yusuf and Abdul Malik are named in defensive positions, with Jimoh and Toyeeb in midfield and Adelusi Wasiu and Mohammed in attack. No substitutes are listed.",
+      "The live record remains 0–0 at the time of this kick-off update, with no goals, cards or substitutions logged. Both confirmed line-ups can be viewed in the match centre alongside the live score.",
+      "Follow Satellite Humah v Darul Salam live on EKSU Sports Hub.",
+    ],
+    image: { src: `${STHDSLKO}/lead.jpg`, alt: "A player in blue carries the ball as players in fluorescent yellow move across the pitch", width: 1536, height: 1152 },
+    gallery: [
+      { src: `${STHDSLKO}/team-photo.jpg`, alt: "Players in fluorescent yellow shirts pose together for a pre-match photograph", width: 1536, height: 1152 },
+      { src: `${STHDSLKO}/blue-line-up.jpg`, alt: "Players in blue shirts stand together on the pitch before play", width: 1536, height: 1152 },
+      { src: `${STHDSLKO}/goalmouth.jpg`, alt: "Players in blue and fluorescent yellow track a high ball near the goal", width: 1536, height: 1152 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "011deea3-6e05-43b4-91b8-360726c7b1cd",
+  },
+
   {
     id: "civil-400l-warm-up-ahead-of-civil-300l",
     published: true,
-    featured: true,
+    featured: false,
     category: "TEAM_UPDATE",
     kind: "report",
     publishedAt: "2026-11-20T13:16:00+01:00",
