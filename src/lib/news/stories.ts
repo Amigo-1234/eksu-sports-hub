@@ -100,11 +100,60 @@ const STHDSLFT = "/news/2026-11-21-satellite-darul-salam-full-time";
 
 const SGDSKO = "/news/2026-11-21-school-gate-darul-sunah-kick-off";
 
+const SGDSFT = "/news/2026-11-21-school-gate-darul-sunah-full-time";
+
 export const STORIES: Story[] = [
+{
+  "id": "school-gate-humah-darul-sunah-goalless-draw-full-time",
+  "published": true,
+  "featured": true,
+  "category": "MATCH_REPORT",
+  "kind": "report",
+  "publishedAt": "2026-11-21T12:37:15+01:00",
+  "headline": "School Gate Humah and Darul Sunah share goalless draw",
+  "summary": "School Gate Humah and Darul Sunah finished 0–0 in the MSSN EKSU Football League 2026/2027. Neither side found a breakthrough, with five yellow cards recorded across the match.",
+  "body": [
+    "School Gate Humah and Darul Sunah played out a goalless draw in the MSSN EKSU Football League 2026/2027 on Saturday 21 November. The 0–0 result gives each side a point, with neither team conceding.",
+    "The sides were level at the interval and remained so through the second half. Match photographs show players in dark blue and light blue contesting the ball, alongside set-piece action around the penalty area. Neither side added a goal to the final score.",
+    "Darul Sunah's Adejumo Sodiq received the first recorded yellow card in the 11th minute. Tiamiyu Sodiq was booked in the 47th minute, while goalkeeper Ganiu Roqeeb received a yellow card in the 70th.",
+    "School Gate Humah had two players booked: Mohamed in the 52nd minute and Teslim in the 55th. That brings the recorded total to five yellow cards, three for Darul Sunah and two for School Gate Humah, with no red cards logged.",
+    "An injury involving Darul Sunah's Abdulkarim Abdulmalik was recorded in the 62nd minute. The record does not specify its nature or severity. The match is marked full-time, confirming a 0–0 draw and a clean sheet for both sides.",
+    "Follow the MSSN EKSU Football League 2026/2027 live on EKSU Sports Hub."
+  ],
+  "image": {
+    "src": `${SGDSFT}/lead.jpg`,
+    "alt": "A player in dark blue controls the ball as a player in light blue closes in",
+    "width": 1536,
+    "height": 1152
+  },
+  "gallery": [
+    {
+      "src": `${SGDSFT}/free-kick.jpg`,
+      "alt": "A player in light blue strikes the ball towards a group of players near goal",
+      "width": 1536,
+      "height": 1152
+    },
+    {
+      "src": `${SGDSFT}/goalmouth.jpg`,
+      "alt": "A goalkeeper reaches towards the ball as players watch near the goalmouth",
+      "width": 1536,
+      "height": 1152
+    },
+    {
+      "src": `${SGDSFT}/set-piece.jpg`,
+      "alt": "A player in dark blue approaches a stationary ball with two light-blue-shirted players ahead",
+      "width": 1536,
+      "height": 1152
+    }
+  ],
+  "imageCredit": "EKSU Sports Hub",
+  "matchId": "79930e0d-d07e-43a8-9695-8723314fa623"
+},
+
 {
   "id": "school-gate-humah-darul-sunah-kick-off-mssn-league",
   "published": true,
-  "featured": true,
+  "featured": false,
   "category": "MATCH_REPORT",
   "kind": "report",
   "publishedAt": "2026-11-21T11:02:39+01:00",
