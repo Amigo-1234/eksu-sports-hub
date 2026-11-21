@@ -96,11 +96,54 @@ const TOHEEBGOAL = "/news/2026-11-21-toheeb-satellite-goal";
 
 const FAWAZTHIRD = "/news/2026-11-21-fawaz-satellite-third-goal";
 
+const STHDSLFT = "/news/2026-11-21-satellite-darul-salam-full-time";
+
 export const STORIES: Story[] = [
+{
+  "id": "satellite-humah-beat-darul-salam-6-1-full-time",
+  "published": true,
+  "featured": true,
+  "category": "MATCH_REPORT",
+  "kind": "report",
+  "publishedAt": "2026-11-21T10:47:14+01:00",
+  "headline": "Fawaz scores twice as Satellite Humah beat Darul Salam 6–1",
+  "summary": "Satellite Humah recorded a 6–1 win over Darul Salam in the MSSN EKSU Football League 2026/2027. Fawaz scored twice, while Darul Salam converted a late penalty for their only goal.",
+  "body": [
+    "Satellite Humah beat Darul Salam 6–1 in their MSSN EKSU Football League 2026/2027 meeting on Saturday 21 November. Fawaz scored twice as Satellite Humah built on a three-goal first-half lead to secure the victory.",
+    "Toheeb scored the opener in the 10th minute, putting Satellite Humah 1–0 ahead. Akeremokewu added the second in the 13th minute, before Fawaz scored the third in the 18th. Those three goals established a 3–0 advantage before the interval.",
+    "Fawaz added his second goal in the 49th minute to make it 4–0. He was then replaced by Alamite in the 55th minute. Khalid extended the lead with Satellite Humah's fifth goal in the 63rd minute.",
+    "Noqeeb converted a penalty in the 66th minute, taking the score to 6–0. Darul Salam were awarded a penalty in the 68th minute and converted it in the 69th for a late consolation. The scorer of Darul Salam's penalty is not named in the match record.",
+    "Darul Salam's Abdul Malik received the match's only recorded yellow card in the 57th minute, before Kolawole Samad replaced him in the 60th. The completed event list contains two substitutions and no red cards. The final score confirms six goals for Satellite Humah and one for Darul Salam.",
+    "Follow the MSSN EKSU Football League 2026/2027 live on EKSU Sports Hub."
+  ],
+  "image": {
+    "src": `${STHDSLFT}/lead.jpg`,
+    "alt": "A player in blue approaches the ball in front of goal as players in fluorescent yellow watch",
+    "width": 1536,
+    "height": 1152
+  },
+  "gallery": [
+    {
+      "src": `${STHDSLFT}/goalmouth.jpg`,
+      "alt": "A player in blue runs past a goalkeeper seated on the ground in front of goal",
+      "width": 1536,
+      "height": 1152
+    },
+    {
+      "src": `${STHDSLFT}/penalty-action.jpg`,
+      "alt": "Players in blue and fluorescent yellow watch the action near the penalty area",
+      "width": 1536,
+      "height": 1152
+    }
+  ],
+  "imageCredit": "EKSU Sports Hub",
+  "matchId": "011deea3-6e05-43b4-91b8-360726c7b1cd"
+},
+
 {
   "id": "fawaz-scores-third-as-satellite-humah-lead-darul-salam",
   "published": true,
-  "featured": true,
+  "featured": false,
   "category": "MATCH_REPORT",
   "kind": "report",
   "publishedAt": "2026-11-21T10:07:07+01:00",
