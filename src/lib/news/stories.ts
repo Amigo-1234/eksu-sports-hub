@@ -94,11 +94,54 @@ const STHDSLKO = "/news/2026-11-21-satellite-darul-salam-kick-off";
 
 const TOHEEBGOAL = "/news/2026-11-21-toheeb-satellite-goal";
 
+const FAWAZTHIRD = "/news/2026-11-21-fawaz-satellite-third-goal";
+
 export const STORIES: Story[] = [
+{
+  "id": "fawaz-scores-third-as-satellite-humah-lead-darul-salam",
+  "published": true,
+  "featured": true,
+  "category": "MATCH_REPORT",
+  "kind": "report",
+  "publishedAt": "2026-11-21T10:07:07+01:00",
+  "headline": "Fawaz adds third as Satellite Humah lead Darul Salam 3–0",
+  "summary": "Fawaz scored in the 18th minute to extend Satellite Humah's lead to 3–0. Toheeb scored the opener in the 10th minute, with Akeremokewu adding the second in the 13th.",
+  "body": [
+    "Fawaz has scored Satellite Humah's third goal against Darul Salam in the MSSN EKSU Football League 2026/2027. His effort in the 18th minute extended the lead to 3–0 in the first half.",
+    "Toheeb scored the opening goal in the 10th minute. Akeremokewu then made it 2–0 in the 13th minute, before Fawaz added the third five minutes later. Three different players have therefore scored Satellite Humah's three goals.",
+    "Fawaz is listed in Satellite Humah's starting attack alongside Akeremokewu and Ridwan. Toheeb started at centre-back, giving the home side contributions from both defence and attack on the scoresheet.",
+    "Darul Salam now have a three-goal deficit to recover, with the match still in its opening half at the time of this update. Their confirmed starting sheet includes Adewale in goal, with Adelusi Wasiu and Mohammed among the attacking players.",
+    "The latest photographs show players in blue and fluorescent yellow competing near the goal, while another image captures a player in blue with both hands raised. The live event list records three valid goals, with no cards or substitutions logged at this point.",
+    "Follow Satellite Humah v Darul Salam live on EKSU Sports Hub."
+  ],
+  "image": {
+    "src": `${FAWAZTHIRD}/lead.jpg`,
+    "alt": "A player in a blue shirt raises both hands beside the pitch",
+    "width": 1536,
+    "height": 1152
+  },
+  "gallery": [
+    {
+      "src": `${FAWAZTHIRD}/goalmouth.jpg`,
+      "alt": "Players in blue and fluorescent yellow contest the ball in front of goal",
+      "width": 1536,
+      "height": 1152
+    },
+    {
+      "src": `${FAWAZTHIRD}/high-ball.jpg`,
+      "alt": "Players track a ball in the air near the goal on the red-earth pitch",
+      "width": 1536,
+      "height": 1152
+    }
+  ],
+  "imageCredit": "EKSU Sports Hub",
+  "matchId": "011deea3-6e05-43b4-91b8-360726c7b1cd"
+},
+
 {
   "id": "toheeb-opens-scoring-as-satellite-humah-lead-darul-salam",
   "published": true,
-  "featured": true,
+  "featured": false,
   "category": "MATCH_REPORT",
   "kind": "report",
   "publishedAt": "2026-11-21T09:57:13+01:00",
