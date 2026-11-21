@@ -92,11 +92,60 @@ const C43WU = "/news/2026-11-20-civil-400l-warm-up";
 
 const STHDSLKO = "/news/2026-11-21-satellite-darul-salam-kick-off";
 
+const TOHEEBGOAL = "/news/2026-11-21-toheeb-satellite-goal";
+
 export const STORIES: Story[] = [
+{
+  "id": "toheeb-opens-scoring-as-satellite-humah-lead-darul-salam",
+  "published": true,
+  "featured": true,
+  "category": "MATCH_REPORT",
+  "kind": "report",
+  "publishedAt": "2026-11-21T09:57:13+01:00",
+  "headline": "Toheeb opens scoring as Satellite Humah lead Darul Salam 2–0",
+  "summary": "Toheeb struck in the 10th minute before Akeremokewu added a second in the 13th. Satellite Humah lead Darul Salam 2–0 in the first half of their MSSN EKSU Football League meeting.",
+  "body": [
+    "Toheeb has opened the scoring for Satellite Humah against Darul Salam in the MSSN EKSU Football League 2026/2027. His goal in the 10th minute gave Satellite Humah the lead in Saturday's meeting.",
+    "Akeremokewu then added a second in the 13th minute, taking the score to 2–0. The two recorded goals came three minutes apart, giving Darul Salam an early deficit to recover.",
+    "Toheeb, wearing shirt number 3 on the confirmed match sheet, started at centre-back in Satellite Humah's 4-3-3. Akeremokewu, listed in the central attacking position, is wearing number 10.",
+    "Satellite Humah's starting line-up also includes Amroo in goal, with Mikun, Mustapha and Khalid alongside Toheeb in defence. Noqeeb, Samad and Alhameen make up the midfield, while Fawaz and Ridwan join Akeremokewu in attack. Alamite is the named substitute.",
+    "The match remains in the first half at the time of this update. The latest photographs show play continuing on the red-earth pitch, with players in fluorescent yellow and blue contesting the ball. No cards or substitutions are recorded in the live event list at this point.",
+    "Follow Satellite Humah v Darul Salam live on EKSU Sports Hub."
+  ],
+  "image": {
+    "src": `${TOHEEBGOAL}/lead.jpg`,
+    "alt": "A player in fluorescent yellow strikes the ball with players in blue nearby",
+    "width": 1536,
+    "height": 1152
+  },
+  "gallery": [
+    {
+      "src": `${TOHEEBGOAL}/goalmouth.jpg`,
+      "alt": "A goalkeeper reaches across the goalmouth as players in blue and fluorescent yellow watch",
+      "width": 1536,
+      "height": 1152
+    },
+    {
+      "src": `${TOHEEBGOAL}/high-ball.jpg`,
+      "alt": "Players in blue and fluorescent yellow follow a high ball on the red-earth pitch",
+      "width": 1536,
+      "height": 1152
+    },
+    {
+      "src": `${TOHEEBGOAL}/match-action.jpg`,
+      "alt": "A player in fluorescent yellow controls the ball as players in blue approach",
+      "width": 1536,
+      "height": 1152
+    }
+  ],
+  "imageCredit": "EKSU Sports Hub",
+  "matchId": "011deea3-6e05-43b4-91b8-360726c7b1cd"
+},
+
   {
     id: "satellite-humah-darul-salam-kick-off-mssn-league",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-21T09:49:07+01:00",
