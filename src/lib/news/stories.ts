@@ -102,11 +102,34 @@ const SGDSKO = "/news/2026-11-21-school-gate-darul-sunah-kick-off";
 
 const SGDSFT = "/news/2026-11-21-school-gate-darul-sunah-full-time";
 
+const GREENKO = "/news/2026-11-22-dm-greeners-pathfinder-kick-off";
+
 export const STORIES: Story[] = [
+  {
+    id: "dm-greeners-pathfinder-kick-off",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-22T08:37:26+01:00",
+    headline: "DM Greeners kick off against Pathfinder FC",
+    summary: "Mangala leads the line for DM Greeners, with Sunday on the left and Kenny on the right in Sunday morning’s friendly.",
+    body: [
+      "DM Greeners and Pathfinder FC kicked off at 8:34am WAT on Sunday. Greeners started in a 4-3-3, with Gakpo, Matic and Kante in midfield.",
+      "Pathfinder lined up in a 4-4-2. Oba started in goal, Benjamin took the left-back spot and Sancho partnered Babatunde up front.",
+    ],
+    image: { src: `${GREENKO}/lead.jpg`, alt: "DM Greeners teammates greet each other on the pitch", width: 1536, height: 1152 },
+    gallery: [
+      { src: `${GREENKO}/team.jpg`, alt: "Players in mint-green shirts gather on the red-earth pitch", width: 1152, height: 1536 },
+      { src: `${GREENKO}/opening-play.jpg`, alt: "Players follow the play across midfield", width: 1536, height: 1152 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "f8cd1e47-8f9a-4bbe-94a4-a7e4b41b111d",
+  },
 {
   "id": "school-gate-humah-darul-sunah-goalless-draw-full-time",
   "published": true,
-  "featured": true,
+  "featured": false,
   "category": "MATCH_REPORT",
   "kind": "report",
   "publishedAt": "2026-11-21T12:37:15+01:00",
