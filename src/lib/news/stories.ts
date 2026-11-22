@@ -104,11 +104,35 @@ const SGDSFT = "/news/2026-11-21-school-gate-darul-sunah-full-time";
 
 const GREENKO = "/news/2026-11-22-dm-greeners-pathfinder-kick-off";
 
+const BABATUNDEPEN = "/news/2026-11-22-babatunde-penalty-pathfinder-dm-greeners";
+
 export const STORIES: Story[] = [
+  {
+    id: "babatunde-penalty-pathfinder-dm-greeners",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-22T09:21:04+01:00",
+    headline: "Babatunde levels from the spot for Pathfinder against DM Greeners",
+    summary: "Pathfinder drew level before half-time after Babatunde converted a penalty against DM Greeners.",
+    body: [
+      "Kenny gave DM Greeners the lead from the penalty spot in the 13th minute of Sunday’s friendly.",
+      "Pathfinder were awarded a penalty in the 39th minute. Babatunde converted two minutes later to make it 1–1 before half-time.",
+      "Follow the friendly on EKSU Sports Hub.",
+    ],
+    image: { src: `${BABATUNDEPEN}/lead.jpg`, alt: "The penalty taker prepares to strike as the goalkeeper waits on the line", width: 1536, height: 1152 },
+    gallery: [
+      { src: `${BABATUNDEPEN}/penalty.jpg`, alt: "A player stands over the ball with the goalkeeper set in front of goal", width: 1536, height: 1152 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "f8cd1e47-8f9a-4bbe-94a4-a7e4b41b111d",
+  },
+
   {
     id: "dm-greeners-pathfinder-kick-off",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-22T08:37:26+01:00",
