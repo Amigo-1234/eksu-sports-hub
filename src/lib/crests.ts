@@ -14,6 +14,7 @@ export const CRESTS: Record<string, string> = {
   "e882ef37-b018-413e-933e-c16ef3393187": "/crests/neuronerds-fc.png", // Neuronerds FC
   "38a0bc6b-50b4-43ea-a11c-17c01492f214": "/crests/physio-pheonix-fc.png", // Physio Pheonix FC
   "76a78e23-9a71-4aec-a2fd-9f044b27441f": "/crests/royal-pheonix-fc.png", // Royal Pheonix FC
+  "5183391e-766b-4769-83bb-77d005a092db": "/crests/diplomat-fc.png", // DIPLOMAT FC
 };
 
 export const crestFor = (teamId: string | undefined): string | undefined => (teamId ? CRESTS[teamId] : undefined);
