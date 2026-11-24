@@ -1,5 +1,6 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { cleanPhone, validateApplication, type ApplicationInput } from "@/lib/operator-applications/shared";
 import { callerKey, publicMessage, serviceClient } from "@/lib/registration/server";
 
@@ -10,7 +11,7 @@ import { callerKey, publicMessage, serviceClient } from "@/lib/registration/serv
  * which also rate-limits per connection and blocks duplicate applications.
  */
 
-export type ApplyResult = { ok: true; reference: string | null } | { ok: false; error: string; fields?: Record<string, string> };
+export type ApplyResult = { ok: true; reference: string | null; practice?: string | null } | { ok: false; error: string; fields?: Record<string, string> };
 
 const UNAVAILABLE = "Applications are not open right now. Please try again later.";
 const MIN_FILL_MS = 4000; // humans need more than a few seconds for this form
@@ -52,8 +53,26 @@ export async function submitOperatorApplication(raw: ApplicationInput & { websit
     void _consent;
     const { data, error } = await db.rpc("service_submit_operator_application", { p: payload, p_rate_key: await callerKey() });
     if (error) return { ok: false, error: publicMessage(error, UNAVAILABLE) };
-    return { ok: true, reference: String(data) };
+    const reference = String(data);
+    return { ok: true, reference, practice: await issuePracticeLink(db, reference) };
   } catch {
     return { ok: false, error: UNAVAILABLE };
+  }
+}
+
+/**
+ * Every new applicant gets their practice (skills test) link straight away.
+ * Best effort: the application is already saved, so a failure here only means
+ * an admin sends the link from the dashboard instead.
+ */
+async function issuePracticeLink(db: NonNullable<ReturnType<typeof serviceClient>>, reference: string): Promise<string | null> {
+  try {
+    const { data: app } = await db.from("operator_applications").select("id").eq("reference", reference).maybeSingle();
+    if (!app?.id) return null;
+    const token = randomBytes(24).toString("base64url");
+    const { error } = await db.from("operator_practice_links").insert({ application_id: app.id, token });
+    return error ? null : token;
+  } catch {
+    return null;
   }
 }

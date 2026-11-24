@@ -63,7 +63,10 @@ export function OperatorApplyForm() {
     setBusy(true);
     const res = await submitOperatorApplication({ ...v, website: honeypot.current?.value ?? "", startedAt });
     if (res.ok) {
-      router.push(res.reference ? `/apply/operator/submitted?ref=${encodeURIComponent(res.reference)}` : "/apply/operator/submitted");
+      const q = new URLSearchParams();
+      if (res.reference) q.set("ref", res.reference);
+      if (res.practice) q.set("practice", res.practice);
+      router.push(`/apply/operator/submitted${q.size ? `?${q}` : ""}`);
       return;
     }
     setBusy(false);
