@@ -7,11 +7,12 @@ import { MyTeamStar } from "@/components/myteams/MyTeamStar";
 import { StandingsTable } from "@/components/standings/StandingsTable";
 import { FormGuide } from "@/components/team/FormGuide";
 import { SquadList } from "@/components/team/SquadList";
+import { TeamScorers } from "@/components/team/TeamScorers";
 import { TeamCrest } from "@/components/team/TeamCrest";
 import { BackLink } from "@/components/ui/BackLink";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { getCompetitions, getMatches, getNow, getSquad, getStandings, getTeam } from "@/lib/data";
+import { getCompetitions, getMatches, getNow, getSquad, getStandings, getTeam, getTopScorers } from "@/lib/data";
 import { outcomeFor } from "@/lib/match";
 
 export async function generateMetadata({ params }: PageProps<"/teams/[id]">): Promise<Metadata> {
@@ -34,7 +35,14 @@ export default async function TeamPage({ params }: PageProps<"/teams/[id]">) {
   ]);
   const teamCompetitions = competitions.filter((c) => c.teamIds.includes(id));
   const league = teamCompetitions.find((c) => c.format === "league");
-  const standings = league ? await getStandings(league.id) : [];
+  const [standings, scorerLists] = await Promise.all([
+    league ? getStandings(league.id) : Promise.resolve([]),
+    // Scorers must never take the team page down either.
+    Promise.all(teamCompetitions.map((c) => getTopScorers(c.id).catch(() => []))),
+  ]);
+  const scorers = teamCompetitions
+    .map((c, i) => ({ competitionId: c.id, competitionName: c.shortName, rows: scorerLists[i].filter((r) => r.teamId === id) }))
+    .filter((g) => g.rows.length > 0);
   const row = standings.find((s) => s.teamId === id);
 
   const next = upcoming.find((m) => m.status === "SCHEDULED");
@@ -119,6 +127,14 @@ export default async function TeamPage({ params }: PageProps<"/teams/[id]">) {
               <MatchCardList matches={results.slice(0, 6)} serverNow={now} />
             ) : (
               <EmptyState compact title="No results yet" />
+            )}
+          </section>
+          <section aria-labelledby="t-scorers">
+            <SectionHeader id="t-scorers" title="Goal scorers" />
+            {scorers.length > 0 ? (
+              <TeamScorers groups={scorers} squad={squad} accent={team.colors.primary} />
+            ) : (
+              <EmptyState compact title="No goals yet" description="Players who score for this team will be listed here." />
             )}
           </section>
           <section aria-labelledby="t-squad">
