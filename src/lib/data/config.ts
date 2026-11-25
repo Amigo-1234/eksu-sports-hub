@@ -16,7 +16,8 @@ export type PublicDataConfig = { kind: "supabase" } | { kind: "mock" } | { kind:
 export function publicDataConfig(): PublicDataConfig {
   const raw = process.env.PUBLIC_DATA_SOURCE;
   const production = process.env.NODE_ENV === "production";
-  const vercelProduction = process.env.VERCEL_ENV === "production";
+  // Same rule as isProductionDeploy() in site-url.ts (that module is server-only).
+  const vercelProduction = process.env.VERCEL_ENV === "production" || process.env.DEPLOY_ENV === "production";
   if (raw === "mock") {
     if (vercelProduction) return { kind: "error", error: "PUBLIC_DATA_SOURCE=mock is not allowed in production." };
     return { kind: "mock" };

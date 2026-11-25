@@ -1,0 +1,13 @@
+# Netlify build settings. Netlify detects Next.js and adds its Next.js runtime
+# automatically (server pages, API routes, proxy, images, share cards).
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# Environment variables (Supabase keys, DEPLOY_ENV=production, push secrets)
+# are set in the Netlify dashboard, not here: values in this file reach the
+# build only, never the server functions that read them at request time.
