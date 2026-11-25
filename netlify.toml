@@ -7,6 +7,9 @@
 [build.environment]
   NODE_VERSION = "22"
   NEXT_TELEMETRY_DISABLED = "1"
+  # Turbopack's build cache can hold copies of server env values. It is never
+  # published, so the secret scanner skips it (it still scans everything served).
+  SECRETS_SCAN_OMIT_PATHS = ".netlify/.next/cache/**,.next/cache/**"
 
 # Environment variables (Supabase keys, DEPLOY_ENV=production, push secrets)
 # are set in the Netlify dashboard, not here: values in this file reach the
