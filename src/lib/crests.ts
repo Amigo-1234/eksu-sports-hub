@@ -1,5 +1,7 @@
 /** Official club crests supplied by the teams, keyed by team id (files in /public/crests). */
 export const CRESTS: Record<string, string> = {
+  "d9bb0139-97ca-460f-b170-92930e3cf80c": "/crests/pessans-eksu.png", // PESSANS EKSU
+  "86bbbac3-c2f8-4599-b476-beed5f6e6d10": "/crests/napcss-fuoye.png", // NAPCSS FUOYE
   "d6c9d32f-5073-4def-9f66-42f5549a57e9": "/crests/fsf-eksu.png", // FSF EKSU (NaFFS)
   "540f74d9-538c-43ef-b483-4f6ff3f10c46": "/crests/dm-greeners.png", // DM Greeners
   "e95b26a1-4a64-4f34-941b-e3bb94a78efc": "/crests/downfall-fc.png", // Downfall FC
