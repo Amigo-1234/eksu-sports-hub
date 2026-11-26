@@ -108,11 +108,38 @@ const BABATUNDEPEN = "/news/2026-11-22-babatunde-penalty-pathfinder-dm-greeners"
 
 const PESNAP = "/news/2026-11-26-pessans-eksu-v-napcss-fuoye";
 
+const PNKO = "/news/2026-11-26-pessans-napcss-kick-off";
+
 export const STORIES: Story[] = [
+  {
+    id: "eksu-v-fuoye-pessans-eksu-napcss-fuoye-kick-off",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-26T10:47:00+01:00",
+    headline: "EKSU v FUOYE is on: PESSANS EKSU and NAPCSS FUOYE line up for kick-off",
+    summary:
+      "PESSANS EKSU and NAPCSS FUOYE lined up side by side at the EKSU Sports Complex before their inter-school friendly got under way.",
+    body: [
+      "The inter-school clash between EKSU and FUOYE is under way. PESSANS EKSU and NAPCSS FUOYE lined up side by side at the EKSU Sports Complex before kick-off.",
+      "The home side, in black with blue and red stripes, were led out by their captain wearing the armband and number 3, with their goalkeeper in green. The visitors from FUOYE wore grey and white, with their goalkeeper in blue.",
+      "Both teams shook hands down the line before taking their positions. PESSANS EKSU have set up in a 3-4-3.",
+      "The match is refereed by Ogooluwa (SOS).",
+      "Follow PESSANS EKSU v NAPCSS FUOYE live on EKSU Sports Hub.",
+    ],
+    image: { src: `${PNKO}/lead.jpg`, alt: "PESSANS EKSU, in black, and NAPCSS FUOYE, in grey, line up side by side before kick-off", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${PNKO}/line-up.jpg`, alt: "The two teams line up at the EKSU Sports Complex", width: 1600, height: 1200 },
+      { src: `${PNKO}/handshakes.jpg`, alt: "Players from both teams before the pre-match handshakes", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "c668c2ed-34a0-4652-9023-b9bd55fa3eac",
+  },
   {
     id: "pessans-eksu-host-napcss-fuoye-inter-school-clash",
     published: true,
-    featured: true,
+    featured: false,
     category: "TEAM_UPDATE",
     kind: "report",
     publishedAt: "2026-11-26T10:36:00+01:00",
