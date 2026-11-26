@@ -106,11 +106,39 @@ const GREENKO = "/news/2026-11-22-dm-greeners-pathfinder-kick-off";
 
 const BABATUNDEPEN = "/news/2026-11-22-babatunde-penalty-pathfinder-dm-greeners";
 
+const PESNAP = "/news/2026-11-26-pessans-eksu-v-napcss-fuoye";
+
 export const STORIES: Story[] = [
+  {
+    id: "pessans-eksu-host-napcss-fuoye-inter-school-clash",
+    published: true,
+    featured: true,
+    category: "TEAM_UPDATE",
+    kind: "report",
+    publishedAt: "2026-11-26T10:36:00+01:00",
+    headline: "EKSU v FUOYE: PESSANS EKSU warm up for inter-school clash with NAPCSS FUOYE",
+    summary:
+      "PESSANS EKSU are warming up at the EKSU Sports Complex ahead of an inter-school friendly against NAPCSS FUOYE, with EKSU pride on the line.",
+    body: [
+      "It is EKSU against FUOYE this morning. PESSANS EKSU are on the pitch at the EKSU Sports Complex, warming up for an inter-school friendly against NAPCSS FUOYE.",
+      "The home side went through their stretches together in their black, blue and pink kit before lining up in shape ahead of kick-off.",
+      "PESSANS EKSU have named a 3-4-3, with A.A Solution in goal and a front three of Tobi, Ridwan and Daniel.",
+      "The match will be refereed by Ogooluwa, known on the pitch as SOS.",
+      "Follow PESSANS EKSU v NAPCSS FUOYE live on EKSU Sports Hub.",
+    ],
+    image: { src: `${PESNAP}/lead.jpg`, alt: "PESSANS EKSU players line up in shape with their goalkeeper before the match", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${PESNAP}/stretch.jpg`, alt: "PESSANS EKSU players stretch together during the warm-up", width: 1600, height: 1200 },
+      { src: `${PESNAP}/stretch-2.jpg`, alt: "PESSANS EKSU players stretch in a line in front of the goal", width: 1600, height: 1200 },
+      { src: `${PESNAP}/stretch-3.jpg`, alt: "The PESSANS EKSU squad warms up at the EKSU Sports Complex", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "c668c2ed-34a0-4652-9023-b9bd55fa3eac",
+  },
   {
     id: "babatunde-penalty-pathfinder-dm-greeners",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-22T09:36:50+01:00",
