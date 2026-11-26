@@ -110,11 +110,40 @@ const PESNAP = "/news/2026-11-26-pessans-eksu-v-napcss-fuoye";
 
 const PNKO = "/news/2026-11-26-pessans-napcss-kick-off";
 
+const PNLV = "/news/2026-11-26-pessans-napcss-level";
+
 export const STORIES: Story[] = [
+  {
+    id: "eksu-v-fuoye-pessans-eksu-napcss-fuoye-level-at-1-1",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-26T11:30:00+01:00",
+    headline: "EKSU v FUOYE still level: PESSANS EKSU and NAPCSS FUOYE locked at 1–1",
+    summary:
+      "Daniel's penalty put NAPCSS FUOYE ahead before Abubakri levelled for PESSANS EKSU. Nearly 40 minutes in, the inter-school friendly is still all square.",
+    body: [
+      "Nothing separates EKSU and FUOYE so far. With the first half nearing its end at the EKSU Sports Complex, PESSANS EKSU and NAPCSS FUOYE are level at 1–1.",
+      "The visitors struck first. NAPCSS FUOYE were awarded a penalty in the 13th minute, and Daniel stepped up to score it a minute later.",
+      "PESSANS EKSU made an early change in the 24th minute, sending on Figmen in place of Tobi, and the hosts were back on terms almost straight away. Abubakri equalised in the 25th minute.",
+      "The game has grown tetchy since. NAPCSS FUOYE had two players booked in quick succession, Joseph in the 26th minute and Dotun in the 27th.",
+      "Both sides have had their moments around the box on a dusty afternoon, with set pieces and challenges flying in. The match is refereed by Ogooluwa (SOS).",
+      "Follow PESSANS EKSU v NAPCSS FUOYE live on EKSU Sports Hub.",
+    ],
+    image: { src: `${PNLV}/lead.jpg`, alt: "PESSANS EKSU, in black, and NAPCSS FUOYE, in grey, crowd the goalmouth during a set piece", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${PNLV}/battle.jpg`, alt: "A PESSANS EKSU player twists in a challenge as NAPCSS FUOYE players close in on the ball", width: 1600, height: 1200 },
+      { src: `${PNLV}/down.jpg`, alt: "A PESSANS EKSU player sits on the pitch after a challenge as players gather round", width: 1600, height: 1200 },
+      { src: `${PNLV}/huddle.jpg`, alt: "Players from both teams gather around the ball during a break in play", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "c668c2ed-34a0-4652-9023-b9bd55fa3eac",
+  },
   {
     id: "eksu-v-fuoye-pessans-eksu-napcss-fuoye-kick-off",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-26T10:47:00+01:00",
