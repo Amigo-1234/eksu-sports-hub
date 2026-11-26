@@ -1,0 +1,17 @@
+[Unit]
+Description=EKSU Sports Hub (Next.js)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=eksu
+WorkingDirectory=/srv/eksu/current
+EnvironmentFile=/srv/eksu/shared/env
+Environment=NODE_ENV=production PORT=3000 HOSTNAME=127.0.0.1
+ExecStart=/usr/bin/node node_modules/next/dist/bin/next start -p 3000 -H 127.0.0.1
+Restart=always
+RestartSec=3
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+# HTTPS certificates are issued and renewed automatically by Caddy.
+www.eksusportshub.com.ng {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:3000
+}
+
+eksusportshub.com.ng {
+	redir https://www.eksusportshub.com.ng{uri} permanent
+}

@@ -1,0 +1,8 @@
+[Unit]
+Description=EKSU Sports Hub auto-deploy from GitHub main
+
+[Service]
+Type=oneshot
+User=eksu
+ExecStart=/usr/local/bin/eksu-deploy
+TimeoutStartSec=1800
