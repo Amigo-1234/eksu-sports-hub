@@ -112,11 +112,39 @@ const PNKO = "/news/2026-11-26-pessans-napcss-kick-off";
 
 const PNLV = "/news/2026-11-26-pessans-napcss-level";
 
+const DSSG = "/news/2026-11-26-darul-salam-school-gate-kick-off";
+
 export const STORIES: Story[] = [
+  {
+    id: "mssn-week-2-darul-salam-v-school-gate-humah-kick-off",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-26T13:45:00+01:00",
+    headline: "MSSN Week 2: Darul Salam and School Gate Humah ready for kick-off",
+    summary:
+      "Darul Salam take on School Gate Humah in the MSSN EKSU Football League. Both line-ups are in, and the teams have posed for their pre-match photos.",
+    body: [
+      "The MSSN EKSU Football League continues with Week 2 as Darul Salam face School Gate Humah.",
+      "Both sides have handed in their team sheets. Darul Salam, in orange, line up in a 4-3-3, with Adewale in goal and Quadri, known as Haaland, leading the attack between Olaitan and Adam Adeshina.",
+      "School Gate Humah, in sky blue, have gone for a 3-5-2. Sodiq starts in goal behind a back three of Waris, Uthman and Abdullahi, and Muhammed partners Al-Ameen up front.",
+      "The teams have posed for their pre-match photos and are warming up for kick-off.",
+      "Follow Darul Salam v School Gate Humah live on EKSU Sports Hub.",
+    ],
+    image: { src: `${DSSG}/lead.jpg`, alt: "School Gate Humah, in sky blue, pose for their team photo before kick-off", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${DSSG}/school-gate-team.jpg`, alt: "School Gate Humah players line up for a close-up team photo, with their goalkeeper in orange holding the ball", width: 1600, height: 1200 },
+      { src: `${DSSG}/darul-salam.jpg`, alt: "Darul Salam players, in orange, on the pitch before the match", width: 1600, height: 1200 },
+      { src: `${DSSG}/darul-salam-2.jpg`, alt: "Darul Salam players, in orange, get ready on the pitch", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "10976da2-328b-4ba4-ab4d-548e180a8364",
+  },
   {
     id: "eksu-v-fuoye-pessans-eksu-napcss-fuoye-level-at-1-1",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-26T11:52:00+01:00",
