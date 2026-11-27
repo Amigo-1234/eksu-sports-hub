@@ -16,6 +16,8 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { CalendarIcon, ChevronRightIcon, ClockIcon, TrophyIcon } from "@/components/ui/icons";
 import { LiveScoresProvider } from "@/components/realtime/LiveScores";
 import { NewsSection } from "@/components/news/NewsSection";
+import { FeaturedMatchBanner } from "@/components/match/FeaturedMatchBanner";
+import { FEATURED_MATCH, featuredMatchVisible } from "@/lib/featured-match";
 import { DATA_SOURCE_KIND, getCompetitions, getMatches, getNow, getRegisteredTeamIds, getStandings, getTeams } from "@/lib/data";
 import { dateKey, formatKickoff, formatLongDate } from "@/lib/format";
 import { matchHref } from "@/lib/match";
@@ -45,6 +47,12 @@ export default async function HomePage() {
 
   // My Teams: every team with a public match, grouped by competition for the picker.
   const allMatches = [...live, ...upcoming, ...results];
+  const featuredCfg = FEATURED_MATCH;
+  const featuredMatch = featuredCfg ? allMatches.find((m) => m.id === featuredCfg.matchId) : undefined;
+  const showFeatured =
+    featuredCfg && featuredMatch && featuredMatchVisible(featuredMatch.kickoffAt, now, featuredCfg.hideAfterHours)
+      ? { cfg: featuredCfg, match: featuredMatch }
+      : null;
   const pickerTeams = new Map<string, PickerTeam>();
   const groupMap = new Map<string, Set<string>>();
   for (const m of allMatches) {
@@ -80,6 +88,14 @@ export default async function HomePage() {
         <span aria-hidden="true">·</span>
         <span>WAT</span>
       </p>
+      {showFeatured && (
+        <FeaturedMatchBanner
+          match={showFeatured.match}
+          kicker={showFeatured.cfg.kicker}
+          storyId={showFeatured.cfg.storyId}
+          serverNow={now}
+        />
+      )}
       <LeagueStrip competitions={competitions} />
       {pickerTeams.size > 0 && (
         <MyTeamsSection teams={[...pickerTeams.values()]} groups={pickerGroups} matches={allMatches} serverNow={now} />
