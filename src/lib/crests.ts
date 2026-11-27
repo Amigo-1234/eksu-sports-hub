@@ -1,5 +1,6 @@
 /** Official club crests supplied by the teams, keyed by team id (files in /public/crests). */
 export const CRESTS: Record<string, string> = {
+  "ad5919a6-4531-49cd-8513-ab4a75826a54": "/crests/eksu-galacticos-fc.png", // EKSU Galacticos FC
   "72c7cdcb-91d7-4532-bcb1-cc2fd4bc96df": "/crests/dynasty-fc.png", // Dynasty FC (History & International Studies 200L)
   "d9bb0139-97ca-460f-b170-92930e3cf80c": "/crests/pessans-eksu.png", // PESSANS EKSU
   "86bbbac3-c2f8-4599-b476-beed5f6e6d10": "/crests/napcss-fuoye.png", // NAPCSS FUOYE
