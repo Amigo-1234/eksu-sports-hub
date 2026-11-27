@@ -127,10 +127,10 @@ export const STORIES: Story[] = [
     publishedAt: "2026-11-27T15:45:00+01:00",
     headline: "EKSU Galacticos arrive safely ahead of tomorrow's NLO Cup clash with F8 Ballers",
     summary:
-      "The EKSU Galacticos squad has arrived safely ahead of Saturday's 11:00 NLO Cup meeting with F8 Ballers FC, and EKSU Sports Hub is travelling with the team.",
+      "The EKSU Galacticos squad has arrived safely ahead of Saturday's 12:00 NLO Cup meeting with F8 Ballers FC at Legacy Stadium, Lagos, and EKSU Sports Hub is travelling with the team.",
     body: [
       "EKSU Galacticos FC have arrived safely ahead of tomorrow's NLO Cup clash with F8 Ballers FC.",
-      "The team representing Ekiti State University now turns its focus to Saturday's game, which kicks off at 11:00 on Saturday 28 November.",
+      "The team representing Ekiti State University now turns its focus to Saturday's game, which kicks off at 12:00 on Saturday 28 November at Legacy Stadium, Lagos State.",
       "It is a chance for revenge. F8 Ballers won the last meeting between the sides 4–3 on 14 November, in a seven-goal thriller.",
       "EKSU Sports Hub is travelling with the Galacticos and will bring you every goal, card and substitution live from the match.",
       "EKSU students, get behind the school team: follow the match live on EKSU Sports Hub and share it with your friends.",
@@ -149,9 +149,9 @@ export const STORIES: Story[] = [
     publishedAt: "2026-11-27T14:45:59+01:00",
     headline: "EKSU Galacticos — Representing EKSU: revenge mission against F8 Ballers in the NLO Cup",
     summary:
-      "EKSU Galacticos FC travel to F8 Ballers FC on Saturday at 11:00 in the NLO Cup, two weeks after a seven-goal thriller between the sides went 4–3 to F8 Ballers.",
+      "EKSU Galacticos FC face F8 Ballers FC on Saturday at 12:00 at Legacy Stadium, Lagos, in the NLO Cup, two weeks after a seven-goal thriller between the sides went 4–3 to F8 Ballers.",
     body: [
-      "EKSU Galacticos FC carry the name of Ekiti State University into the NLO Cup again on Saturday 28 November, when they visit F8 Ballers FC. Kick-off is at 11:00.",
+      "EKSU Galacticos FC carry the name of Ekiti State University into the NLO Cup again on Saturday 28 November, when they face F8 Ballers FC at Legacy Stadium in Lagos State. Kick-off is at 12:00.",
       "There is unfinished business. When the two sides met on 14 November, F8 Ballers edged a seven-goal thriller 4–3, and the Galacticos will be out to put that right.",
       "The Galacticos' NLO Cup campaign so far has been eventful. They lost 3–2 to Roms on 25 October, beat Na Royal FC 4–2 on 1 November and drew 1–1 with Telu FC on 7 November before that defeat to F8 Ballers.",
       "Their summer form shows what they can do. In the NLO Division Two League, Ado-Ekiti Centre, in August, they went five games unbeaten: 5–0 against Elebuibon Boys FC, 0–0 with Kamal FA, 4–1 against Rehoboth FA, 2–0 at TSI FA and 1–1 with Hommydays FC.",
