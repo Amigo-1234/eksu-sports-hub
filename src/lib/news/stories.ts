@@ -115,12 +115,36 @@ const PNLV = "/news/2026-11-26-pessans-napcss-level";
 const DSSG = "/news/2026-11-26-darul-salam-school-gate-kick-off";
 
 const DHINJ = "/news/2026-11-27-darul-haq-injury";
+const EGF8 = "/news/2026-11-28-eksu-galacticos-v-f8-ballers";
 
 export const STORIES: Story[] = [
   {
-    id: "darul-haq-olayiwola-abdulsamad-injury-shonibare",
+    id: "eksu-galacticos-v-f8-ballers-nlo-cup-preview",
     published: true,
     featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-27T14:45:59+01:00",
+    headline: "EKSU Galacticos — Representing EKSU: revenge mission against F8 Ballers in the NLO Cup",
+    summary:
+      "EKSU Galacticos FC travel to F8 Ballers FC on Saturday at 11:00 in the NLO Cup, two weeks after a seven-goal thriller between the sides went 4–3 to F8 Ballers.",
+    body: [
+      "EKSU Galacticos FC carry the name of Ekiti State University into the NLO Cup again on Saturday 28 November, when they visit F8 Ballers FC. Kick-off is at 11:00.",
+      "There is unfinished business. When the two sides met on 14 November, F8 Ballers edged a seven-goal thriller 4–3, and the Galacticos will be out to put that right.",
+      "The Galacticos' NLO Cup campaign so far has been eventful. They lost 3–2 to Roms on 25 October, beat Na Royal FC 4–2 on 1 November and drew 1–1 with Telu FC on 7 November before that defeat to F8 Ballers.",
+      "Their summer form shows what they can do. In the NLO Division Two League, Ado-Ekiti Centre, in August, they went five games unbeaten: 5–0 against Elebuibon Boys FC, 0–0 with Kamal FA, 4–1 against Rehoboth FA, 2–0 at TSI FA and 1–1 with Hommydays FC.",
+      "After Saturday, the NLO Cup run continues with Telu FC at home on 5 December, Na Royal FC away on 12 December, Roms at home on 19 December and Oba's FA away on 2 January.",
+      "This is the school's team. EKSU students, come out and back the Galacticos, and follow every goal, card and change live on EKSU Sports Hub, where our correspondent is travelling with the team.",
+    ],
+    image: { src: `${EGF8}/lead.jpg`, alt: "The EKSU Galacticos FC crest", width: 1600, height: 1200 },
+    gallery: [],
+    imageCredit: "EKSU Galacticos FC",
+    matchId: "697df93b-5cd8-4be1-bc69-9130c7c0b52e",
+  },
+  {
+    id: "darul-haq-olayiwola-abdulsamad-injury-shonibare",
+    published: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-27T09:15:00+01:00",
