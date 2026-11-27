@@ -1,6 +1,6 @@
 /** Official club crests supplied by the teams, keyed by team id (files in /public/crests). */
 export const CRESTS: Record<string, string> = {
-  "72c7cdcb-91d7-4532-bcb1-cc2fd4bc96df": "/crests/his-200l.png", // History & International Studies 200L (Dynasty FC)
+  "72c7cdcb-91d7-4532-bcb1-cc2fd4bc96df": "/crests/dynasty-fc.png", // Dynasty FC (History & International Studies 200L)
   "d9bb0139-97ca-460f-b170-92930e3cf80c": "/crests/pessans-eksu.png", // PESSANS EKSU
   "86bbbac3-c2f8-4599-b476-beed5f6e6d10": "/crests/napcss-fuoye.png", // NAPCSS FUOYE
   "d6c9d32f-5073-4def-9f66-42f5549a57e9": "/crests/fsf-eksu.png", // FSF EKSU (NaFFS)
