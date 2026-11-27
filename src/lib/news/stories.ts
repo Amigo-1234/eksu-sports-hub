@@ -119,9 +119,31 @@ const EGF8 = "/news/2026-11-28-eksu-galacticos-v-f8-ballers";
 
 export const STORIES: Story[] = [
   {
-    id: "eksu-galacticos-v-f8-ballers-nlo-cup-preview",
+    id: "eksu-galacticos-arrive-safely-ahead-of-f8-ballers-clash",
     published: true,
     featured: true,
+    category: "TEAM_UPDATE",
+    kind: "report",
+    publishedAt: "2026-11-27T15:45:00+01:00",
+    headline: "EKSU Galacticos arrive safely ahead of tomorrow's NLO Cup clash with F8 Ballers",
+    summary:
+      "The EKSU Galacticos squad has arrived safely ahead of Saturday's 11:00 NLO Cup meeting with F8 Ballers FC, and EKSU Sports Hub is travelling with the team.",
+    body: [
+      "EKSU Galacticos FC have arrived safely ahead of tomorrow's NLO Cup clash with F8 Ballers FC.",
+      "The team representing Ekiti State University now turns its focus to Saturday's game, which kicks off at 11:00 on Saturday 28 November.",
+      "It is a chance for revenge. F8 Ballers won the last meeting between the sides 4–3 on 14 November, in a seven-goal thriller.",
+      "EKSU Sports Hub is travelling with the Galacticos and will bring you every goal, card and substitution live from the match.",
+      "EKSU students, get behind the school team: follow the match live on EKSU Sports Hub and share it with your friends.",
+    ],
+    image: { src: `${EGF8}/lead.jpg`, alt: "The EKSU Galacticos FC crest", width: 1600, height: 1200 },
+    gallery: [],
+    imageCredit: "EKSU Galacticos FC",
+    matchId: "697df93b-5cd8-4be1-bc69-9130c7c0b52e",
+  },
+  {
+    id: "eksu-galacticos-v-f8-ballers-nlo-cup-preview",
+    published: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-27T14:45:59+01:00",
