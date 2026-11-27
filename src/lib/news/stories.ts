@@ -114,11 +114,38 @@ const PNLV = "/news/2026-11-26-pessans-napcss-level";
 
 const DSSG = "/news/2026-11-26-darul-salam-school-gate-kick-off";
 
+const DHINJ = "/news/2026-11-27-darul-haq-injury";
+
 export const STORIES: Story[] = [
+  {
+    id: "darul-haq-olayiwola-abdulsamad-injury-shonibare",
+    published: true,
+    featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-27T09:15:00+01:00",
+    headline: "Darul Haq goalkeeper Olayiwola Abdulsamad injured against Shonibare",
+    summary:
+      "An injury to Olayiwola Abdulsamad was recorded in the 7th minute of Darul Haq's friendly with Shonibare. Photos show a player receiving support at the pitch.",
+    body: [
+      "An injury was recorded in the 7th minute of Darul Haq's friendly with Shonibare.",
+      "The match record identifies Darul Haq goalkeeper Olayiwola Abdulsamad in the injury event.",
+      "Photographs from the ground show a player seated on the pitch as others gather around, then being supported by people nearby.",
+      "The type and extent of the injury have not been confirmed.",
+      "Follow Darul Haq v Shonibare live on EKSU Sports Hub.",
+    ],
+    image: { src: `${DHINJ}/lead.jpg`, alt: "A player sits on the pitch while others gather to assist", width: 960, height: 720 },
+    gallery: [
+      { src: `${DHINJ}/assisted.jpg`, alt: "People support a player beside the pitch", width: 720, height: 960 },
+      { src: `${DHINJ}/pitch.jpg`, alt: "Players gather near the goal during a pause in play", width: 960, height: 720 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "c6b58e92-fa13-4780-a350-db4aa19404f1",
+  },
   {
     id: "mssn-week-2-darul-salam-v-school-gate-humah-kick-off",
     published: true,
-    featured: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-26T13:45:00+01:00",
