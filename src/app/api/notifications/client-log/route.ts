@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isSameOrigin } from "@/lib/same-origin";
 
 /*
  * POST /api/notifications/client-log — diagnostics when a browser fails to
@@ -13,8 +14,7 @@ const STEPS = new Set(["register", "ready", "key", "getSubscription", "subscribe
 const clip = (v: unknown, n: number) => (typeof v === "string" ? v.slice(0, n).replace(/[\r\n]+/g, " ") : undefined);
 
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) return new NextResponse(null, { status: 403 });
+  if (!isSameOrigin(request)) return new NextResponse(null, { status: 403 });
   try {
     const text = await request.text();
     if (text.length > 1024) return new NextResponse(null, { status: 413 });

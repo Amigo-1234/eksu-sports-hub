@@ -3,6 +3,7 @@ import { DATA_SOURCE_KIND } from "@/lib/data";
 import { deviceToken, setDeviceCookie } from "@/lib/notifications/server";
 import { callerKey, publicMessage, serviceClient } from "@/lib/registration/server";
 import { parseVisitorRequest } from "@/lib/visitor/types";
+import { isSameOrigin } from "@/lib/same-origin";
 
 /*
  * /api/visitor — the public site's light sign-in ("What should we call you?").
@@ -31,8 +32,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) return NextResponse.json({ error: "Not allowed" }, { status: 403 });
+  if (!isSameOrigin(request)) return NextResponse.json({ error: "Not allowed" }, { status: 403 });
   const db = DATA_SOURCE_KIND === "live" ? serviceClient() : null;
   if (!db) return NextResponse.json({ error: "Sign-in is not available right now." }, { status: 503 });
 

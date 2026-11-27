@@ -4,6 +4,7 @@ import { initialClock } from "@/lib/operator/clock";
 import { markPractice, PRACTICE_HALF_SECONDS } from "@/lib/practice/script";
 import { PRACTICE_MATCH_ID } from "@/lib/practice/seed";
 import { publicMessage, serviceClient } from "@/lib/registration/server";
+import { isSameOrigin } from "@/lib/same-origin";
 
 /*
  * POST /api/practice/submit { token, name, state: { phase, events, log } }
@@ -59,8 +60,7 @@ function clean(raw: unknown): OpMatchState | null {
 }
 
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) return NextResponse.json({ error: "Not allowed" }, { status: 403 });
+  if (!isSameOrigin(request)) return NextResponse.json({ error: "Not allowed" }, { status: 403 });
   const db = serviceClient();
   if (!db) return NextResponse.json({ error: "Practice is not available right now." }, { status: 503 });
   let body: Record<string, unknown>;

@@ -3,6 +3,7 @@ import { DATA_SOURCE_KIND } from "@/lib/data";
 import { parseGamesAction, parseTarget } from "@/lib/fan/types";
 import { deviceToken, setDeviceCookie } from "@/lib/notifications/server";
 import { callerKey, publicMessage, serviceClient } from "@/lib/registration/server";
+import { isSameOrigin } from "@/lib/same-origin";
 
 /*
  * /api/fan/games — score predictions and Player of the Match for one match.
@@ -26,8 +27,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) return NextResponse.json({ error: "Not allowed" }, { status: 403 });
+  if (!isSameOrigin(request)) return NextResponse.json({ error: "Not allowed" }, { status: 403 });
   const db = DATA_SOURCE_KIND === "live" ? serviceClient() : null;
   if (!db) return NextResponse.json({ error: UNAVAILABLE }, { status: 503 });
 

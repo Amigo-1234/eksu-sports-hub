@@ -3,6 +3,7 @@ import { parseAudienceRequest } from "@/lib/audience/types";
 import { DATA_SOURCE_KIND } from "@/lib/data";
 import { deviceToken, setDeviceCookie } from "@/lib/notifications/server";
 import { callerKey, serviceClient } from "@/lib/registration/server";
+import { isSameOrigin } from "@/lib/same-origin";
 
 /*
  * POST /api/audience — a public match page saying "this device is viewing
@@ -18,8 +19,7 @@ export const dynamic = "force-dynamic";
 const quiet = (status = 204) => new NextResponse(null, { status });
 
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) return quiet(403);
+  if (!isSameOrigin(request)) return quiet(403);
   if (DATA_SOURCE_KIND !== "live") return quiet();
   const db = serviceClient();
   if (!db) return quiet();

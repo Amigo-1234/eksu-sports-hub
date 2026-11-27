@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { NotifyError, pushNotificationsEnabled, withDevice } from "@/lib/notifications/server";
+import { isSameOrigin } from "@/lib/same-origin";
 
 /*
  * POST /api/notifications/subscription — the service worker reports a
@@ -12,8 +13,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   if (!pushNotificationsEnabled()) return NextResponse.json({ ok: false }, { status: 503 });
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) return NextResponse.json({ ok: false }, { status: 403 });
+  if (!isSameOrigin(request)) return NextResponse.json({ ok: false }, { status: 403 });
   let body: { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown } };
   try {
     body = await request.json();
