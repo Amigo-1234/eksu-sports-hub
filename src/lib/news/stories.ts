@@ -121,12 +121,39 @@ const GALWU = "/news/2026-11-28-galacticos-warm-up";
 const F8WU = "/news/2026-11-28-f8-ballers-warm-up";
 const GALKO = "/news/2026-11-28-galacticos-f8-kick-off";
 const GALHT = "/news/2026-11-28-galacticos-f8-half-time";
+const GAL2 = "/news/2026-11-28-galacticos-f8-two-up";
 
 export const STORIES: Story[] = [
   {
-    id: "half-time-eksu-galacticos-lead-f8-ballers",
+    id: "eksu-galacticos-two-up-against-f8-ballers",
     published: true,
     featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-28T12:45:00+01:00",
+    headline: "2–0! Substitute James doubles EKSU Galacticos' lead over F8 Ballers",
+    summary:
+      "James, on as a 53rd-minute substitute, scored in the 61st minute to put EKSU Galacticos 2–0 up against F8 Ballers FC in the NLO Cup.",
+    body: [
+      "EKSU Galacticos FC now lead F8 Ballers FC 2–0 in the NLO Cup at Legacy Stadium in Lagos.",
+      "The second goal came from the bench. James replaced the injured Emma (midfield) in the 53rd minute and scored eight minutes later, in the 61st minute.",
+      "It builds on Emma's (forward) 27th-minute penalty, which gave the Galacticos a 1–0 lead at the break. Emma was later shown a yellow card in the 59th minute.",
+      "The Galacticos made a second change in the 63rd minute, with Fabian coming on for Angoria.",
+      "The school team is closing in on revenge for their 4–3 defeat to F8 Ballers on 14 November. EKSU students, keep the support coming and share the match.",
+      "Follow F8 Ballers FC v EKSU Galacticos FC live on EKSU Sports Hub.",
+    ],
+    image: { src: `${GAL2}/lead.jpg`, alt: "EKSU Galacticos players in white and purple during the second half against F8 Ballers", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${GAL2}/reset.jpg`, alt: "EKSU Galacticos players reset in the second half", width: 1600, height: 1200 },
+      { src: `${GAL2}/reset-2.jpg`, alt: "EKSU Galacticos players walk back into position", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "697df93b-5cd8-4be1-bc69-9130c7c0b52e",
+  },
+  {
+    id: "half-time-eksu-galacticos-lead-f8-ballers",
+    published: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-28T12:20:00+01:00",
