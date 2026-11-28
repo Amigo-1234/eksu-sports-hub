@@ -120,12 +120,45 @@ const GALWU = "/news/2026-11-28-galacticos-warm-up";
 
 const F8WU = "/news/2026-11-28-f8-ballers-warm-up";
 const GALKO = "/news/2026-11-28-galacticos-f8-kick-off";
+const GALHT = "/news/2026-11-28-galacticos-f8-half-time";
 
 export const STORIES: Story[] = [
   {
-    id: "eksu-galacticos-v-f8-ballers-kick-off",
+    id: "half-time-eksu-galacticos-lead-f8-ballers",
     published: true,
     featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-28T12:20:00+01:00",
+    headline: "Half-time: EKSU Galacticos lead F8 Ballers 1–0 through Emma's penalty",
+    summary:
+      "Emma converted a 27th-minute penalty to give EKSU Galacticos a 1–0 half-time lead over F8 Ballers FC in the NLO Cup at Legacy Stadium, Lagos.",
+    body: [
+      "EKSU Galacticos FC lead F8 Ballers FC 1–0 at half-time in their NLO Cup meeting at Legacy Stadium in Lagos.",
+      "The breakthrough came from the spot. The Galacticos were awarded a penalty in the 26th minute, and the F8 Ballers goalkeeper was shown a yellow card in the same incident. Emma stepped up and scored it in the 27th minute.",
+      "It was a physical first half, with plenty of tough challenges in midfield. Play was stopped more than once for players to receive treatment, and the Galacticos' medical staff were called on to the pitch.",
+      "The Galacticos are 45 minutes away from avenging their 4–3 defeat to F8 Ballers on 14 November.",
+      "EKSU students, keep backing the school team and share the match with your friends. Predictions are closed, but you can still cheer the team on in the Fans tab.",
+      "Follow F8 Ballers FC v EKSU Galacticos FC live on EKSU Sports Hub.",
+    ],
+    image: { src: `${GALHT}/lead.jpg`, alt: "The EKSU Galacticos captain carries the ball forward as an F8 Ballers player lies on the turf", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${GALHT}/duel.jpg`, alt: "An EKSU Galacticos player and an F8 Ballers player battle for the ball", width: 1600, height: 1200 },
+      { src: `${GALHT}/attack.jpg`, alt: "EKSU Galacticos attack the F8 Ballers goal", width: 1600, height: 1200 },
+      { src: `${GALHT}/shoulder.jpg`, alt: "The EKSU Galacticos captain shapes to tackle an F8 Ballers player near the stand", width: 1600, height: 1200 },
+      { src: `${GALHT}/stoppage.jpg`, alt: "Players gather as play is stopped in the first half", width: 1600, height: 1200 },
+      { src: `${GALHT}/stoppage-2.jpg`, alt: "The referee stands by as two EKSU Galacticos players sit on the turf", width: 1600, height: 1200 },
+      { src: `${GALHT}/treatment.jpg`, alt: "An EKSU Galacticos player is helped up after a challenge", width: 1600, height: 1200 },
+      { src: `${GALHT}/medic.jpg`, alt: "A member of the EKSU Galacticos staff runs on with the medical kit", width: 1600, height: 1200 },
+      { src: `${GALHT}/wing.jpg`, alt: "An F8 Ballers player takes on the EKSU Galacticos captain on the wing", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "697df93b-5cd8-4be1-bc69-9130c7c0b52e",
+  },
+  {
+    id: "eksu-galacticos-v-f8-ballers-kick-off",
+    published: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-28T11:25:00+01:00",
