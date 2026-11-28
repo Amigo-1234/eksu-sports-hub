@@ -48,7 +48,8 @@ export async function newsMatchOptions(): Promise<NewsMatchOption[]> {
     await db
       .from("matches")
       .select("id, scheduled_at, round_label, home:home_team_id(short_name), away:away_team_id(short_name), competition:competition_id(short_name, status)")
-      .eq("is_demo", false)
+      // No is_demo filter: admins cannot read that column (column-level grant), and
+      // filtering on it made the whole query fail ("Could not load matches").
       .gte("scheduled_at", from)
       .lte("scheduled_at", to)
       .order("scheduled_at"),
