@@ -118,11 +118,37 @@ const DHINJ = "/news/2026-11-27-darul-haq-injury";
 const EGF8 = "/news/2026-11-28-eksu-galacticos-v-f8-ballers";
 const GALWU = "/news/2026-11-28-galacticos-warm-up";
 
+const F8WU = "/news/2026-11-28-f8-ballers-warm-up";
+
 export const STORIES: Story[] = [
+  {
+    id: "f8-ballers-fc-begin-warm-up-ahead-of-eksu-galacticos-clash",
+    published: true,
+    featured: true,
+    category: "TEAM_UPDATE",
+    kind: "report",
+    publishedAt: "2026-11-28T10:46:00+01:00",
+    headline: "F8 Ballers FC begin warm-up ahead of EKSU Galacticos clash",
+    summary:
+      "F8 Ballers FC players have arrived and begun warm-up drills ahead of today’s 12:00 NLO Cup meeting with EKSU Galacticos FC at Legacy Stadium, Lagos.",
+    body: [
+      "F8 Ballers FC players have arrived for training ahead of their NLO Cup fixture against EKSU Galacticos FC at Legacy Stadium, Lagos. Kick-off is scheduled for 12:00 WAT on Saturday 28 November.",
+      "The squad were pictured jogging through warm-up drills along the edge of the pitch, with cones set out for the session.",
+      "The photos offer an early look at F8 Ballers FC’s preparations. Further team news will be shared when confirmed.",
+      "EKSU students, get behind Galacticos and share the match with fellow supporters. Follow F8 Ballers FC v EKSU Galacticos FC live on EKSU Sports Hub.",
+    ],
+    image: { src: `${F8WU}/lead.jpg`, alt: "F8 Ballers FC players jogging through warm-up drills beside the pitch", width: 1280, height: 960 },
+    gallery: [
+      { src: `${F8WU}/warm-up.jpg`, alt: "F8 Ballers FC squad warming up beside training cones", width: 1280, height: 960 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "697df93b-5cd8-4be1-bc69-9130c7c0b52e",
+  },
+
   {
     id: "eksu-galacticos-warm-up-ahead-of-f8-ballers-clash",
     published: true,
-    featured: true,
+    featured: false,
     category: "TEAM_UPDATE",
     kind: "report",
     publishedAt: "2026-11-28T11:15:00+01:00",
