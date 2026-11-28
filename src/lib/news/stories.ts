@@ -119,12 +119,44 @@ const EGF8 = "/news/2026-11-28-eksu-galacticos-v-f8-ballers";
 const GALWU = "/news/2026-11-28-galacticos-warm-up";
 
 const F8WU = "/news/2026-11-28-f8-ballers-warm-up";
+const GALKO = "/news/2026-11-28-galacticos-f8-kick-off";
 
 export const STORIES: Story[] = [
   {
-    id: "f8-ballers-fc-begin-warm-up-ahead-of-eksu-galacticos-clash",
+    id: "eksu-galacticos-v-f8-ballers-kick-off",
     published: true,
     featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-28T11:25:00+01:00",
+    headline: "We're under way: EKSU Galacticos take on F8 Ballers in the NLO Cup",
+    summary:
+      "EKSU Galacticos and F8 Ballers FC have kicked off their NLO Cup meeting at Legacy Stadium in Lagos, two weeks after F8 Ballers won the reverse fixture 4–3.",
+    body: [
+      "The NLO Cup clash between F8 Ballers FC and EKSU Galacticos FC is under way at Legacy Stadium in Lagos.",
+      "The two teams walked out together behind the match officials and shook hands down the line before kick-off. The Galacticos, in white and purple, gathered in a huddle and applauded before taking their positions, while F8 Ballers wore maroon and black.",
+      "The Galacticos have lined up in a 4-3-3: Ayomide in goal; Gavi, Abuja, Goodnews and Samson in defence; Dotun, Emma and Peter in midfield; and Tenge, Emma and Angoria in attack.",
+      "There is a score to settle. F8 Ballers won the last meeting 4–3 on 14 November, and the Galacticos, carrying the name of Ekiti State University, are out to put that right.",
+      "EKSU students, get behind the team and share the match with your friends.",
+      "Follow F8 Ballers FC v EKSU Galacticos FC live on EKSU Sports Hub.",
+    ],
+    image: { src: `${GALKO}/lead.jpg`, alt: "EKSU Galacticos, in white and purple, and F8 Ballers, in maroon and black, shake hands before kick-off", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${GALKO}/walk-out.jpg`, alt: "The two teams walk out behind the match officials at Legacy Stadium", width: 1600, height: 1200 },
+      { src: `${GALKO}/walk-out-2.jpg`, alt: "Players and officials walk out on to the pitch", width: 1600, height: 1200 },
+      { src: `${GALKO}/handshakes.jpg`, alt: "Players from both teams shake hands down the line", width: 1600, height: 1200 },
+      { src: `${GALKO}/handshakes-2.jpg`, alt: "The pre-match handshakes between EKSU Galacticos and F8 Ballers", width: 1600, height: 1200 },
+      { src: `${GALKO}/huddle.jpg`, alt: "EKSU Galacticos players raise their hands in a huddle before kick-off", width: 1200, height: 1600 },
+      { src: `${GALKO}/applause.jpg`, alt: "EKSU Galacticos players applaud before taking their positions", width: 1200, height: 1600 },
+      { src: `${GALKO}/captain.jpg`, alt: "The EKSU Galacticos captain gets ready for kick-off", width: 1200, height: 1600 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "697df93b-5cd8-4be1-bc69-9130c7c0b52e",
+  },
+  {
+    id: "f8-ballers-fc-begin-warm-up-ahead-of-eksu-galacticos-clash",
+    published: true,
+    featured: false,
     category: "TEAM_UPDATE",
     kind: "report",
     publishedAt: "2026-11-28T10:46:00+01:00",
