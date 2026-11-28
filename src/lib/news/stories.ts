@@ -122,12 +122,44 @@ const F8WU = "/news/2026-11-28-f8-ballers-warm-up";
 const GALKO = "/news/2026-11-28-galacticos-f8-kick-off";
 const GALHT = "/news/2026-11-28-galacticos-f8-half-time";
 const GAL2 = "/news/2026-11-28-galacticos-f8-two-up";
+const GAL3 = "/news/2026-11-28-galacticos-f8-three-up";
 
 export const STORIES: Story[] = [
   {
-    id: "eksu-galacticos-two-up-against-f8-ballers",
+    id: "eksu-galacticos-three-up-against-f8-ballers",
     published: true,
     featured: true,
+    category: "MATCH_REPORT",
+    kind: "report",
+    publishedAt: "2026-11-28T13:00:00+01:00",
+    headline: "3–0! Peter adds a third as EKSU Galacticos take control against F8 Ballers",
+    summary:
+      "Peter scored in the 74th minute to put EKSU Galacticos 3–0 up against F8 Ballers FC in the NLO Cup at Legacy Stadium, Lagos.",
+    body: [
+      "EKSU Galacticos FC are 3–0 up against F8 Ballers FC in the NLO Cup at Legacy Stadium in Lagos.",
+      "Midfielder Peter got the third in the 74th minute, sparking celebrations with team-mates and staff on the touchline.",
+      "It follows Emma's 27th-minute penalty and a 61st-minute goal from substitute James.",
+      "F8 Ballers tried to respond with two changes in the 70th and 71st minutes, while Tenge was booked for the Galacticos in the 67th minute.",
+      "With the clock ticking down, the school team is on course for revenge after their 4–3 defeat to F8 Ballers on 14 November. EKSU students, keep sharing the match.",
+      "Follow F8 Ballers FC v EKSU Galacticos FC live on EKSU Sports Hub.",
+    ],
+    image: { src: `${GAL3}/lead.jpg`, alt: "EKSU Galacticos players run back smiling after scoring their third goal", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${GAL3}/celebration.jpg`, alt: "EKSU Galacticos players and staff celebrate on the touchline", width: 1600, height: 1200 },
+      { src: `${GAL3}/high-five.jpg`, alt: "An EKSU Galacticos player high-fives a supporter after the goal", width: 1600, height: 1200 },
+      { src: `${GAL3}/smile.jpg`, alt: "An EKSU Galacticos player smiles as the celebrations continue", width: 1600, height: 1200 },
+      { src: `${GAL3}/walk-back.jpg`, alt: "An EKSU Galacticos player walks back after the goal", width: 1600, height: 1200 },
+      { src: `${GAL3}/reset.jpg`, alt: "EKSU Galacticos players reset for the restart", width: 1600, height: 1200 },
+      { src: `${GAL3}/number-25.jpg`, alt: "An EKSU Galacticos player in the number 25 shirt", width: 1600, height: 1200 },
+      { src: `${GAL3}/sideline.jpg`, alt: "The EKSU Galacticos number 25 walks past a member of staff", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "697df93b-5cd8-4be1-bc69-9130c7c0b52e",
+  },
+  {
+    id: "eksu-galacticos-two-up-against-f8-ballers",
+    published: true,
+    featured: false,
     category: "MATCH_REPORT",
     kind: "report",
     publishedAt: "2026-11-28T12:45:00+01:00",
