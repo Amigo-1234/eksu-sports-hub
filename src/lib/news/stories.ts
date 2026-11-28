@@ -116,12 +116,42 @@ const DSSG = "/news/2026-11-26-darul-salam-school-gate-kick-off";
 
 const DHINJ = "/news/2026-11-27-darul-haq-injury";
 const EGF8 = "/news/2026-11-28-eksu-galacticos-v-f8-ballers";
+const GALWU = "/news/2026-11-28-galacticos-warm-up";
 
 export const STORIES: Story[] = [
   {
-    id: "eksu-galacticos-arrive-safely-ahead-of-f8-ballers-clash",
+    id: "eksu-galacticos-warm-up-ahead-of-f8-ballers-clash",
     published: true,
     featured: true,
+    category: "TEAM_UPDATE",
+    kind: "report",
+    publishedAt: "2026-11-28T11:15:00+01:00",
+    headline: "EKSU Galacticos put in the work ahead of today's F8 Ballers clash",
+    summary:
+      "The EKSU Galacticos squad went through their warm-up at Legacy Stadium in Lagos ahead of this afternoon's 12:00 NLO Cup meeting with F8 Ballers FC.",
+    body: [
+      "EKSU Galacticos FC are on the pitch and getting ready. The squad went through their warm-up at Legacy Stadium in Lagos ahead of today's NLO Cup clash with F8 Ballers FC.",
+      "The players jogged in groups across the artificial turf, worked through running drills and gathered around the staff for instructions, with the goalkeepers warming up alongside them.",
+      "Kick-off is at 12:00. The Galacticos are out to avenge their 4–3 defeat to F8 Ballers on 14 November, a seven-goal thriller.",
+      "The team is carrying the name of Ekiti State University. EKSU students, get behind them: predict the score on the match page for a chance to win a prize, and share the match with your friends.",
+      "Follow F8 Ballers FC v EKSU Galacticos FC live on EKSU Sports Hub.",
+    ],
+    image: { src: `${GALWU}/lead.jpg`, alt: "EKSU Galacticos players jog together during their warm-up at Legacy Stadium", width: 1600, height: 1200 },
+    gallery: [
+      { src: `${GALWU}/squad-jog.jpg`, alt: "The EKSU Galacticos squad warms up on the artificial pitch", width: 1600, height: 1200 },
+      { src: `${GALWU}/drills.jpg`, alt: "EKSU Galacticos players work through running drills", width: 1600, height: 1200 },
+      { src: `${GALWU}/huddle.jpg`, alt: "EKSU Galacticos players gather around a member of staff during the warm-up", width: 1600, height: 1200 },
+      { src: `${GALWU}/run-out.jpg`, alt: "EKSU Galacticos players run across the pitch together", width: 1600, height: 1200 },
+      { src: `${GALWU}/stretch.jpg`, alt: "An EKSU Galacticos player during the warm-up", width: 1600, height: 1200 },
+      { src: `${GALWU}/lead-out.jpg`, alt: "EKSU Galacticos players warm up in front of the National Institute for Sports building", width: 1600, height: 1200 },
+    ],
+    imageCredit: "EKSU Sports Hub",
+    matchId: "697df93b-5cd8-4be1-bc69-9130c7c0b52e",
+  },
+  {
+    id: "eksu-galacticos-arrive-safely-ahead-of-f8-ballers-clash",
+    published: true,
+    featured: false,
     category: "TEAM_UPDATE",
     kind: "report",
     publishedAt: "2026-11-27T15:45:00+01:00",
