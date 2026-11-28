@@ -5,6 +5,8 @@ import { LiveLineupsPanel, LiveMatchHero, LiveMatchProvider, LiveStatsPanel, Liv
 import { LiveMatchAlerts, LiveSoundControls } from "@/components/realtime/LiveAlerts";
 import { MatchTabs } from "@/components/match/MatchTabs";
 import { FanZone } from "@/components/fan/FanZone";
+import { PredictionPrizeBanner } from "@/components/fan/PredictionPrizeBanner";
+import { predictionPrizeFor } from "@/lib/prediction-prizes";
 import { MatchAlertsButton } from "@/components/notifications/MatchAlertsButton";
 import { ShareMatchCard } from "@/components/share/ShareMatchCard";
 import { AudienceTracker } from "@/components/audience/AudienceTracker";
@@ -38,8 +40,10 @@ async function recentForm(teamId: string): Promise<FormResult[]> {
     .map((m) => ({ matchId: m.id, outcome: outcomeFor(m, teamId)! }));
 }
 
-export default async function MatchPage({ params }: PageProps<"/matches/[id]">) {
+export default async function MatchPage({ params, searchParams }: PageProps<"/matches/[id]">) {
   const { id } = await params;
+  const tab = (await searchParams).tab;
+  const prize = predictionPrizeFor(id);
   const match = await getMatch(id);
   if (!match) notFound();
 
@@ -77,8 +81,14 @@ export default async function MatchPage({ params }: PageProps<"/matches/[id]">) 
           away={{ id: match.awayTeam.id, name: match.awayTeam.name, shortName: match.awayTeam.shortName }}
         />
       </div>
+      {prize && match.status === "SCHEDULED" && (
+        <div className="mt-3">
+          <PredictionPrizeBanner prize={prize} compact />
+        </div>
+      )}
       <div className="mt-2">
         <MatchTabs
+          initial={tab === "fans" ? "fans" : undefined}
           tabs={[
             {
               id: "summary",
@@ -91,6 +101,12 @@ export default async function MatchPage({ params }: PageProps<"/matches/[id]">) 
               id: "fans",
               label: "Fans",
               content: (
+                <>
+                {prize && (
+                  <div className="mb-4">
+                    <PredictionPrizeBanner prize={prize} />
+                  </div>
+                )}
                 <FanZone
                   kind="match"
                   id={match.id}
@@ -98,6 +114,7 @@ export default async function MatchPage({ params }: PageProps<"/matches/[id]">) 
                   voteOpen={match.status === "SCHEDULED"}
                   live={isLive(match.status)}
                 />
+                </>
               ),
             },
             { id: "lineups", label: "Line-ups", content: <LiveLineupsPanel /> },

@@ -6,6 +6,7 @@ import { formatLongDate, formatTime } from "@/lib/format";
 import { matchHref } from "@/lib/match";
 import { isLive, showsScore } from "@/lib/status";
 import type { MatchSummary } from "@/lib/types";
+import { predictionPrizeFor } from "@/lib/prediction-prizes";
 
 /** Homepage spotlight for one match (see src/lib/featured-match.ts). */
 export function FeaturedMatchBanner({
@@ -71,6 +72,15 @@ export function FeaturedMatchBanner({
           <div className="mt-3">
             <KickoffCountdown kickoffAt={match.kickoffAt} serverNow={serverNow} />
           </div>
+        )}
+
+        {upcoming && predictionPrizeFor(match.id) && (
+          <Link
+            href={`${matchHref(match.id)}?tab=fans`}
+            className="mt-3 block rounded-lg bg-black/25 px-3 py-2 text-center text-sm font-bold ring-1 ring-accent-400/50 hover:bg-black/35"
+          >
+            🏆 Predict the exact score &amp; win a prize · <span className="text-accent-400">sponsored by {predictionPrizeFor(match.id)!.sponsor}</span>
+          </Link>
         )}
 
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
